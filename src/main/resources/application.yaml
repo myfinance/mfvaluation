@@ -1,5 +1,9 @@
-server.port: 7001
+server.port: 7002
 logging:
   level:
     root: INFO
     de.hf.myfinance: DEBUG
+app:
+  mfinstruments:
+    host: localhost
+    port: 7001  
