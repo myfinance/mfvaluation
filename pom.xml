@@ -80,7 +80,7 @@
                     <image>${jib.image-tag}</image>
                 </to>
                 <container>
-                    <mainClass>de.hf.myfinance.mfvalueationservice.ValuationServiceApplication</mainClass>
+                    <mainClass>de.hf.myfinance.mfvaluation.ValuationServiceApplication</mainClass>
                 </container>
                 <allowInsecureRegistries>true</allowInsecureRegistries>
                 </configuration>
