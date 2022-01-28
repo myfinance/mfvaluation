@@ -18,7 +18,7 @@ pv:
 
 mfvaluation:
   mf_http_port_ext: 30025
-  mf_http_port: 7001
+  mf_http_port: 7002
   mf_name: mfvaluation
 
   
