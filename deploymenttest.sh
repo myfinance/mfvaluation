@@ -7,6 +7,16 @@
 : ${HOST=localhost}
 : ${PORT=8080}
 
+function testUrl() {
+  url=$@
+  if $url -ks -f -o /dev/null
+  then
+    return 0
+  else
+    return 1
+  fi;
+}
+
 function waitForService() {
   url=$@
   echo -n "Wait for: $url... "
