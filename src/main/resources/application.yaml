@@ -18,18 +18,8 @@ api:
 
   common:
     version: 1.0.0
-    title: Sample API
-    description: Description of the API...
-    termsOfService: MY TERMS OF SERVICE
-    license: MIT
-    licenseUrl: MY LICENSE URL
-
-    externalDocDesc: MY WIKI PAGE
-    externalDocUrl: MY WIKI URL
-    contact:
-      name: NAME OF CONTACT
-      url: URL TO CONTACT
-      email: contact@mail.com
+    title: mfvaluation API
+    description: REST API for valuation informations of instruments.
 
   responseCodes:
     ok.description: OK
@@ -40,7 +30,7 @@ api:
   valuationService:
 
     helloInstrument:
-      description: Returns a composite view of the specified product id
+      description: Returns a hello world string
       notes: |
         # Normal response
         If the requested product id is found the method will return information regarding:
