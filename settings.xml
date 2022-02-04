@@ -9,18 +9,12 @@
             <url>http://192.168.100.73:31001/repository/maven-releases/</url>
             <blocked>false</blocked>
         </mirror>
-    </mirrors>
-    <servers>
-        <server>
+        <mirror>
             <id>central</id>
-            <configuration>
-                <httpConfiguration>
-                    <all>
-                        <connectionTimeout>240000</connectionTimeout>
-                        <readTimeout>240000</readTimeout>
-                    </all>
-                </httpConfiguration>
-            </configuration>
-        </server>
-    </servers>
+            <mirrorOf>central</mirrorOf>
+            <name>central</name>
+            <url>http://192.168.100.73:31001/repository/maven-public/</url>
+            <blocked>false</blocked>
+        </mirror>
+    </mirrors>
 </settings>
