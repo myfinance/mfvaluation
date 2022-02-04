@@ -9,13 +9,6 @@ image:
   repository: 192.168.100.73:31003/repository/mydockerrepo/holgerfischer/myfinance-
   pullPolicy: IfNotPresent
 
-
-pv:
-  mntpath: /mnt/data/mf/
-  configpvc: mfalueconfigpvc
-  configstorage: _config/
-  configstoragesize: 1Mi
-
 mfvaluation:
   mf_http_port_ext: 30025
   mf_http_port: 7002

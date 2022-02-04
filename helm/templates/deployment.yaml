@@ -16,11 +16,7 @@ spec:
         - name: {{ .Values.mfvaluation.mf_name }}      
           image: "{{ .Values.image.repository }}mfvaluation:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}      
-          tty: true     
-          volumeMounts:
-           - name: mfvaluationsconfig
-             mountPath: /MyFinance/envconfig           
-      volumes:
-        - name: mfvaluationsconfig
-          persistentVolumeClaim:
-              claimName: {{ .Values.stage }}-{{ .Values.pv.configpvc }}                                    
+          tty: true
+          env:
+            - name: "SPRING_PROFILES_ACTIVE"
+              value: "k8n"

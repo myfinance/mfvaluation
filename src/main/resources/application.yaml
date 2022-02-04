@@ -6,4 +6,19 @@ logging:
 app:
   mfinstruments:
     host: localhost
-    port: 7001  
+    port: 7001
+
+
+---
+spring.config.activate.on-profile: k8n
+
+server.port: 7002
+logging:
+  level:
+    root: INFO
+    de.hf.myfinance: DEBUG
+app:
+  mfinstruments:
+    host: mfinstruments
+    port: 7001
+
