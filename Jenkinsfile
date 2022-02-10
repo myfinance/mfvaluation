@@ -20,6 +20,8 @@ pipeline {
    SONAR = "https://sonarcloud.io"
    DEV_NAMESPACE = "mfdev"
    TEST_NAMESPACE = "mftest"
+   DEV_PORT = "30025"
+   TEST_PORT = "30035"
  }
  
  stages{
@@ -63,8 +65,8 @@ pipeline {
        //sh 'kubectl delete job.batch/mfupgrade'
        //sh 'envsubst < deploy.yaml | kubectl apply -f -'
        sh 'envsubst < ./helm/Chart_template.yaml > ./helm/Chart.yaml'
-       sh 'helm upgrade -i --cleanup-on-fail ${SERVICE_NAME} ./helm/  -n ${DEV_NAMESPACE} --set stage=dev --set repository=${DOCKER_REPO}${DOCKERHUB_USER}/${ORGANIZATION_NAME}-'
-       //sh 'helm upgrade -i --cleanup-on-fail mfinstruments ./helm/  -n ${TEST_NAMESPACE} --set stage=test --set mfinstruments.mf_http_port_ext=30034 --set repository=${DOCKER_REPO}${DOCKERHUB_USER}/${ORGANIZATION_NAME}-'
+       sh 'helm upgrade -i --cleanup-on-fail ${SERVICE_NAME} ./helm/  -n ${DEV_NAMESPACE} --set stage=dev --set ${SERVICE_NAME}.mf_http_port_ext=${DEV_PORT} --set repository=${DOCKER_REPO}${DOCKERHUB_USER}/${ORGANIZATION_NAME}-'
+       //sh 'helm upgrade -i --cleanup-on-fail ${SERVICE_NAME} ./helm/  -n ${TEST_NAMESPACE} --set stage=test --set ${SERVICE_NAME}.mf_http_port_ext=${TEST_PORT} --set repository=${DOCKER_REPO}${DOCKERHUB_USER}/${ORGANIZATION_NAME}-'
        sh 'helm package helm -u -d helmcharts/'
        sh 'curl ${TARGET_HELM_REPO} --upload-file helmcharts/${SERVICE_NAME}-${VERSION}.tgz -v'
      }
@@ -73,7 +75,7 @@ pipeline {
       stage('test'){
         agent any
         steps {
-          sh 'HOST=${K8N_IP} PORT=30025 ./deploymenttest.sh'
+          sh 'HOST=${K8N_IP} PORT=${DEV_PORT} ./deploymenttest.sh'
         }
       }
 
