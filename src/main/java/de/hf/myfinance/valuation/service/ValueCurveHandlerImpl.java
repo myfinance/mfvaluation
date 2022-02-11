@@ -1,4 +1,4 @@
-package de.hf.myfinance.mfvaluation.handler;
+package de.hf.myfinance.valuation.service;
 
 import java.time.LocalDate;
 import java.util.Map;

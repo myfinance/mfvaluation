@@ -1,5 +1,6 @@
-package de.hf.myfinance.mfvaluation.service;
+package de.hf.myfinance.valuation.api;
 
+import de.hf.myfinance.restapi.ValuationApi;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -7,18 +8,17 @@ import de.hf.framework.exceptions.MFException;
 import de.hf.framework.utils.ServiceUtil;
 import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.mfinstrumentclient.MFInstrumentClient;
-import de.hf.myfinance.mfvaluation.handler.ValueCurveHandlerImpl;
-import de.hf.myfinance.restapi.ValuationService;
+import de.hf.myfinance.valuation.service.ValueCurveHandlerImpl;
 import de.hf.myfinance.restmodel.Instrument;
 
 @RestController
-public class ValuationServiceImpl implements ValuationService {
+public class ValuationApiImpl implements ValuationApi {
     ServiceUtil serviceUtil;
     MFInstrumentClient instrumentClient;
     ValueCurveHandlerImpl valueCurveHandler;
 
     @Autowired
-    public ValuationServiceImpl(ServiceUtil serviceUtil, MFInstrumentClient instrumentClient, ValueCurveHandlerImpl valueCurveHandler) {
+    public ValuationApiImpl(ServiceUtil serviceUtil, MFInstrumentClient instrumentClient, ValueCurveHandlerImpl valueCurveHandler) {
         this.serviceUtil = serviceUtil;
         this.instrumentClient = instrumentClient;
         this.valueCurveHandler = valueCurveHandler;

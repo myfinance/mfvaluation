@@ -1,4 +1,4 @@
-package de.hf.myfinance.mfvaluation;
+package de.hf.myfinance.valuation;
 
 import de.hf.myfinance.mfinstrumentclient.MFInstrumentClient;
 import de.hf.myfinance.restmodel.Instrument;
