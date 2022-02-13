@@ -11,7 +11,7 @@ app:
 springdoc:
   swagger-ui.path: /openapi/swagger-ui.html
   api-docs.path: /openapi/v3/api-docs
-  packagesToScan: de.hf.myfinance.mfvaluation.service
+  packagesToScan: de.hf.myfinance
   pathsToMatch: /**
 
 api:
