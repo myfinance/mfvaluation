@@ -14,6 +14,11 @@ springdoc:
   packagesToScan: de.hf.myfinance
   pathsToMatch: /**
 
+spring.data.mongodb:
+  host: 192.168.100.73
+  port: 30029
+  database: product-db
+
 api:
 
   common:
@@ -58,4 +63,9 @@ app:
   mfinstruments:
     host: mfinstruments
     port: 7001
+
+spring.data.mongodb:
+  host: mfmongo
+  port: 30029
+  database: product-db
 
