@@ -1,7 +1,6 @@
 package de.hf.myfinance.valuation.api;
 
 import de.hf.myfinance.restapi.ValuationApi;
-import de.hf.myfinance.valuation.persistence.entities.InstrumentEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 

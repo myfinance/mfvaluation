@@ -27,7 +27,7 @@ public class ValueCurveHandlerImpl {
         var instrumentEntity = new InstrumentEntity("testkey"+id, "testvalue");
         instrumentRepository.save(instrumentEntity);
         var instrument = new Instrument();
-        var newInstrumentEntity = instrumentRepository.findByBusinesskey("testkey").get();
+        var newInstrumentEntity = instrumentRepository.findByBusinesskey("testkey"+id).get();
         return new Instrument(1, newInstrumentEntity.getBusinesskey(), newInstrumentEntity.getTestvalue());
     }
 

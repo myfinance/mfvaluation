@@ -18,6 +18,9 @@ spring.data.mongodb:
   host: 192.168.100.73
   port: 30029
   database: product-db
+  authentication-database: admin
+  username: root
+  password: vulkan
 
 api:
 
@@ -32,7 +35,7 @@ api:
     notFound.description: Not found, the specified id does not exist
     unprocessableEntity.description: Unprocessable entity, input parameters caused the processing to fail. See response message for more information
 
-  valuationService:
+  ValuationApi:
 
     helloInstrument:
       description: Returns a hello world string
