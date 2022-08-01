@@ -1,6 +1,7 @@
 package de.hf.myfinance.valuation.api;
 
 import de.hf.myfinance.restapi.ValuationApi;
+import de.hf.myfinance.restmodel.InstrumentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,7 +49,8 @@ public class ValuationApiImpl implements ValuationApi {
     public Instrument helloInstrument(int instrumentId) {
         try{
             //return valueCurveHandler.getNewInstrument(instrumentId);
-            return new Instrument(instrumentId, "name-" + instrumentId, serviceUtil.getServiceAddress());
+            //return new Instrument(instrumentId, "name-" + instrumentId, serviceUtil.getServiceAddress());
+            return new Instrument("test", InstrumentType.TENANT);
         } catch(MFException e) {
             throw e;
         }
@@ -60,7 +62,8 @@ public class ValuationApiImpl implements ValuationApi {
     @Override
     public Instrument helloInstrumentService() {
         try{
-            return instrumentClient.getInstrument(1);
+            return new Instrument("test", InstrumentType.TENANT);
+            //return instrumentClient.getInstrument("1");
         } catch(MFException e) {
             throw e;
         }

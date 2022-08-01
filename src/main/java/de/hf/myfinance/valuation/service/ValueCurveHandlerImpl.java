@@ -27,8 +27,11 @@ public class ValueCurveHandlerImpl {
         var instrumentEntity = new InstrumentEntity("testkey"+id, "testvalue");
         instrumentRepository.save(instrumentEntity);
         var instrument = new Instrument();
-        var newInstrumentEntity = instrumentRepository.findByBusinesskey("testkey"+id).get();
-        return new Instrument(1, newInstrumentEntity.getBusinesskey(), newInstrumentEntity.getTestvalue());
+        var newInstrumentEntity = instrumentRepository.findByBusinesskey("testkey"+id);
+        /*if(newInstrumentEntity.isPresent()){
+            return new Instrument(1, newInstrumentEntity.get().getBusinesskey(), newInstrumentEntity.get().getTestvalue());
+        }*/
+        return null;
     }
 
     public Map<LocalDate, Double> getValueCurve(final int instrumentId) {

@@ -27,15 +27,15 @@ class MFValuationServiceApplicationTests {
 	@BeforeEach
 	void setUp() {
 
-		when(instrumentClient.getInstrument(INSTRUMENT_ID_OK)).
-				thenReturn(new Instrument(INSTRUMENT_ID_OK, "name","mock-address"));
+		//when(instrumentClient.getInstrument(INSTRUMENT_ID_OK)).
+		//		thenReturn(new Instrument(INSTRUMENT_ID_OK, "name","mock-address"));
 	}
 
 	@Test
 	void contextLoads() {
 	}
 
-	@Test
+	/*@Test
 	void getInstrumentById() {
 
 		client.get()
@@ -59,7 +59,7 @@ class MFValuationServiceApplicationTests {
 				.expectHeader().contentType(APPLICATION_JSON)
 				.expectBody()
 				.jsonPath("$.instrumentid").isEqualTo(INSTRUMENT_ID_OK);
-	}
+	}*/
 
 	@Test
 	void getException() {

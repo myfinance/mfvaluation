@@ -50,7 +50,7 @@ public class ValuationServiceApplication {
 		ConfigurableApplicationContext ctx = SpringApplication.run(ValuationServiceApplication.class, args);
 		String mongodDbHost = ctx.getEnvironment().getProperty("spring.data.mongodb.host");
 		String mongodDbPort = ctx.getEnvironment().getProperty("spring.data.mongodb.port");
-		LOG.info("Connected to MongoDb: " + mongodDbHost + ":" + mongodDbPort);
+		LOG.info("Connected to MongoDb: {0}:{01}", mongodDbHost, mongodDbPort);
 	}
 
 	@Autowired
@@ -63,7 +63,7 @@ public class ValuationServiceApplication {
 		IndexResolver resolver = new MongoPersistentEntityIndexResolver(mappingContext);
 
 		IndexOperations indexOps = mongoTemplate.indexOps(InstrumentEntity.class);
-		resolver.resolveIndexFor(InstrumentEntity.class).forEach(e -> indexOps.ensureIndex(e));
+		resolver.resolveIndexFor(InstrumentEntity.class).forEach(indexOps::ensureIndex);
 	}
 
 }
