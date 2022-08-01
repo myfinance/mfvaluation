@@ -47,8 +47,8 @@ public class ValuationApiImpl implements ValuationApi {
     @Override
     public Instrument helloInstrument(int instrumentId) {
         try{
-            return valueCurveHandler.getNewInstrument(instrumentId);
-            //return new Instrument(instrumentId, "name-" + instrumentId, serviceUtil.getServiceAddress());
+            //return valueCurveHandler.getNewInstrument(instrumentId);
+            return new Instrument(instrumentId, "name-" + instrumentId, serviceUtil.getServiceAddress());
         } catch(MFException e) {
             throw e;
         }
