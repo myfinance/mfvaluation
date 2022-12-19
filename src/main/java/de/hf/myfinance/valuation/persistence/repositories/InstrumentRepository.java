@@ -1,10 +1,10 @@
 package de.hf.myfinance.valuation.persistence.repositories;
 
 import de.hf.myfinance.valuation.persistence.entities.InstrumentEntity;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 
-public interface InstrumentRepository extends CrudRepository<InstrumentEntity, Integer> {
-    Optional<InstrumentEntity> findByBusinesskey(String businesskey);
+public interface InstrumentRepository extends ReactiveCrudRepository<InstrumentEntity, Integer> {
+    Mono<InstrumentEntity> findByBusinesskey(String businesskey);
 }

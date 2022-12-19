@@ -22,6 +22,72 @@ spring.data.mongodb:
   username: root
   password: vulkan
 
+spring:
+  cloud:
+    function:
+      definition: valuationProcessor;saveInstrumentProcessor;saveCashflowsProcessor;saveMarketDataProcessor;extractCashflowsProcessor;saveValueCurveProcessor
+
+spring.cloud.stream:
+  defaultBinder: rabbit
+  default.contentType: application/json
+  bindings.extractCashflowsProcessor-in-0:
+    destination: transactionApproved
+    group: extractCashflow4ValuationGroup
+  bindings.saveCashflowsProcessor-in-0:
+    destination: extractedCashflows
+    group: saveCashflow4ValuationGroup
+  bindings.saveInstrumentProcessor-in-0:
+    destination: instrumentApproved
+    group: saveInstrumentValuationGroup
+  bindings.saveMarketDataProcessor-in-0:
+    destination: pricesupdated
+    group: saveprices4ValuationGroup
+  bindings.valuationProcessor-in-0:
+    destination: valuationDataChanged
+    group: valuationGroup
+  bindings.saveValueCurveProcessor-in-0:
+    destination: valueCurveCalculated
+    group: saveValueCurveGroup
+  bindings.valuationDataChanged-out-0:
+    destination: valuationDataChanged
+    producer:
+      required-groups: valuationDataChangedAuditGroup
+  bindings.extractedCashflows-out-0:
+    destination: extractedCashflows
+    producer:
+      required-groups: extractedCashflowsAuditGroup
+  bindings.valueCurveCalculated-out-0:
+    destination: valueCurveCalculated
+    producer:
+      required-groups: valueCurveCalculatedAuditGroup
+
+spring.cloud.stream.rabbit.bindings:
+  extractCashflowsProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+  saveCashflowsProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+  saveInstrumentProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+  saveMarketDataProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+  valuationProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+  saveValueCurveProcessor-in-0:
+    autoBindDlq: true
+    republishToDlq: true
+
+
+spring.rabbitmq:
+  host: 192.168.100.73
+  port: 30021
+  username: user
+  password: vulkan
+
 api:
 
   common:
@@ -59,16 +125,6 @@ api:
         ## Negative product ids
         422 - An **Unprocessable Entity** error will be returned
 
----
-spring.config.activate.on-profile: k8n
 
-app:
-  mfinstruments:
-    host: mfinstruments
-    port: 7001
 
-spring.data.mongodb:
-  host: mfmongo
-  port: 30029
-  database: product-db
 
