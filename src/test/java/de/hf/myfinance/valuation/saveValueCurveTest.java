@@ -41,7 +41,7 @@ public class saveValueCurveTest  extends EventProcessorTestBase {
         assertEquals(1, curve.getValueCurve().size());
         assertEquals(100.0, curve.getValueCurve().get(transactionDate));
 
-        var messages = getMessages("valuationDataChanged-out-0");
+        var messages = getMessages(valuationDataChangedBindingName);
         assertEquals(0, messages.size());
     }
 
@@ -68,7 +68,7 @@ public class saveValueCurveTest  extends EventProcessorTestBase {
         assertEquals(1, curve.getValueCurve().size());
         assertEquals(100.0, curve.getValueCurve().get(transactionDate));
 
-        var messages = getMessages("valuationDataChanged-out-0");
+        var messages = getMessages(valuationDataChangedBindingName);
         assertEquals(1, messages.size());
         JsonHelper jsonHelper = new JsonHelper();
         var eventtype = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("eventType");

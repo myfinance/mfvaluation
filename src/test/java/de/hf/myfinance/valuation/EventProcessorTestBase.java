@@ -50,6 +50,7 @@ public class EventProcessorTestBase extends MongoDbTestBase {
 
     String instrumentProcessorBindingName = "saveInstrumentProcessor-in-0";
     String cashflowProcessorBindingName = "saveCashflowsProcessor-in-0";
+    String valuationDataChangedBindingName = "valuationDataChanged-out-0";
 
 
     @BeforeEach
@@ -59,6 +60,7 @@ public class EventProcessorTestBase extends MongoDbTestBase {
         valueCurveRepository.deleteAll().block();
         purgeMessages(instrumentProcessorBindingName);
         purgeMessages(cashflowProcessorBindingName);
+        purgeMessages(valuationDataChangedBindingName);
     }
 
     protected void purgeMessages(String bindingName) {
