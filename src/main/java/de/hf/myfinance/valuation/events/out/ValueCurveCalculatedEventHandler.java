@@ -1,12 +1,15 @@
 package de.hf.myfinance.valuation.events.out;
 
 import de.hf.myfinance.event.Event;
+import de.hf.myfinance.restmodel.ValueCurve;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
 
-import static de.hf.myfinance.event.Event.Type.START;
+import static de.hf.myfinance.event.Event.Type.CREATE;
 
+@Component
 public class ValueCurveCalculatedEventHandler {
     private final StreamBridge streamBridge;
 
@@ -14,9 +17,9 @@ public class ValueCurveCalculatedEventHandler {
         this.streamBridge = streamBridge;
     }
 
-    public void sendInstrumentApprovedEvent(String businesskey){
+    public void sendValueCurveCalculatedEvent(String businesskey, ValueCurve valueCurve){
         sendMessage("valueCurveCalculated-out-0",
-                new Event(START, businesskey, businesskey));
+                new Event(CREATE, businesskey, valueCurve));
     }
 
     private void sendMessage(String bindingName, Event event) {

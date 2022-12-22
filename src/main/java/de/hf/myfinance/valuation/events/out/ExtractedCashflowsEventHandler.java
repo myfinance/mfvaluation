@@ -1,12 +1,13 @@
 package de.hf.myfinance.valuation.events.out;
 
 import de.hf.myfinance.event.Event;
+import de.hf.myfinance.restmodel.Cashflow;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
-import static de.hf.myfinance.event.Event.Type.START;
+import static de.hf.myfinance.event.Event.Type.CREATE;
 
 @Component
 public class ExtractedCashflowsEventHandler {
@@ -16,9 +17,9 @@ public class ExtractedCashflowsEventHandler {
         this.streamBridge = streamBridge;
     }
 
-    public void sendExtractedCashflowsEvent(String businesskey){
+    public void sendExtractedCashflowsEvent(Cashflow cashflow){
         sendMessage("extractedCashflows-out-0",
-                new Event(START, businesskey, businesskey));
+                new Event(CREATE, cashflow.getInstrumentBusinesskey(), cashflow));
     }
 
     private void sendMessage(String bindingName, Event event) {

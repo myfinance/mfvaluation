@@ -5,6 +5,6 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;
 
 
-public interface InstrumentRepository extends ReactiveCrudRepository<InstrumentEntity, Integer> {
+public interface InstrumentRepository extends ReactiveCrudRepository<InstrumentEntity, String> {
     Mono<InstrumentEntity> findByBusinesskey(String businesskey);
 }

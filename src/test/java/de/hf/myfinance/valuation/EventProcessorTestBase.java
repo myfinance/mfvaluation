@@ -1,8 +1,11 @@
 package de.hf.myfinance.valuation;
 
 import de.hf.myfinance.event.Event;
+import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
+import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.testhelper.MongoDbTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +31,34 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     InstrumentRepository instrumentRepository;
 
     @Autowired
+    CashflowRepository cashflowRepository;
+
+    @Autowired
+    ValueCurveRepository valueCurveRepository;
+
+    @Autowired
     private OutputDestination target;
 
     @Autowired
     @Qualifier("saveInstrumentProcessor")
     protected Consumer<Event<String, Instrument>> saveInstrumentProcessor;
 
+
+    @Autowired
+    @Qualifier("saveCashflowsProcessor")
+    protected Consumer<Event<String, Cashflow>> saveCashflowProcessor;
+
     String instrumentProcessorBindingName = "saveInstrumentProcessor-in-0";
+    String cashflowProcessorBindingName = "saveCashflowsProcessor-in-0";
 
 
     @BeforeEach
     void setupDb() {
         instrumentRepository.deleteAll().block();
+        cashflowRepository.deleteAll().block();
+        valueCurveRepository.deleteAll().block();
         purgeMessages(instrumentProcessorBindingName);
+        purgeMessages(cashflowProcessorBindingName);
     }
 
     protected void purgeMessages(String bindingName) {
