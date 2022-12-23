@@ -1,4 +1,4 @@
-package de.hf.myfinance.valuation.persistence;
+package de.hf.myfinance.valuation.persistence.mapper;
 
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;

@@ -6,7 +6,7 @@ import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
-import de.hf.myfinance.valuation.persistence.InstrumentMapper;
+import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

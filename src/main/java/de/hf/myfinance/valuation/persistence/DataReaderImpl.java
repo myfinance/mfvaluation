@@ -1,11 +1,12 @@
 package de.hf.myfinance.valuation.persistence;
 
-import de.hf.myfinance.restmodel.Cashflow;
-import de.hf.myfinance.restmodel.Instrument;
-import de.hf.myfinance.restmodel.InstrumentType;
-import de.hf.myfinance.restmodel.ValueCurve;
-import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
+import de.hf.myfinance.restmodel.*;
+import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
+import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
+import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
+import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
+import de.hf.myfinance.valuation.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,15 +22,22 @@ public class DataReaderImpl implements DataReader{
     private final CashflowMapper cashflowMapper;
     private final ValueCurveRepository valueCurveRepository;
     private final ValueCurveMapper valueCurveMapper;
+    private final EndOfDayPricesRepository endOfDayPricesRepository;
+    private final EndOfDayPricesMapper endOfDayPricesMapper;
 
     @Autowired
-    public DataReaderImpl(InstrumentRepository instrumentRepository, InstrumentMapper instrumentMapper, CashflowRepository cashflowRepository, CashflowMapper cashflowMapper, ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper) {
+    public DataReaderImpl(InstrumentRepository instrumentRepository, InstrumentMapper instrumentMapper,
+                          CashflowRepository cashflowRepository, CashflowMapper cashflowMapper,
+                          ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper,
+                          EndOfDayPricesRepository endOfDayPricesRepository, EndOfDayPricesMapper endOfDayPricesMapper) {
         this.instrumentRepository = instrumentRepository;
         this.instrumentMapper = instrumentMapper;
         this.cashflowRepository = cashflowRepository;
         this.cashflowMapper = cashflowMapper;
         this.valueCurveRepository = valueCurveRepository;
         this.valueCurveMapper = valueCurveMapper;
+        this.endOfDayPricesRepository = endOfDayPricesRepository;
+        this.endOfDayPricesMapper = endOfDayPricesMapper;
     }
 
     @Override
@@ -60,5 +68,10 @@ public class DataReaderImpl implements DataReader{
     @Override
     public Flux<Instrument> findByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType){
         return instrumentRepository.findByParentBusinesskeyAndInstrumentType(parentBusinesskey, instrumentType).map(e-> instrumentMapper.entityToApi(e));
+    }
+
+    @Override
+    public Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey){
+        return endOfDayPricesRepository.findByInstrumentBusinesskey(businesskey).map(e-> endOfDayPricesMapper.entityToApi(e));
     }
 }

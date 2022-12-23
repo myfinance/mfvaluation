@@ -1,10 +1,6 @@
 package de.hf.myfinance.valuation.persistence;
 
-import de.hf.myfinance.restmodel.Cashflow;
-import de.hf.myfinance.restmodel.Instrument;
-import de.hf.myfinance.restmodel.InstrumentType;
-import de.hf.myfinance.restmodel.ValueCurve;
-import de.hf.myfinance.valuation.persistence.entities.InstrumentEntity;
+import de.hf.myfinance.restmodel.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -15,4 +11,5 @@ public interface DataReader {
     Flux<Instrument> findByParentBusinesskey(String parentBusinesskey);
     Mono<ValueCurve> findValueCurveByInstrumentBusinesskey(String businesskey);
     Flux<Instrument> findByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType);
+    Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey);
 }

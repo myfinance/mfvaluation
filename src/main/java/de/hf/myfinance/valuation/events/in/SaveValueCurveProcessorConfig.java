@@ -5,7 +5,7 @@ import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
-import de.hf.myfinance.valuation.persistence.ValueCurveMapper;
+import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

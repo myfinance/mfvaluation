@@ -2,9 +2,11 @@ package de.hf.myfinance.valuation;
 
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.Cashflow;
+import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
+import de.hf.myfinance.valuation.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.testhelper.JsonHelper;
@@ -39,6 +41,9 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     ValueCurveRepository valueCurveRepository;
 
     @Autowired
+    EndOfDayPricesRepository endOfDayPricesRepository;
+
+    @Autowired
     private OutputDestination target;
 
     @Autowired
@@ -56,6 +61,10 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     @Autowired
     @Qualifier("valuationProcessor")
     protected Consumer<Event<String, Instrument>> valuationProcessor;
+
+    @Autowired
+    @Qualifier("saveMarketDataProcessor")
+    protected Consumer<Event<String, EndOfDayPrices>> saveMarketDataProcessor;
 
     String instrumentProcessorBindingName = "saveInstrumentProcessor-in-0";
     String cashflowProcessorBindingName = "saveCashflowsProcessor-in-0";
