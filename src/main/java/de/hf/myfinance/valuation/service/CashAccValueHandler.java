@@ -22,6 +22,7 @@ public class CashAccValueHandler extends AbsValueHandler {
     }
 
 
+    @Override
     public Mono<Void> calcValueCurve(){
         return  dataReader.findAllCashflow4Instrument(instrument.getBusinesskey())
                 .switchIfEmpty(Flux.just(new Cashflow("empty Cashflow", LocalDate.now(), instrument.getBusinesskey(), 0.0)))
@@ -55,15 +56,6 @@ public class CashAccValueHandler extends AbsValueHandler {
         }
 
         return Mono.just(valueCurve);
-    }
-
-    private Mono<Void> sendValueCurveCalculatedEvent(Map<LocalDate, Double> valueCurve) {
-        auditService.saveMessage(" new valuecurve calculated for instrument: " + instrument.getBusinesskey(), Severity.INFO, AUDIT_MSG_TYPE);
-        var valueCurveObject = new ValueCurve(instrument.getBusinesskey());
-        valueCurveObject.setValueCurve(valueCurve);
-        valueCurveObject.setParentBusinesskey(instrument.getParentBusinesskey());
-        valueCurveCalculatedEventHandler.sendValueCurveCalculatedEvent(instrument.getBusinesskey(), valueCurveObject);
-        return Mono.just("").then();
     }
 
     private TreeMap<LocalDate, Double> convert2CashflowPerDayMap(List<Cashflow> cashflows) {

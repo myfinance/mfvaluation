@@ -38,7 +38,11 @@ public class ValueHandlerFactory {
                 valueHandler = new CashAccValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
                 break;
             case TENANT:
+                valueHandler = new TenantValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
+                break;
             case PORTFOLIO:
+                valueHandler = new PortfolioValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
+                break;
             case REALESTATE:
             case DEPOT:
             case DEPRECATIONOBJECT:

@@ -15,10 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class saveValueCurveTest  extends EventProcessorTestBase {
 
-    @Autowired
-    @Qualifier("saveValueCurveProcessor")
-    protected Consumer<Event<String, ValueCurve>> saveValueCurveProcessor;
-
     @Test
     void saveValueCurve() {
 
