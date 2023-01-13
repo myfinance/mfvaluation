@@ -103,8 +103,8 @@ api:
 
   ValuationApi:
 
-    helloInstrument:
-      description: Returns a hello world string
+    getValueCurve:
+      description: Returns the values of the instrument for the businesskey for each day between startdate and enddate
       notes: |
         # Normal response
         If the requested product id is found the method will return information regarding:

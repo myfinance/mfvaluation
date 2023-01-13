@@ -4,12 +4,9 @@ import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.*;
 import de.hf.testhelper.JsonHelper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

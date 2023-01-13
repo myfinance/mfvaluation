@@ -1,22 +1,24 @@
 package de.hf.myfinance.valuation.api;
 
 import de.hf.myfinance.restapi.ValuationApi;
-import de.hf.myfinance.restmodel.InstrumentType;
+import de.hf.myfinance.restmodel.ValueCurve;
+import de.hf.myfinance.valuation.service.ValuationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-
-import de.hf.framework.exceptions.MFException;
 import de.hf.framework.utils.ServiceUtil;
-import de.hf.myfinance.exception.MFMsgKey;
-import de.hf.myfinance.restmodel.Instrument;
+import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 @RestController
 public class ValuationApiImpl implements ValuationApi {
     ServiceUtil serviceUtil;
+    ValuationService valuationService;
 
     @Autowired
-    public ValuationApiImpl(ServiceUtil serviceUtil) {
+    public ValuationApiImpl(ValuationService valuationService, ServiceUtil serviceUtil) {
         this.serviceUtil = serviceUtil;
+        this.valuationService = valuationService;
     }
 
     @Override
@@ -24,39 +26,15 @@ public class ValuationApiImpl implements ValuationApi {
         return "Hello valuationservice";
     }
 
+    @Override
+    public Mono<ValueCurve> getValueCurve(String businesskey, LocalDate startDate, LocalDate endDate) {
+        return valuationService.getValueCurve(businesskey, startDate, endDate);
+    }
 
     @Override
-    public Instrument helloException() {
-        
+    public Mono<Double> getValue(String businesskey, LocalDate date) {
         return null;
     }
 
-    @Override
-    public Instrument helloInstrument(int instrumentId) {
-        try{
-            //return valueCurveHandler.getNewInstrument(instrumentId);
-            //return new Instrument(instrumentId, "name-" + instrumentId, serviceUtil.getServiceAddress());
-            return new Instrument("test", InstrumentType.TENANT);
-        } catch(MFException e) {
-            throw e;
-        }
-        catch(Exception e) {
-            throw new MFException(MFMsgKey.UNSPECIFIED, e.getMessage());
-        }
-    }
-
-    @Override
-    public Instrument helloInstrumentService() {
-        try{
-            return new Instrument("test", InstrumentType.TENANT);
-            //return instrumentClient.getInstrument("1");
-        } catch(MFException e) {
-            throw e;
-        }
-        catch(Exception e) {
-            throw new MFException(MFMsgKey.UNSPECIFIED, e.getMessage());
-        }
-        
-    }
 
 }
