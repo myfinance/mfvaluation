@@ -38,7 +38,8 @@ public class ExtractCashflowsProcessorConfig {
             switch (event.getEventType()) {
 
                 case CREATE:
-                    if(transaction.getTransactionType().equals(TransactionType.INCOMEEXPENSES)
+                    if(transaction.getTransactionType().equals(TransactionType.INCOME)
+                            || transaction.getTransactionType().equals(TransactionType.EXPENSE)
                             || transaction.getTransactionType().equals(TransactionType.TRANSFER)
                             || transaction.getTransactionType().equals(TransactionType.BUDGETTRANSFER)){
                         transaction.getCashflows().entrySet().forEach(e-> {
@@ -50,7 +51,8 @@ public class ExtractCashflowsProcessorConfig {
                     break;
 
                 case DELETE:
-                    if(transaction.getTransactionType().equals(TransactionType.INCOMEEXPENSES)
+                    if(transaction.getTransactionType().equals(TransactionType.INCOME)
+                            || transaction.getTransactionType().equals(TransactionType.EXPENSE)
                             || transaction.getTransactionType().equals(TransactionType.TRANSFER)
                             || transaction.getTransactionType().equals(TransactionType.BUDGETTRANSFER)){
                         transaction.getCashflows().entrySet().forEach(e-> {

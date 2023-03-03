@@ -30,7 +30,7 @@ public class ExtractCashflowsTests extends EventProcessorTestBase {
 
         var desc = "testeinkommen";
         LocalDate transactionDate = LocalDate.of(2022, 1, 1);
-        var transaction = new Transaction(desc, transactionDate, TransactionType.INCOMEEXPENSES);
+        var transaction = new Transaction(desc, transactionDate, TransactionType.INCOME);
         var cashflows = new HashMap<String, Double>();
         cashflows.put(bgtKey, 100.0);
         cashflows.put(giroKey, 100.0);
@@ -62,7 +62,7 @@ public class ExtractCashflowsTests extends EventProcessorTestBase {
 
         var desc = "testeinkommen";
         LocalDate transactionDate = LocalDate.of(2022, 1, 1);
-        var transaction = new Transaction(desc, transactionDate, TransactionType.INCOMEEXPENSES);
+        var transaction = new Transaction(desc, transactionDate, TransactionType.INCOME);
         var cashflows = new HashMap<String, Double>();
         cashflows.put(bgtKey, 100.0);
         cashflows.put(giroKey, 100.0);

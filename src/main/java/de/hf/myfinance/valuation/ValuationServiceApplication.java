@@ -50,7 +50,7 @@ public class ValuationServiceApplication {
 		ConfigurableApplicationContext ctx = SpringApplication.run(ValuationServiceApplication.class, args);
 		String mongodDbHost = ctx.getEnvironment().getProperty("spring.data.mongodb.host");
 		String mongodDbPort = ctx.getEnvironment().getProperty("spring.data.mongodb.port");
-		LOG.info("Connected to MongoDb: {0}:{01}", mongodDbHost, mongodDbPort);
+		LOG.info("Connected to MongoDb: " + mongodDbHost + ":" + mongodDbPort);
 	}
 
 	@Autowired
