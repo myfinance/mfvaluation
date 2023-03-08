@@ -44,7 +44,16 @@ public class SaveValueCurveProcessorConfig  {
 
                 case CREATE:
                     auditService.saveMessage("save valueCurve of instrument with businesskey=" + event.getKey(), Severity.INFO, AUDIT_MSG_TYPE);
-                    valueCurveRepository.save(valueCurveMapper.apiToEntity(event.getData()))
+                    var valueCurve = valueCurveMapper.apiToEntity(event.getData());
+                    valueCurveRepository.findByInstrumentBusinesskey(valueCurve.getInstrumentBusinesskey())
+                            .switchIfEmpty(Mono.just(valueCurve))
+                            .map(e -> {
+                                e.setValueCurve(valueCurve.getValueCurve());
+                                e.setParentBusinesskey(valueCurve.getParentBusinesskey());
+                                e.setInstrumentBusinesskey(valueCurve.getInstrumentBusinesskey());
+                                return e;
+                            })
+                            .flatMap(e -> valueCurveRepository.save(e))
                             .flatMap(e -> {
                                 if(e.getParentBusinesskey()!=null && !e.getParentBusinesskey().isEmpty()){
                                     valuationEventHandler.sendValuationEvent(e.getParentBusinesskey());
