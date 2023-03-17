@@ -77,6 +77,59 @@ public class ValuationTest  extends EventProcessorTestBase {
         startAndTestCurveCalc(tenantKey);
     }
 
+    @Test
+    void currencyValuation() {
+        var currency = new Instrument(currencyKey, currencyDesc, InstrumentType.CURRENCY, true);
+        Event creatEvent = new Event(Event.Type.CREATE, currencyKey, currency);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        Event valuationEvent = new Event(Event.Type.START, currencyKey, currencyKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+
+
+        var prices = new EndOfDayPrices();
+        prices.setInstrumentBusinesskey(currencyKey);
+        var pricemap = new HashMap<LocalDate, EndOfDayPrice>();
+        var price = new EndOfDayPrice(0.9, "EUR");
+        pricemap.put(LocalDate.of(2022,12,1), price);
+        var price2 = new EndOfDayPrice(0.8, "EUR");
+        pricemap.put(LocalDate.of(2022,12,3), price2);
+        prices.setPrices(pricemap);
+        creatEvent = new Event(Event.Type.CREATE, prices.getInstrumentBusinesskey(), prices);
+        saveMarketDataProcessor.accept(creatEvent);
+
+        var savedPrices = endOfDayPricesRepository.findAll().collectList().block();
+        assertEquals(1, savedPrices.size());
+        assertEquals(2, savedPrices.get(0).getPrices().size());
+
+        messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        valuationEvent = new Event(Event.Type.START, currencyKey, currencyKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+        data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var uscurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(0.9, uscurve.get("2022-12-01"));
+        assertEquals(0.85, uscurve.get("2022-12-02"));
+        assertEquals(0.8, uscurve.get("2022-12-03"));
+    }
+
     private void addInstrument(InstrumentType instrumentType, String key, String desc, String parentKey){
         var entity = new Instrument(key, desc, instrumentType, true);
         entity.setParentBusinesskey(parentKey);

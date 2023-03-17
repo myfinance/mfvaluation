@@ -84,6 +84,8 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     String budgetGroupKey = budgetGroupDesc + "@10";
     String budgetDesc = "budget";
     String budgetKey = budgetDesc + "@5";
+    String currencyDesc = "USD";
+    String currencyKey = currencyDesc + "@13";
 
 
     @BeforeEach
