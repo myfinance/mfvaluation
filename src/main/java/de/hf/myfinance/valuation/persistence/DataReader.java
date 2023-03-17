@@ -12,4 +12,5 @@ public interface DataReader {
     Mono<ValueCurve> findValueCurveByInstrumentBusinesskey(String businesskey);
     Flux<Instrument> findByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType);
     Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey);
+    Flux<ValueCurve> findValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable);
 }

@@ -130,6 +130,52 @@ public class ValuationTest  extends EventProcessorTestBase {
         assertEquals(0.8, uscurve.get("2022-12-03"));
     }
 
+    @Test
+    void equityValuationWithFx() {
+        var currency = new Instrument(currencyKey, currencyDesc, InstrumentType.CURRENCY, true);
+        Event creatEvent = new Event(Event.Type.CREATE, currencyKey, currency);
+        saveInstrumentProcessor.accept(creatEvent);
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+        var fxValueCurve = new ValueCurve();
+        fxValueCurve.setInstrumentBusinesskey(currencyKey);
+        var valueMap = new TreeMap<LocalDate, Double>();
+        valueMap.put(LocalDate.of(2022,12,1), 0.9);
+        fxValueCurve.setValueCurve(valueMap);
+        creatEvent = new Event(Event.Type.CREATE, currencyKey, fxValueCurve);
+        saveValueCurveProcessor.accept(creatEvent);
+        var fxInstruments = new HashSet<String>();
+        fxInstruments.add(currencyKey);
+        var fxCurves = valueCurveRepository.findByInstrumentBusinesskeyIn(fxInstruments).collectList().block();
+        assertEquals(1, fxCurves.size());
+
+
+        var eq = new Instrument(eqKey, eqDesc, InstrumentType.EQUITY, true);
+        creatEvent = new Event(Event.Type.CREATE, eqKey, eq);
+        saveInstrumentProcessor.accept(creatEvent);
+        var eqPrices = new EndOfDayPrices();
+        eqPrices.setInstrumentBusinesskey(eqKey);
+        var eqPricemap = new HashMap<LocalDate, EndOfDayPrice>();
+        var eqPrice = new EndOfDayPrice(100, currencyKey);
+        eqPricemap.put(LocalDate.of(2022,12,1), eqPrice);
+        var eqPrice2 = new EndOfDayPrice(200, currencyKey);
+        eqPricemap.put(LocalDate.of(2022,12,2), eqPrice2);
+        eqPrices.setPrices(eqPricemap);
+        creatEvent = new Event(Event.Type.CREATE, eqPrices.getInstrumentBusinesskey(), eqPrices);
+        saveMarketDataProcessor.accept(creatEvent);
+        var valuationEvent = new Event(Event.Type.START, eqKey, eqKey);
+        valuationProcessor.accept(valuationEvent);
+
+
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var eqcurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(90.0, eqcurve.get("2022-12-01"));
+        assertEquals(180.0, eqcurve.get("2022-12-02"));
+    }
+
     private void addInstrument(InstrumentType instrumentType, String key, String desc, String parentKey){
         var entity = new Instrument(key, desc, instrumentType, true);
         entity.setParentBusinesskey(parentKey);

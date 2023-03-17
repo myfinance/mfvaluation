@@ -74,4 +74,9 @@ public class DataReaderImpl implements DataReader{
     public Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey){
         return endOfDayPricesRepository.findByInstrumentBusinesskey(businesskey).map(e-> endOfDayPricesMapper.entityToApi(e));
     }
+
+    @Override
+    public Flux<ValueCurve> findValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable){
+        return valueCurveRepository.findByInstrumentBusinesskeyIn(businesskeyIterable).map(e-> valueCurveMapper.entityToApi(e));
+    }
 }

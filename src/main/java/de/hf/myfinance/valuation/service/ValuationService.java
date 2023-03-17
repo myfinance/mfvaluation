@@ -36,15 +36,7 @@ public class ValuationService {
     }
 
     private Mono<Double> extractValueFromCurve(final ValueCurve valueCurve, final LocalDate date) {
-        if(valueCurve.getValueCurve().containsKey(date)) {
-            return  Mono.just(valueCurve.getValueCurve().get(date));
-        }
-        var firstEntry = valueCurve.getValueCurve().firstEntry();
-        if(firstEntry.getKey().isAfter(date)) {
-            return Mono.just(firstEntry.getValue());
-        }
-        var lastEntry = valueCurve.getValueCurve().lastEntry();
-        return Mono.just(lastEntry.getValue());
+        return Mono.just(AbsValueHandler.extractValueFromCurve(valueCurve.getValueCurve(), date));
     }
 
     private Mono<ValueCurve> fillCurveGaps(ValueCurve valueCurve, final LocalDate startDate, final LocalDate endDate) {

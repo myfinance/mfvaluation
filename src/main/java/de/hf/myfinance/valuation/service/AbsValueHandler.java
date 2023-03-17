@@ -52,4 +52,16 @@ public abstract class AbsValueHandler implements ValueHandler {
         }
         return startDate;
     }
+
+    public static Double extractValueFromCurve(final TreeMap<LocalDate, Double> valueCurve, final LocalDate date) {
+        if(valueCurve.containsKey(date)) {
+            return  valueCurve.get(date);
+        }
+        var firstEntry = valueCurve.firstEntry();
+        if(firstEntry.getKey().isAfter(date)) {
+            return firstEntry.getValue();
+        }
+        var lastEntry = valueCurve.lastEntry();
+        return lastEntry.getValue();
+    }
 }

@@ -87,12 +87,16 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     String currencyDesc = "USD";
     String currencyKey = currencyDesc + "@13";
 
+    String eqDesc = "anEquity";
+    String eqKey = eqDesc + "@14";
+
 
     @BeforeEach
     void setupDb() {
         instrumentRepository.deleteAll().block();
         cashflowRepository.deleteAll().block();
         valueCurveRepository.deleteAll().block();
+        endOfDayPricesRepository.deleteAll().block();
         purgeMessages(instrumentProcessorBindingName);
         purgeMessages(cashflowProcessorBindingName);
         purgeMessages(valuationDataChangedBindingName);

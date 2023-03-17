@@ -33,7 +33,7 @@ public class ValuationApiImpl implements ValuationApi {
 
     @Override
     public Mono<Double> getValue(String businesskey, LocalDate date) {
-        return null;
+        return valuationService.getValue(businesskey, date);
     }
 
 
