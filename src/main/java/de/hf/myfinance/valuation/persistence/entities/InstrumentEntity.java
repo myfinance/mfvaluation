@@ -23,7 +23,6 @@ public class InstrumentEntity implements java.io.Serializable {
     private Integer version;
     private Integer instrumentTypeId;
     private InstrumentType instrumentType;
-    private String description;
     private boolean active;
     @Indexed(unique = true)
     private String businesskey;
@@ -36,9 +35,8 @@ public class InstrumentEntity implements java.io.Serializable {
     public InstrumentEntity() {
     }
 
-    public InstrumentEntity(InstrumentType instrumentType, String description, boolean active) {
+    public InstrumentEntity(InstrumentType instrumentType, boolean active) {
         setInstrumentTypeId(instrumentType.getValue());
-        this.description = description;
         this.active = active;
     }
 
@@ -63,13 +61,6 @@ public class InstrumentEntity implements java.io.Serializable {
     public void setInstrumentType(InstrumentType instrumentType) {
         this.instrumentType = instrumentType;
         this.instrumentTypeId = instrumentType.getValue();
-    }
-
-    public String getDescription() {
-        return this.description;
-    }
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public boolean isActive() {
