@@ -7,8 +7,6 @@ import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
 import de.hf.myfinance.valuation.persistence.repositories.EndOfDayPricesRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +16,6 @@ import java.util.function.Consumer;
 
 @Configuration
 public class SaveMarketDataProcessorConfig {
-    private static final Logger LOG = LoggerFactory.getLogger(SaveMarketDataProcessorConfig.class);
 
     private final AuditService auditService;
     private final EndOfDayPricesMapper endOfDayPricesMapper;
@@ -37,7 +34,7 @@ public class SaveMarketDataProcessorConfig {
     @Bean
     public Consumer<Event<String, EndOfDayPrices>> saveMarketDataProcessor() {
         return event -> {
-            LOG.info("Process message created at {}...", event.getEventCreatedAt());
+            auditService.saveMessage("Process message in SaveMarketDataProcessorConfig created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
 
             switch (event.getEventType()) {
 
@@ -58,10 +55,10 @@ public class SaveMarketDataProcessorConfig {
 
                 default:
                     String errorMessage = "Incorrect event type: " + event.getEventType() + ", expected a Create event";
-                    LOG.warn(errorMessage);
+                    auditService.saveMessage(errorMessage, Severity.FATAL, AUDIT_MSG_TYPE);
             }
 
-            LOG.info("Message processing done!");
+            auditService.saveMessage("Message processing in SaveMarketDataProcessorConfig done!", Severity.DEBUG, AUDIT_MSG_TYPE);
 
         };
     }

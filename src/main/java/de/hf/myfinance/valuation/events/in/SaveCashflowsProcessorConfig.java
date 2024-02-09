@@ -7,8 +7,6 @@ import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
 import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +16,6 @@ import java.util.function.Consumer;
 
 @Configuration
 public class SaveCashflowsProcessorConfig {
-    private static final Logger LOG = LoggerFactory.getLogger(SaveCashflowsProcessorConfig.class);
 
     private final AuditService auditService;
     private final CashflowMapper cashflowMapper;
@@ -37,7 +34,7 @@ public class SaveCashflowsProcessorConfig {
     @Bean
     public Consumer<Event<String, Cashflow>> saveCashflowsProcessor() {
         return event -> {
-            LOG.info("Process message created at {}...", event.getEventCreatedAt());
+            auditService.saveMessage("Process message created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
 
             switch (event.getEventType()) {
 
@@ -52,10 +49,10 @@ public class SaveCashflowsProcessorConfig {
 
                 default:
                     String errorMessage = "Incorrect event type: " + event.getEventType() + ", expected a Create event";
-                    LOG.warn(errorMessage);
+                    auditService.saveMessage(errorMessage, Severity.FATAL, AUDIT_MSG_TYPE);
             }
 
-            LOG.info("Message processing done!");
+            auditService.saveMessage("Message processing done!", Severity.DEBUG, AUDIT_MSG_TYPE);
 
         };
     }

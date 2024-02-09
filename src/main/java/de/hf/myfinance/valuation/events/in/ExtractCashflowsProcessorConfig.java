@@ -7,8 +7,6 @@ import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Transaction;
 import de.hf.myfinance.restmodel.TransactionType;
 import de.hf.myfinance.valuation.events.out.ExtractedCashflowsEventHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +15,6 @@ import java.util.function.Consumer;
 
 @Configuration
 public class ExtractCashflowsProcessorConfig {
-    private static final Logger LOG = LoggerFactory.getLogger(ExtractCashflowsProcessorConfig.class);
 
     private final AuditService auditService;
     private final ExtractedCashflowsEventHandler extractedCashflowsEventHandler;
@@ -32,9 +29,9 @@ public class ExtractCashflowsProcessorConfig {
     @Bean
     public Consumer<Event<String, Transaction>> extractCashflowsProcessor() {
         return event -> {
-            LOG.info("Process message created at {}...", event.getEventCreatedAt());
+            auditService.saveMessage("Process message in ExtractCashflowsProcessorConfig created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
             Transaction transaction = event.getData();
-            auditService.saveMessage("extract cashflows of transaction with id=" + event.getData().getTransactionId(), Severity.INFO, AUDIT_MSG_TYPE);
+            auditService.saveMessage("extract cashflows of transaction with id=" + event.getData().getTransactionId(), Severity.DEBUG, AUDIT_MSG_TYPE);
             switch (event.getEventType()) {
 
                 case CREATE:
@@ -64,10 +61,10 @@ public class ExtractCashflowsProcessorConfig {
 
                 default:
                     String errorMessage = "Incorrect event type: " + event.getEventType() + ", expected a Create event";
-                    LOG.warn(errorMessage);
+                    auditService.saveMessage(errorMessage, Severity.FATAL, AUDIT_MSG_TYPE);
             }
 
-            LOG.info("Message processing done!");
+            auditService.saveMessage("Message processing in ExtractCashflowsProcessorConfig done!", Severity.DEBUG, AUDIT_MSG_TYPE);
 
         };
     }

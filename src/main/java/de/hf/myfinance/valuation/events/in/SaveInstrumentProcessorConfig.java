@@ -8,8 +8,6 @@ import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +17,6 @@ import java.util.function.Consumer;
 
 @Configuration
 public class SaveInstrumentProcessorConfig {
-    private static final Logger LOG = LoggerFactory.getLogger(SaveInstrumentProcessorConfig.class);
 
     private final InstrumentMapper instrumentMapper;
     private final AuditService auditService;
@@ -38,13 +35,13 @@ public class SaveInstrumentProcessorConfig {
     @Bean
     public Consumer<Event<String, Instrument>> saveInstrumentProcessor() {
         return event -> {
-            LOG.info("Process message created at {}...", event.getEventCreatedAt());
+            auditService.saveMessage("Process message created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
 
             switch (event.getEventType()) {
 
                 case CREATE:
                     Instrument instrument = event.getData();
-                    LOG.info("Create instrument with ID: {}", instrument.getBusinesskey());
+                    auditService.saveMessage("Create instrument with ID: " + instrument.getBusinesskey(), Severity.DEBUG, AUDIT_MSG_TYPE);
                     var instrumentEntity = instrumentMapper.apiToEntity(instrument);
                     instrumentRepository.findByBusinesskey(instrumentEntity.getBusinesskey())
                             .switchIfEmpty(Mono.just(instrumentEntity))
@@ -60,16 +57,16 @@ public class SaveInstrumentProcessorConfig {
                                 return Mono.just("done");
                             })
                             .block();
-                    auditService.saveMessage("Instrument updated:businesskey=" + instrument.getBusinesskey() + " desc=" + instrument.getDescription(), Severity.INFO, AUDIT_MSG_TYPE);
+                    auditService.saveMessage("Instrument updated in transactionservice:businesskey=" + instrument.getBusinesskey() + " desc=" + instrument.getDescription(), Severity.INFO, AUDIT_MSG_TYPE);
 
                     break;
 
                 default:
                     String errorMessage = "Incorrect event type: " + event.getEventType() + ", expected a CREATE event";
-                    LOG.warn(errorMessage);
+                    auditService.saveMessage(errorMessage, Severity.FATAL, AUDIT_MSG_TYPE);
             }
 
-            LOG.info("Message processing done!");
+            auditService.saveMessage("Message processing done!", Severity.DEBUG, AUDIT_MSG_TYPE);
 
         };
     }

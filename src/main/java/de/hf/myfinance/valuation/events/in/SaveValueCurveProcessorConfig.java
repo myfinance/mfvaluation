@@ -7,8 +7,6 @@ import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +16,6 @@ import java.util.function.Consumer;
 
 @Configuration
 public class SaveValueCurveProcessorConfig  {
-    private static final Logger LOG = LoggerFactory.getLogger(SaveValueCurveProcessorConfig.class);
 
     private final AuditService auditService;
     private final ValueCurveRepository valueCurveRepository;
@@ -38,7 +35,7 @@ public class SaveValueCurveProcessorConfig  {
     @Bean
     public Consumer<Event<String, ValueCurve>> saveValueCurveProcessor() {
         return event -> {
-            LOG.info("Process message created at {}...", event.getEventCreatedAt());
+            auditService.saveMessage("Process message in SaveValueCurveProcessorConfig created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
 
             switch (event.getEventType()) {
 
@@ -64,10 +61,10 @@ public class SaveValueCurveProcessorConfig  {
 
                 default:
                     String errorMessage = "Incorrect event type: " + event.getEventType() + ", expected a Create event";
-                    LOG.warn(errorMessage);
+                    auditService.saveMessage(errorMessage, Severity.FATAL, AUDIT_MSG_TYPE);
             }
 
-            LOG.info("Message processing done!");
+            auditService.saveMessage("Message processing in SaveValueCurveProcessorConfig done!", Severity.DEBUG, AUDIT_MSG_TYPE);
 
         };
     }
