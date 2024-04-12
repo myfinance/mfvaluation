@@ -7,9 +7,13 @@ import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -26,6 +30,17 @@ public class ValuationService {
 
     public Mono<Double> getValue(String businesskey, LocalDate date) {
         return dataReader.findValueCurveByInstrumentBusinesskey(businesskey).flatMap(c -> extractValueFromCurve(c, date));
+    }
+
+    public Flux<Map<String,Double>> getValues(List<String> businesskeys, LocalDate date) {
+        return Flux.fromIterable(businesskeys).flatMap(b->{
+            return getValue(b, date).flatMap(v->{
+                var returnValue = new HashMap<String,Double>();
+                returnValue.put(b,v);
+                return Mono.just(returnValue);
+            });
+        });
+        
     }
 
     public Mono<ValueCurve> getValueCurve(String businesskey, LocalDate startDate, LocalDate endDate) {

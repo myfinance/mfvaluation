@@ -4,6 +4,9 @@ import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.myfinance.valuation.service.ValuationService;
 import de.hf.testhelper.MongoDbTestBase;
+import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -176,5 +181,36 @@ public class ValuationServiceTest extends MongoDbTestBase {
 
         result = valuationService.getValue("testKey", LocalDate.of(2022,2,2)).block();
         assertEquals(140, result);
+    }
+
+    @Test
+    void getValuesForListOfBusinessKeys() {
+        var valueCurve = new ValueCurveEntity();
+        valueCurve.setInstrumentBusinesskey("testKey");
+        var valueMap = new TreeMap<LocalDate, Double>();
+        valueMap.put(LocalDate.of(2022,1,1), 100.0);
+        valueMap.put(LocalDate.of(2022,1,2), 110.0);
+        valueCurve.setValueCurve(valueMap);
+        valueCurveRepository.save(valueCurve).block();
+
+        valueCurve = new ValueCurveEntity();
+        valueCurve.setInstrumentBusinesskey("testKey2");
+        valueMap = new TreeMap<LocalDate, Double>();
+        valueMap.put(LocalDate.of(2022,1,1), 200.0);
+        valueMap.put(LocalDate.of(2022,1,2), 210.0);
+        valueCurve.setValueCurve(valueMap);
+        valueCurveRepository.save(valueCurve).block();
+
+        var listOfBusinessKeys = new ArrayList<String>();
+        listOfBusinessKeys.add("testKey");
+        listOfBusinessKeys.add("testKey2");
+
+        Map<String,Double> resultMap = new TreeMap<String, Double>();
+        Flux<Map<String,Double>> result = valuationService.getValues(listOfBusinessKeys, LocalDate.of(2022,1,2));
+        result.collectList().block().forEach(r->resultMap.putAll(r));
+        assertEquals(110, resultMap.get("testKey"));
+        assertEquals(210, resultMap.get("testKey2"));
+
+
     }
 }

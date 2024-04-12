@@ -1,12 +1,14 @@
-server.port: 7004
+server.port: 30034
+server.host: localhost
+# in case you want to run rabbitMq and keycloak on a dev server and not on your local machine like the software componentens(MFcomposite, mfinstrument...)
+#env.host: ${server.host}
+env:
+  host: 192.168.100.73
+
 logging:
   level:
     root: INFO
     de.hf.myfinance: DEBUG
-app:
-  mfinstruments:
-    host: localhost
-    port: 7001
 
 springdoc:
   swagger-ui.path: /openapi/swagger-ui.html
@@ -15,7 +17,7 @@ springdoc:
   pathsToMatch: /**
 
 spring.data.mongodb:
-  host: 192.168.100.73
+  host: ${env.host}
   port: 30023
   database: valuation-db
   authentication-database: admin
@@ -84,7 +86,7 @@ spring.cloud.stream.rabbit.bindings:
 
 
 spring.rabbitmq:
-  host: 192.168.100.73
+  host: ${env.host}
   port: 30021
   username: user
   password: vulkan
