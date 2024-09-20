@@ -8,14 +8,14 @@
     <parent>
 		<groupId>de.hf.myfinance</groupId>
 		<artifactId>root</artifactId>
-		<version>0.24.0-alpha-67696856d771f29f3eeef80517e8ee95b0a9ecc5</version>
+		<version>0.24.0-alpha-893b05105d42ed65c509b6f548e1d3fc762d3b68</version>
         <!--<version>0.0.0-0-SNAPSHOT</version>-->
 		<relativePath/> 
 	</parent>
     <properties>
         <NEXUS_URL>192.168.100.73:31001</NEXUS_URL>
         <!--<MFFrameWork.Version>0.0.0-0-SNAPSHOT</MFFrameWork.Version>-->
-        <MFFrameWork.Version>0.24.0-alpha-67696856d771f29f3eeef80517e8ee95b0a9ecc5</MFFrameWork.Version>
+        <MFFrameWork.Version>0.24.0-alpha-893b05105d42ed65c509b6f548e1d3fc762d3b68</MFFrameWork.Version>
         <jib.container-name>holgerfischer/myfinance-mfvaluation:</jib.container-name>
     </properties>
 
@@ -35,8 +35,8 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-webflux-ui</artifactId>
-            <version>${springdoc.version}</version>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+            <version>${openapistarter.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>

@@ -1,10 +1,13 @@
 package de.hf.myfinance.valuation.events.in;
 
 import de.hf.framework.audit.AuditService;
+import de.hf.framework.audit.AuditType;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
+import de.hf.myfinance.valuation.persistence.entities.InstrumentEntity;
+import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
 import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +54,7 @@ public class SaveValueCurveProcessorConfig  {
                                 return e;
                             })
                             .flatMap(e -> valueCurveRepository.save(e))
+                            .flatMap(this::logEvent)
                             .flatMap(e -> {
                                 if(e.getParentBusinesskey()!=null && !e.getParentBusinesskey().isEmpty()){
                                     valuationEventHandler.sendValuationEvent(e.getParentBusinesskey());
@@ -67,5 +71,10 @@ public class SaveValueCurveProcessorConfig  {
             auditService.saveMessage("Message processing in SaveValueCurveProcessorConfig done!", Severity.DEBUG, AUDIT_MSG_TYPE);
 
         };
+    }
+
+    private Mono<ValueCurveEntity> logEvent(ValueCurveEntity valueCurveEntity){
+        auditService.saveMessage("ValueCurve saved for Instrument:businesskey=" + valueCurveEntity.getInstrumentBusinesskey(), Severity.INFO, AUDIT_MSG_TYPE, "NA", AuditType.VALUECHANGEDEVENT);
+        return Mono.just(valueCurveEntity);
     }
 }
