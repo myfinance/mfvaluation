@@ -28,14 +28,17 @@ spring.data.mongodb:
 spring:
   cloud:
     function:
-      definition: valuationProcessor;saveInstrumentProcessor;saveCashflowsProcessor;saveMarketDataProcessor;extractCashflowsProcessor;saveValueCurveProcessor
+      definition: valuationProcessor;positionProcessor;saveInstrumentProcessor;saveCashflowsProcessor;saveMarketDataProcessor;extractCashflowsAndTradesProcessor;saveTradeProcessor;saveValueCurveProcessor
 
 spring.cloud.stream:
   defaultBinder: rabbit
   default.contentType: application/json
-  bindings.extractCashflowsProcessor-in-0:
+  bindings.extractCashflowsAndTradesProcessor-in-0:
     destination: transactionApproved
     group: extractCashflow4ValuationGroup
+  bindings.saveTradeProcessor-in-0:
+    destination: extractedTrade
+    group: saveTradeGroup
   bindings.saveCashflowsProcessor-in-0:
     destination: extractedCashflows
     group: saveCashflow4ValuationGroup
@@ -51,6 +54,9 @@ spring.cloud.stream:
   bindings.saveValueCurveProcessor-in-0:
     destination: valueCurveCalculated
     group: saveValueCurveGroup
+  bindings.positionProcessor-in-0:
+    destination: tradeSavedForPositionBuilding
+    group: calcPositionGroup
   bindings.valuationDataChanged-out-0:
     destination: valuationDataChanged
     producer:
@@ -63,27 +69,15 @@ spring.cloud.stream:
     destination: valueCurveCalculated
     producer:
       required-groups: valueCurveCalculatedAuditGroup
-
-spring.cloud.stream.rabbit.bindings:
-  extractCashflowsProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
-  saveCashflowsProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
-  saveInstrumentProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
-  saveMarketDataProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
-  valuationProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
-  saveValueCurveProcessor-in-0:
-    autoBindDlq: true
-    republishToDlq: true
-
+  bindings.extractedTrade-out-0:
+    destination: extractedTrade
+    producer:
+      required-groups: extractedTradeAuditGroup   
+  bindings.tradeSaved-out-0:
+    destination: tradeSavedForPositionBuilding
+    producer:
+      required-groups: tradeSavedForPositionBuildingAuditGroup 
+ 
 
 spring.rabbitmq:
   host: ${env.host}

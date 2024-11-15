@@ -5,7 +5,6 @@ import de.hf.framework.exceptions.MFException;
 import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.DataReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import reactor.core.publisher.Flux;
@@ -22,7 +21,6 @@ public class ValuationService {
     private final DataReader dataReader;
     private final AuditService auditService;
 
-    @Autowired
     public ValuationService(DataReader dataReader, AuditService auditService) {
         this.dataReader = dataReader;
         this.auditService = auditService;

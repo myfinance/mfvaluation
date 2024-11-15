@@ -10,7 +10,6 @@ import java.util.Map;
 
 @Document(collection = "curves")
 public class ValueCurveEntity {
-    private static final long serialVersionUID = 1L;
 
     @Id
     private String curveid;

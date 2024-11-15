@@ -1,15 +1,19 @@
 package de.hf.myfinance.valuation.persistence;
 
 import de.hf.myfinance.restmodel.*;
+import de.hf.myfinance.valuation.persistence.entities.PositionKey;
 import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
 import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
+import de.hf.myfinance.valuation.persistence.mapper.PositionMapper;
+import de.hf.myfinance.valuation.persistence.mapper.TradeMapper;
 import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
 import de.hf.myfinance.valuation.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
+import de.hf.myfinance.valuation.persistence.repositories.PositionRepository;
+import de.hf.myfinance.valuation.persistence.repositories.TradeRepository;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,12 +28,17 @@ public class DataReaderImpl implements DataReader{
     private final ValueCurveMapper valueCurveMapper;
     private final EndOfDayPricesRepository endOfDayPricesRepository;
     private final EndOfDayPricesMapper endOfDayPricesMapper;
+    private final PositionRepository positionRepository;
+    private final PositionMapper positonMapper;
+    private final TradeRepository tradeRepository;
+    private final TradeMapper tradeMapper;
 
-    @Autowired
     public DataReaderImpl(InstrumentRepository instrumentRepository, InstrumentMapper instrumentMapper,
                           CashflowRepository cashflowRepository, CashflowMapper cashflowMapper,
                           ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper,
-                          EndOfDayPricesRepository endOfDayPricesRepository, EndOfDayPricesMapper endOfDayPricesMapper) {
+                          EndOfDayPricesRepository endOfDayPricesRepository, EndOfDayPricesMapper endOfDayPricesMapper, 
+                          PositionRepository positionRepository, PositionMapper positionMapper,
+                          TradeRepository tradeRepository, TradeMapper tradeMapper) {
         this.instrumentRepository = instrumentRepository;
         this.instrumentMapper = instrumentMapper;
         this.cashflowRepository = cashflowRepository;
@@ -38,6 +47,10 @@ public class DataReaderImpl implements DataReader{
         this.valueCurveMapper = valueCurveMapper;
         this.endOfDayPricesRepository = endOfDayPricesRepository;
         this.endOfDayPricesMapper = endOfDayPricesMapper;
+        this.positionRepository = positionRepository;
+        this.positonMapper = positionMapper;
+        this.tradeRepository = tradeRepository;
+        this.tradeMapper = tradeMapper;
     }
 
     @Override
@@ -78,5 +91,17 @@ public class DataReaderImpl implements DataReader{
     @Override
     public Flux<ValueCurve> findValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable){
         return valueCurveRepository.findByInstrumentBusinesskeyIn(businesskeyIterable).map(e-> valueCurveMapper.entityToApi(e));
+    }
+
+    @Override
+    public Mono<PositionCurve> findPositonByKey(String depotBusinessKey, String securityBusinessKey) {
+        var positionkey = new PositionKey(depotBusinessKey, securityBusinessKey);
+        return positionRepository.findByPositionKey(positionkey).map(positonMapper::entityToApi);
+    }
+
+    @Override
+    public Flux<Trade> findTradesByKey(String depotBusinessKey, String securityBusinessKey) {
+        var positionkey = new PositionKey(depotBusinessKey, securityBusinessKey);
+        return tradeRepository.findByPositionKey(positionkey).map(tradeMapper::entityToApi);
     }
 }

@@ -3,7 +3,6 @@ package de.hf.myfinance.valuation.events.out;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
 import org.springframework.cloud.stream.function.StreamBridge;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +22,7 @@ public class ValueCurveCalculatedEventHandler {
     }
 
     private void sendMessage(String bindingName, Event event) {
-        Message message = MessageBuilder.withPayload(event)
+        var message = MessageBuilder.withPayload(event)
                 .setHeader("partitionKey", event.getKey())
                 .build();
         streamBridge.send(bindingName, message);

@@ -7,7 +7,6 @@ import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
 import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Mono;
@@ -23,7 +22,6 @@ public class SaveCashflowsProcessorConfig {
     private final ValuationEventHandler valuationEventHandler;
     protected static final String AUDIT_MSG_TYPE="SaveCashFlowProcessor_Event";
 
-    @Autowired
     public SaveCashflowsProcessorConfig(AuditService auditService, CashflowMapper cashflowMapper, CashflowRepository cashflowRepository, ValuationEventHandler valuationEventHandler) {
         this.auditService = auditService;
         this.cashflowMapper = cashflowMapper;

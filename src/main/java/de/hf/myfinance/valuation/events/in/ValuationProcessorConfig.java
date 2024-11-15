@@ -5,7 +5,6 @@ import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.valuation.service.ValueHandlerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,7 +17,6 @@ public class ValuationProcessorConfig  {
     private final ValueHandlerFactory valueHandlerFactory;
     protected static final String AUDIT_MSG_TYPE="ValuationProcessor_Event";
 
-    @Autowired
     public ValuationProcessorConfig( AuditService auditService, ValueHandlerFactory valueHandlerFactory) {
         this.valueHandlerFactory = valueHandlerFactory;
         this.auditService = auditService;

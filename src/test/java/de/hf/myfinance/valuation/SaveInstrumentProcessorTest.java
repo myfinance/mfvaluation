@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -36,8 +35,8 @@ public class SaveInstrumentProcessorTest extends EventProcessorTestBase {
         equity.setAdditionalMaps(symbols);
 
 
-        Event creatEvent = new Event(Event.Type.CREATE, equity.getBusinesskey(), equity);
-        saveInstrumentProcessor.accept(creatEvent);
+        Event<String, Instrument> createEvent = new Event<>(Event.Type.CREATE, equity.getBusinesskey(), equity);
+        saveInstrumentProcessor.accept(createEvent);
 
         var instruments = instrumentRepository.findAll().collectList().block();
         assertEquals(1, instruments.size());
@@ -57,5 +56,31 @@ public class SaveInstrumentProcessorTest extends EventProcessorTestBase {
         assertEquals("START", eventtype);
         var key = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("key");
         assertEquals(equity.getBusinesskey(), key);
+    }
+
+    @Test
+    void createDepot() {
+
+        var desc = "testDepot";
+        var depot = new Instrument(desc, desc, InstrumentType.DEPOT, true);
+
+        Event<String, Instrument> createEvent = new Event<>(Event.Type.CREATE, depot.getBusinesskey(), depot);
+        saveInstrumentProcessor.accept(createEvent);
+
+        var instruments = instrumentRepository.findAll().collectList().block();
+        assertEquals(1, instruments.size());
+
+        var savedinstrument = instruments.get(0);
+        assertEquals(desc, savedinstrument.getBusinesskey());
+        assertEquals(InstrumentType.DEPOT, savedinstrument.getInstrumentType());
+        assertTrue(savedinstrument.isActive());
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+        JsonHelper jsonHelper = new JsonHelper();
+        var eventtype = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("eventType");
+        assertEquals("START", eventtype);
+        var key = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("key");
+        assertEquals(depot.getBusinesskey(), key);
     }
 }
