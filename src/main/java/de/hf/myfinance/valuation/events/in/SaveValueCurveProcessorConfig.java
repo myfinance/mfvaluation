@@ -9,7 +9,6 @@ import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
 import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Mono;
@@ -25,7 +24,6 @@ public class SaveValueCurveProcessorConfig  {
     private final ValuationEventHandler valuationEventHandler;
     protected static final String AUDIT_MSG_TYPE="SaveCashFlowProcessor_Event";
 
-    @Autowired
     public SaveValueCurveProcessorConfig( AuditService auditService, ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper, ValuationEventHandler valuationEventHandler) {
 
         this.auditService = auditService;

@@ -8,31 +8,31 @@ import org.springframework.context.annotation.Configuration;
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
-import de.hf.myfinance.restmodel.Trade;
+import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.service.ValueHandlerFactory;
 
 @Configuration
-public class PositionProcessorConfig {
+public class PositionValueProcessorConfig {
 
     private final AuditService auditService;
-    protected static final String AUDIT_MSG_TYPE="PositionProcessor_Event";
+    protected static final String AUDIT_MSG_TYPE="PositionValueProcessor_Event";
     private final ValueHandlerFactory valueHandlerFactory;
 
-    public PositionProcessorConfig( AuditService auditService, ValueHandlerFactory valueHandlerFactory) {
+    public PositionValueProcessorConfig( AuditService auditService, ValueHandlerFactory valueHandlerFactory) {
         this.valueHandlerFactory = valueHandlerFactory;
         this.auditService = auditService; 
     }
 
     @Bean
-    public Consumer<Event<String, Trade>> positionProcessor() {
+    public Consumer<Event<String, ValueCurve>> positionValueProcessor() {
         return event -> {
-            auditService.saveMessage("Process message in ExtractCashflowsProcessorConfig created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
-            var trade = event.getData();
-            auditService.saveMessage("build positions for id=" + event.getData().getSecurityBusinessKey(), Severity.DEBUG, AUDIT_MSG_TYPE);
+            auditService.saveMessage("Process message in PositionValueProcessorConfig created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
+            var positionCurve = event.getData();
+            auditService.saveMessage("valuate positions for id=" + positionCurve.getInstrumentBusinesskey(), Severity.DEBUG, AUDIT_MSG_TYPE);
             switch (event.getEventType()) {
 
-                case CREATE:
-                    valueHandlerFactory.getPositionHandler(trade.getDepotBusinessKey(), trade.getSecurityBusinessKey()).calcPositionCurve();
+                case START:
+                    valueHandlerFactory.getPositionHandler(positionCurve.getParentBusinesskey(), positionCurve.getInstrumentBusinesskey()).calcPositionValueCurve();
                     break;
 
                 default:

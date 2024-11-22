@@ -9,28 +9,18 @@ import de.hf.myfinance.valuation.persistence.DataReader;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.TreeMap;
 
-public abstract class AbsValueHandler implements ValueHandler {
+public abstract class AbsValueHandler extends AbsCurveHandler implements ValueHandler {
 
     protected Instrument instrument;
-    protected final DataReader dataReader;
     protected final ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler;
-    protected final AuditService auditService;
     protected static final String AUDIT_MSG_TYPE="ValueHandler_User_Event";
 
     protected AbsValueHandler(Instrument instrument, DataReader dataReader, ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler, AuditService auditService){
+        super(dataReader, auditService);
         this.instrument = instrument;
-        this.dataReader = dataReader;
-        this.auditService = auditService;
         this.valueCurveCalculatedEventHandler = valueCurveCalculatedEventHandler;
-    }
-
-    protected Mono<TreeMap<LocalDate, Double>> createZeroCurve() {
-        TreeMap<LocalDate, Double> valueCurve = new TreeMap<>();
-        valueCurve.put(LocalDate.now(), 0.0);
-        return Mono.just(valueCurve);
     }
 
     protected Mono<Void> sendValueCurveCalculatedEvent(TreeMap<LocalDate, Double> valueCurve) {
@@ -40,28 +30,5 @@ public abstract class AbsValueHandler implements ValueHandler {
         valueCurveObject.setParentBusinesskey(instrument.getParentBusinesskey());
         valueCurveCalculatedEventHandler.sendValueCurveCalculatedEvent(instrument.getBusinesskey(), valueCurveObject);
         return Mono.just("").then();
-    }
-
-    protected LocalDate calcCurveStartDate(List<ValueCurve> valueCurves) {
-        LocalDate startDate = LocalDate.now();
-        for (var childValueCurve : valueCurves) {
-            LocalDate minDate = childValueCurve.getValueCurve().firstKey();
-            if(minDate.isBefore(startDate)) {
-                startDate = minDate;
-            }
-        }
-        return startDate;
-    }
-
-    public static Double extractValueFromCurve(final TreeMap<LocalDate, Double> valueCurve, final LocalDate date) {
-        if(valueCurve.containsKey(date)) {
-            return  valueCurve.get(date);
-        }
-        var firstEntry = valueCurve.firstEntry();
-        if(firstEntry.getKey().isAfter(date)) {
-            return firstEntry.getValue();
-        }
-        var lastEntry = valueCurve.lastEntry();
-        return lastEntry.getValue();
     }
 }

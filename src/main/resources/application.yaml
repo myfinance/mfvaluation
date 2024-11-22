@@ -28,7 +28,7 @@ spring.data.mongodb:
 spring:
   cloud:
     function:
-      definition: valuationProcessor;positionProcessor;saveInstrumentProcessor;saveCashflowsProcessor;saveMarketDataProcessor;extractCashflowsAndTradesProcessor;saveTradeProcessor;saveValueCurveProcessor
+      definition: valuationProcessor;positionProcessor;saveInstrumentProcessor;saveCashflowsProcessor;saveMarketDataProcessor;extractCashflowsAndTradesProcessor;saveTradeProcessor;saveValueCurveProcessor,positionValueProcessor,savePositionProcessor
 
 spring.cloud.stream:
   defaultBinder: rabbit
@@ -57,6 +57,12 @@ spring.cloud.stream:
   bindings.positionProcessor-in-0:
     destination: tradeSavedForPositionBuilding
     group: calcPositionGroup
+  bindings.positionValueProcessor-in-0:
+    destination: positionSaved
+    group: calcPositionValueGroup
+  bindings.savePositionProcessor-in-0:
+    destination: positionBuilded
+    group: savePostionGroup
   bindings.valuationDataChanged-out-0:
     destination: valuationDataChanged
     producer:
@@ -77,6 +83,14 @@ spring.cloud.stream:
     destination: tradeSavedForPositionBuilding
     producer:
       required-groups: tradeSavedForPositionBuildingAuditGroup 
+  bindings.positionBuilded-out-0:
+    destination: positionBuilded
+    producer:
+      required-groups: positionBuildedAuditGroup  
+  bindings.positionSaved-out-0:
+    destination: positionSaved
+    producer:
+      required-groups: positionSavedAuditGroup            
  
 
 spring.rabbitmq:

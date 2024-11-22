@@ -1,7 +1,7 @@
 package de.hf.myfinance.valuation.events.out;
 
 import de.hf.myfinance.event.Event;
-import de.hf.myfinance.restmodel.PositionCurve;
+import de.hf.myfinance.restmodel.ValueCurve;
 
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.messaging.Message;
@@ -18,9 +18,9 @@ public class PositionBuildedEventHandler {
             this.streamBridge = streamBridge;
         }
     
-        public void sendPositionBuildedEvent(PositionCurve position){
+        public void sendPositionBuildedEvent(ValueCurve positionCurve){
             sendMessage("positionBuilded-out-0",
-                    new Event(CREATE, position.getSecurityBusinessKey(), position));
+                    new Event(CREATE, positionCurve.getInstrumentBusinesskey(), positionCurve));
         }
     
         private void sendMessage(String bindingName, Event event) {

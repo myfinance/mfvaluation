@@ -31,31 +31,7 @@ public class CashAccValueHandler extends AbsValueHandler {
     }
 
     protected Mono<TreeMap<LocalDate, Double>> calcCurveFromCashflows(List<Cashflow> cashflows) {
-        TreeMap<LocalDate, Double> valueCurve = new TreeMap<>();
-
-        double value = 0.0;
-
-        var cashflowMap =  convert2CashflowPerDayMap(cashflows);
-
-        SortedSet<LocalDate> sortedDates = new TreeSet<LocalDate>(cashflowMap.keySet());
-        LocalDate lastDate = sortedDates.first();
-        //add initial 0 value before the first cashflow
-        valueCurve.put(lastDate.minusDays(1), value);
-        Iterator<LocalDate> iter = sortedDates.iterator();
-        while(iter.hasNext()) {
-
-            LocalDate nextExistingDate = iter.next();
-            while(lastDate.isBefore(nextExistingDate)){
-                valueCurve.put(lastDate, value);
-                lastDate=lastDate.plusDays(1);
-            }
-            lastDate=nextExistingDate.plusDays(1);
-            var cashflow = cashflowMap.get(nextExistingDate);
-            value += cashflow;
-            valueCurve.put(nextExistingDate, value);
-        }
-
-        return Mono.just(valueCurve);
+        return buildCurveFromValueMap(convert2CashflowPerDayMap(cashflows));
     }
 
     private TreeMap<LocalDate, Double> convert2CashflowPerDayMap(List<Cashflow> cashflows) {

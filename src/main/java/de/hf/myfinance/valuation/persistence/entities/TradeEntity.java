@@ -1,5 +1,7 @@
 package de.hf.myfinance.valuation.persistence.entities;
 
+import java.time.LocalDate;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -16,15 +18,17 @@ public class TradeEntity {
     private PositionKey positionKey;
 
     private Double amount;
+    private LocalDate tradeDate;
 
     public TradeEntity(){}
 
     public TradeEntity(String tradeId) {
         this.tradeId = tradeId;
     }
-    public TradeEntity(String depotBusinessKey, String securityBusinessKey, Double amount) {
+    public TradeEntity(String depotBusinessKey, String securityBusinessKey, Double amount, LocalDate tradeDate) {
         this.positionKey = new PositionKey(depotBusinessKey,securityBusinessKey);
         this.amount = amount;
+        this.tradeDate = tradeDate;
      }
 
      public PositionKey getPositionKey() {
@@ -42,4 +46,12 @@ public class TradeEntity {
      public void setAmount(Double amount) {
         this.amount = amount;
      }
+
+     public LocalDate getTradeDate() {
+      return this.tradeDate;
+   }
+
+   public void setTradeDate(LocalDate tradeDate) {
+      this.tradeDate = tradeDate;
+   }
 }

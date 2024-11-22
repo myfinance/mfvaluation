@@ -4,6 +4,7 @@ import de.hf.framework.audit.AuditService;
 import de.hf.framework.exceptions.MFException;
 import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.valuation.events.out.PositionBuildedEventHandler;
 import de.hf.myfinance.valuation.events.out.ValueCurveCalculatedEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import org.springframework.stereotype.Component;
@@ -15,11 +16,13 @@ public class ValueHandlerFactory {
     private final DataReader dataReader;
     private final AuditService auditService;
     protected final ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler;
+    protected final PositionBuildedEventHandler positionBuildedEventHandler;
 
-    public ValueHandlerFactory(DataReader dataReader, AuditService auditService, ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler) {
+    public ValueHandlerFactory(DataReader dataReader, AuditService auditService, ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler, PositionBuildedEventHandler positionBuildedEventHandler) {
         this.dataReader = dataReader;
         this.auditService = auditService;
         this.valueCurveCalculatedEventHandler = valueCurveCalculatedEventHandler;
+        this.positionBuildedEventHandler = positionBuildedEventHandler;
     }
 
     public Mono<ValueHandler> getValueHandler(String businesskey){
@@ -53,5 +56,9 @@ public class ValueHandlerFactory {
                 throw new MFException(MFMsgKey.UNKNOWN_INSTRUMENTTYPE_EXCEPTION, "Type:" + instrument.getInstrumentType());
         }
         return Mono.just(valueHandler);
+    }
+
+    public PositionValueHandler getPositionHandler(String depotId, String securityId){
+        return new PositionValueHandler(depotId, securityId, dataReader, auditService,positionBuildedEventHandler);
     }
 }

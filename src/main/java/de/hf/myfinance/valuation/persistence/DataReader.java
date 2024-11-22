@@ -13,6 +13,6 @@ public interface DataReader {
     Flux<Instrument> findByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType);
     Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey);
     Flux<ValueCurve> findValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable);
-    Mono<PositionCurve> findPositonByKey(String depotBusinessKey, String securityBusinessKey);
+    Mono<ValueCurve> findPositonByKey(String depotBusinessKey, String securityBusinessKey);
     Flux<Trade> findTradesByKey(String depotBusinessKey, String securityBusinessKey);
 }
