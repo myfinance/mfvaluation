@@ -44,6 +44,7 @@ public class ExtractCashflowsAndTradesProcessorConfig {
                         if (transaction.getTransactionType() == TransactionType.SELL){
                             trade.setAmount(trade.getAmount() * (-1));
                         }
+                        trade.setTradeDate(transaction.getTransactiondate());
                         extractedTradeEventHandler.sendExtractedTradeEvent(trade);
                     }
                     break;
@@ -57,6 +58,7 @@ public class ExtractCashflowsAndTradesProcessorConfig {
                         if (transaction.getTransactionType() == TransactionType.BUY){
                             trade.setAmount(trade.getAmount() * (-1));
                         }
+                        trade.setTradeDate(transaction.getTransactiondate());
                         extractedTradeEventHandler.sendExtractedTradeEvent(trade);
                     }
                     break;

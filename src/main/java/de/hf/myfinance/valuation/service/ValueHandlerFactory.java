@@ -46,8 +46,10 @@ public class ValueHandlerFactory {
             case PORTFOLIO:
                 valueHandler = new PortfolioValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
                 break;
-            case REALESTATE:
             case DEPOT:
+                valueHandler = new DepotValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
+                break;
+            case REALESTATE:
             case DEPRECATIONOBJECT:
             case LIVEINSURANCE:
             case LOAN:

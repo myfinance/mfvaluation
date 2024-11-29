@@ -5,7 +5,6 @@ import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.myfinance.valuation.service.ValuationService;
 import de.hf.testhelper.MongoDbTestBase;
 import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -8,7 +8,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.hf.framework.audit.AuditService;
-import de.hf.myfinance.restmodel.Trade;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import reactor.core.publisher.Mono;

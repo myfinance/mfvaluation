@@ -28,11 +28,11 @@ public class PositionValueHandler extends AbsCurveHandler{
 
 
     public Mono<Void> calcPositionCurve() {
-        return dataReader.findTradesByKey(this.depotId, this.securityId).collectList().flatMap(this::calcPositionCurve).flatMap(this::sendPositionCurveCalculatedEvent);
+        return dataReader.findTradesByKey(this.depotId, this.securityId).collectList().flatMap(this::calcPositionCurve).flatMap(this::sendPositionBuildedEvent);
     }
 
     public Mono<Void> calcPositionValueCurve() {
-        return dataReader.findPositonByKey(depotId, securityId).flatMap(this::calcPositionValueCurve).flatMap(this::sendPositionValue
+        return dataReader.findPositonByKey(depotId, securityId).flatMap(this::calcPositionValueCurve).flatMap(this::sendPositionValueCalculatedEvent);
     }
 
     protected Mono<TreeMap<LocalDate, Double>> calcPositionCurve(List<Trade> trades) {
@@ -77,8 +77,17 @@ public class PositionValueHandler extends AbsCurveHandler{
         return returnValue;
     }
 
-    protected Mono<Void> sendPositionCurveCalculatedEvent(TreeMap<LocalDate, Double> curve) {
+    protected Mono<Void> sendPositionBuildedEvent(TreeMap<LocalDate, Double> curve) {
         auditService.saveMessage(" new positioncurve calculated for instrument: " + securityId + " and depot:"+depotId, Severity.INFO, AUDIT_MSG_TYPE);
+        var valueCurveObject = new ValueCurve(securityId);
+        valueCurveObject.setValueCurve(curve);
+        valueCurveObject.setParentBusinesskey(depotId);
+        positionBuildedEventHandler.sendPositionBuildedEvent(valueCurveObject);
+        return Mono.just("").then();
+    }
+
+    protected Mono<Void> sendPositionValueCalculatedEvent(TreeMap<LocalDate, Double> curve) {
+        auditService.saveMessage(" new positionValuecurve calculated for instrument: " + securityId + " and depot:"+depotId, Severity.INFO, AUDIT_MSG_TYPE);
         var valueCurveObject = new ValueCurve(securityId);
         valueCurveObject.setValueCurve(curve);
         valueCurveObject.setParentBusinesskey(depotId);

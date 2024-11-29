@@ -4,10 +4,14 @@ import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.restmodel.Trade;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
 import de.hf.myfinance.valuation.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
+import de.hf.myfinance.valuation.persistence.repositories.PositionRepository;
+import de.hf.myfinance.valuation.persistence.repositories.PositionValueRepository;
+import de.hf.myfinance.valuation.persistence.repositories.TradeRepository;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.testhelper.JsonHelper;
 import de.hf.testhelper.MongoDbTestBase;
@@ -44,6 +48,15 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     EndOfDayPricesRepository endOfDayPricesRepository;
 
     @Autowired
+    TradeRepository tradeRepository;
+
+    @Autowired
+    PositionRepository positionRepository;
+
+    @Autowired
+    PositionValueRepository positionvalueRepository;
+
+    @Autowired
     private OutputDestination target;
 
     @Autowired
@@ -53,6 +66,10 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     @Autowired
     @Qualifier("saveCashflowsProcessor")
     protected Consumer<Event<String, Cashflow>> saveCashflowProcessor;
+
+    @Autowired
+    @Qualifier("saveTradeProcessor")
+    protected Consumer<Event<String, Trade>> saveTradeProcessor;
 
     @Autowired
     @Qualifier("saveValueCurveProcessor")
@@ -89,6 +106,8 @@ public class EventProcessorTestBase extends MongoDbTestBase {
 
     String eqDesc = "anEquity";
     String eqKey = eqDesc + "@14";
+    String depotDesc = "testdepot";
+    String depotKey = giroDesc + "@11";
 
 
     @BeforeEach
@@ -97,6 +116,8 @@ public class EventProcessorTestBase extends MongoDbTestBase {
         cashflowRepository.deleteAll().block();
         valueCurveRepository.deleteAll().block();
         endOfDayPricesRepository.deleteAll().block();
+        positionRepository.deleteAll().block();
+        positionvalueRepository.deleteAll().block();
         purgeMessages(instrumentProcessorBindingName);
         purgeMessages(cashflowProcessorBindingName);
         purgeMessages(valuationDataChangedBindingName);

@@ -3,6 +3,7 @@ package de.hf.myfinance.valuation.persistence;
 import de.hf.myfinance.restmodel.*;
 import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
 import de.hf.myfinance.valuation.persistence.entities.PositionKey;
+import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
 import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
 import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
@@ -12,6 +13,7 @@ import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
 import de.hf.myfinance.valuation.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
 import de.hf.myfinance.valuation.persistence.repositories.PositionRepository;
+import de.hf.myfinance.valuation.persistence.repositories.PositionValueRepository;
 import de.hf.myfinance.valuation.persistence.repositories.TradeRepository;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 
@@ -33,6 +35,7 @@ public class DataReaderImpl implements DataReader{
     private final EndOfDayPricesRepository endOfDayPricesRepository;
     private final EndOfDayPricesMapper endOfDayPricesMapper;
     private final PositionRepository positionRepository;
+    private final PositionValueRepository positionValueRepository;
     private final TradeRepository tradeRepository;
     private final TradeMapper tradeMapper;
 
@@ -40,7 +43,7 @@ public class DataReaderImpl implements DataReader{
                           CashflowRepository cashflowRepository, CashflowMapper cashflowMapper,
                           ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper,
                           EndOfDayPricesRepository endOfDayPricesRepository, EndOfDayPricesMapper endOfDayPricesMapper, 
-                          PositionRepository positionRepository, 
+                          PositionRepository positionRepository, PositionValueRepository positionValueRepository,
                           TradeRepository tradeRepository, TradeMapper tradeMapper) {
         this.instrumentRepository = instrumentRepository;
         this.instrumentMapper = instrumentMapper;
@@ -51,6 +54,7 @@ public class DataReaderImpl implements DataReader{
         this.endOfDayPricesRepository = endOfDayPricesRepository;
         this.endOfDayPricesMapper = endOfDayPricesMapper;
         this.positionRepository = positionRepository;
+        this.positionValueRepository = positionValueRepository;
         this.tradeRepository = tradeRepository;
         this.tradeMapper = tradeMapper;
     }
@@ -111,6 +115,18 @@ public class DataReaderImpl implements DataReader{
         var valueCurve = new ValueCurve(position.getPositionKey().getSecurityBusinessKey());
         valueCurve.setParentBusinesskey(position.getPositionKey().getDepotBusinessKey());
         valueCurve.setValueCurve(new TreeMap<LocalDate,Double>(position.getPositionCurve()));
+        return valueCurve;
+    }
+
+    @Override
+    public Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey){
+        return positionValueRepository.findByPositionKeyDepotBusinessKey(depotBusinessKey).map(this::positionValueToValueCurve);
+    }
+
+    private ValueCurve positionValueToValueCurve(PositionValueEntity positionValue){
+        var valueCurve = new ValueCurve(positionValue.getPositionKey().getSecurityBusinessKey());
+        valueCurve.setParentBusinesskey(positionValue.getPositionKey().getDepotBusinessKey());
+        valueCurve.setValueCurve(new TreeMap<LocalDate,Double>(positionValue.getPositionValueCurve()));
         return valueCurve;
     }
 }

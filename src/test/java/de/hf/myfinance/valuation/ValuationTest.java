@@ -57,6 +57,30 @@ public class ValuationTest  extends EventProcessorTestBase {
     }
 
     @Test
+    void depotValuation() {
+
+        var depotEntity = new Instrument(depotKey, depotDesc, InstrumentType.DEPOT, true);
+        var creatEvent = new Event(Event.Type.CREATE, depotKey, depotEntity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, depotKey, depotKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
     void TenantValuation() {
 
         addInstrument(InstrumentType.TENANT, tenantKey, tenantDesc, null);
@@ -80,14 +104,14 @@ public class ValuationTest  extends EventProcessorTestBase {
     @Test
     void currencyValuation() {
         var currency = new Instrument(currencyKey, currencyDesc, InstrumentType.CURRENCY, true);
-        Event creatEvent = new Event(Event.Type.CREATE, currencyKey, currency);
+        var creatEvent = new Event(Event.Type.CREATE, currencyKey, currency);
         saveInstrumentProcessor.accept(creatEvent);
 
 
         var messages = getMessages("valuationDataChanged-out-0");
         assertEquals(1, messages.size());
 
-        Event valuationEvent = new Event(Event.Type.START, currencyKey, currencyKey);
+        var valuationEvent = new Event(Event.Type.START, currencyKey, currencyKey);
         valuationProcessor.accept(valuationEvent);
         messages = getMessages("valueCurveCalculated-out-0");
         assertEquals(1, messages.size());
@@ -103,9 +127,9 @@ public class ValuationTest  extends EventProcessorTestBase {
         var prices = new EndOfDayPrices();
         prices.setInstrumentBusinesskey(currencyKey);
         var pricemap = new HashMap<LocalDate, EndOfDayPrice>();
-        var price = new EndOfDayPrice(0.9, "EUR");
+        var price = new EndOfDayPrice(0.9, "EUR@13");
         pricemap.put(LocalDate.of(2022,12,1), price);
-        var price2 = new EndOfDayPrice(0.8, "EUR");
+        var price2 = new EndOfDayPrice(0.8, "EUR@13");
         pricemap.put(LocalDate.of(2022,12,3), price2);
         prices.setPrices(pricemap);
         creatEvent = new Event(Event.Type.CREATE, prices.getInstrumentBusinesskey(), prices);
@@ -221,4 +245,5 @@ public class ValuationTest  extends EventProcessorTestBase {
         var createEvent = new Event(Event.Type.CREATE, instrumentBusinesskey, valueCurve);
         saveValueCurveProcessor.accept(createEvent);
     }
+
 }

@@ -109,7 +109,7 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         assertEquals(1, messages.size());
         jsonHelper = new JsonHelper();
         data = (LinkedHashMap<String, Object>)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        compareTradeEvent(depotKey, securityKey, 10.0, (LinkedHashMap<String, Object>)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
+        compareTradeEvent(depotKey, securityKey, 10.0, transactionDate,(LinkedHashMap<String, Object>)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
     }
 
     @Test
@@ -139,12 +139,13 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         assertEquals(1, messages.size());
         jsonHelper = new JsonHelper();
         data = (LinkedHashMap<String, Object>)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        compareTradeEvent(depotKey, securityKey, -10.0, (LinkedHashMap<String, Object>)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
+        compareTradeEvent(depotKey, securityKey, -10.0, transactionDate, (LinkedHashMap<String, Object>)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
     }
 
-    private void compareTradeEvent(String depotKey, String securityKey, double amount, LinkedHashMap data) {
+    private void compareTradeEvent(String depotKey, String securityKey, double amount,LocalDate tradeDate, LinkedHashMap data) {
         assertEquals(depotKey, data.get("depotBusinessKey"));
         assertEquals(amount, data.get("amount"));
         assertEquals(securityKey, data.get("securityBusinessKey"));
+        assertEquals(tradeDate.toString(), data.get("tradeDate"));
     }
 }

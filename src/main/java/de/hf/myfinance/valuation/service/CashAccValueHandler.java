@@ -1,10 +1,8 @@
 package de.hf.myfinance.valuation.service;
 
 import de.hf.framework.audit.AuditService;
-import de.hf.framework.audit.Severity;
 import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Instrument;
-import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValueCurveCalculatedEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import reactor.core.publisher.Flux;
