@@ -32,7 +32,7 @@ public class PositionProcessorConfig {
             switch (event.getEventType()) {
 
                 case CREATE:
-                    valueHandlerFactory.getPositionHandler(trade.getDepotBusinessKey(), trade.getSecurityBusinessKey()).calcPositionCurve();
+                    valueHandlerFactory.getPositionHandler(trade.getDepotBusinessKey(), trade.getSecurityBusinessKey()).calcPositionCurve().block();
                     break;
 
                 default:

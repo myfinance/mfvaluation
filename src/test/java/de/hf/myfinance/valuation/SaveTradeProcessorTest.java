@@ -28,8 +28,8 @@ public class SaveTradeProcessorTest extends EventProcessorTestBase {
 
         var savedTrades = trades.get(0);
         assertEquals(10.0, savedTrades.getAmount());
-        assertEquals(depotKey, savedTrades.getPositionKey().getDepotBusinessKey());
-        assertEquals(eqKey, savedTrades.getPositionKey().getSecurityBusinessKey());
+        assertEquals(depotKey, savedTrades.getDepotBusinessKey());
+        assertEquals(eqKey, savedTrades.getSecurityBusinessKey());
         assertEquals(transactionDate, savedTrades.getTradeDate());
 
         var messages = getMessages("tradeSaved-out-0");

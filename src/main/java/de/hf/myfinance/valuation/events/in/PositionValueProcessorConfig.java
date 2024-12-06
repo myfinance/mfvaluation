@@ -32,7 +32,7 @@ public class PositionValueProcessorConfig {
             switch (event.getEventType()) {
 
                 case START:
-                    valueHandlerFactory.getPositionHandler(positionCurve.getParentBusinesskey(), positionCurve.getInstrumentBusinesskey()).calcPositionValueCurve();
+                    valueHandlerFactory.getPositionHandler(positionCurve.getParentBusinesskey(), positionCurve.getInstrumentBusinesskey()).calcPositionValueCurve().block();
                     break;
 
                 default:

@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "trades")
@@ -14,11 +13,10 @@ public class TradeEntity {
     @Version
     private Integer version;
 
-    @Indexed(unique = true)
-    private PositionKey positionKey;
-
     private Double amount;
     private LocalDate tradeDate;
+    private String depotBusinessKey;
+    private String securityBusinessKey;
 
     public TradeEntity(){}
 
@@ -26,17 +24,10 @@ public class TradeEntity {
         this.tradeId = tradeId;
     }
     public TradeEntity(String depotBusinessKey, String securityBusinessKey, Double amount, LocalDate tradeDate) {
-        this.positionKey = new PositionKey(depotBusinessKey,securityBusinessKey);
+        this.securityBusinessKey = securityBusinessKey;
+        this.depotBusinessKey = depotBusinessKey;
         this.amount = amount;
         this.tradeDate = tradeDate;
-     }
-
-     public PositionKey getPositionKey() {
-        return this.positionKey;
-     }
-  
-     public void setPositionKey(PositionKey positionKey) {
-        this.positionKey = positionKey;
      }
 
      public Double getAmount() {
@@ -53,5 +44,21 @@ public class TradeEntity {
 
    public void setTradeDate(LocalDate tradeDate) {
       this.tradeDate = tradeDate;
+   }
+
+   public String getDepotBusinessKey() {
+      return this.depotBusinessKey;
+   }
+
+   public void setDepotBusinessKey(String depotBusinessKey) {
+      this.depotBusinessKey = depotBusinessKey;
+   }
+
+   public String getSecurityBusinessKey() {
+      return this.securityBusinessKey;
+   }
+
+   public void setSecurityBusinessKey(String securityBusinessKey) {
+      this.securityBusinessKey = securityBusinessKey;
    }
 }

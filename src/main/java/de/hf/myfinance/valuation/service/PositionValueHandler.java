@@ -6,11 +6,14 @@ import java.util.TreeMap;
 
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
-
+import de.hf.framework.exceptions.MFException;
+import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.restmodel.Trade;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.PositionBuildedEventHandler;
+import de.hf.myfinance.valuation.events.out.PositionValueCalculatedEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public class PositionValueHandler extends AbsCurveHandler{
@@ -18,28 +21,38 @@ public class PositionValueHandler extends AbsCurveHandler{
     private String depotId;
     private String securityId;
     private PositionBuildedEventHandler positionBuildedEventHandler;
+    private PositionValueCalculatedEventHandler positionValueCalculatedEventHandler;
 
-    public PositionValueHandler(String depotId, String securityId, DataReader dataReader, AuditService auditService, PositionBuildedEventHandler positionBuildedEventHandler){
+    public PositionValueHandler(String depotId, String securityId, DataReader dataReader, AuditService auditService, PositionBuildedEventHandler positionBuildedEventHandler, PositionValueCalculatedEventHandler positionValueCalculatedEventHandler){
         super(dataReader, auditService);
         this.depotId = depotId;
         this.securityId = securityId;
         this.positionBuildedEventHandler = positionBuildedEventHandler;
+        this.positionValueCalculatedEventHandler = positionValueCalculatedEventHandler;
     }
 
 
     public Mono<Void> calcPositionCurve() {
-        return dataReader.findTradesByKey(this.depotId, this.securityId).collectList().flatMap(this::calcPositionCurve).flatMap(this::sendPositionBuildedEvent);
+        System.out.println("mytest: ");
+        return dataReader.findTradesByKey(this.depotId, this.securityId)
+                    .doOnNext(trade -> System.out.println("Trade found: " + trade))
+                    .switchIfEmpty(handleNotExisting())
+                    .collectList().flatMap(this::positionCurveCalculation).flatMap(this::sendPositionBuildedEvent);
+    }
+
+    private Flux<Trade> handleNotExisting(){
+        return Flux.error(new MFException(MFMsgKey.UNKNOWN_INSTRUMENT_EXCEPTION, "No Trades for this Id available."));
     }
 
     public Mono<Void> calcPositionValueCurve() {
-        return dataReader.findPositonByKey(depotId, securityId).flatMap(this::calcPositionValueCurve).flatMap(this::sendPositionValueCalculatedEvent);
+        return dataReader.findPositonByKey(depotId, securityId).flatMap(this::positionValueCurveCalculation).flatMap(this::sendPositionValueCalculatedEvent);
     }
 
-    protected Mono<TreeMap<LocalDate, Double>> calcPositionCurve(List<Trade> trades) {
+    protected Mono<TreeMap<LocalDate, Double>> positionCurveCalculation(List<Trade> trades) {
         return buildCurveFromValueMap(convert2TradeAmountPerDayMap(trades));
     }
 
-    protected Mono<TreeMap<LocalDate, Double>> calcPositionValueCurve(ValueCurve positionCurve) {
+    protected Mono<TreeMap<LocalDate, Double>> positionValueCurveCalculation(ValueCurve positionCurve) {
         return dataReader.findValueCurveByInstrumentBusinesskey(positionCurve.getInstrumentBusinesskey()).flatMap(v->{
             var result = new ValueCurve();
             result.setInstrumentBusinesskey(positionCurve.getInstrumentBusinesskey());
@@ -48,7 +61,8 @@ public class PositionValueHandler extends AbsCurveHandler{
             var priceCurve = v.getValueCurve();
             
             positionCurve.getValueCurve().entrySet().forEach(entry -> {
-                positionValueCurve.put(entry.getKey(), entry.getValue()*priceCurve.get(entry.getKey()));
+                var instrumentValue = AbsValueHandler.extractValueFromCurve(priceCurve, entry.getKey());
+                positionValueCurve.put(entry.getKey(), entry.getValue()*instrumentValue);
             });
             var currentDate = positionCurve.getValueCurve().lastKey();
             var currentPosition = positionCurve.getValueCurve().get(currentDate);
@@ -56,7 +70,7 @@ public class PositionValueHandler extends AbsCurveHandler{
                 currentDate=currentDate.plusDays(1);
                 var lastPriceDay = priceCurve.lastKey();
                 while(!currentDate.isAfter(lastPriceDay)){
-                    positionValueCurve.put(currentDate, currentPosition+priceCurve.get(currentDate));
+                    positionValueCurve.put(currentDate, currentPosition*priceCurve.get(currentDate));
                     currentDate = currentDate.plusDays(1);
                 }
             }
@@ -91,7 +105,7 @@ public class PositionValueHandler extends AbsCurveHandler{
         var valueCurveObject = new ValueCurve(securityId);
         valueCurveObject.setValueCurve(curve);
         valueCurveObject.setParentBusinesskey(depotId);
-        positionBuildedEventHandler.sendPositionBuildedEvent(valueCurveObject);
+        positionValueCalculatedEventHandler.sendPositionValueCalculatedEvent(valueCurveObject);
         return Mono.just("").then();
     }
     

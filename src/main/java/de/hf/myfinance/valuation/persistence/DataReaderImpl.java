@@ -1,9 +1,12 @@
 package de.hf.myfinance.valuation.persistence;
 
+import de.hf.framework.exceptions.MFException;
+import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.restmodel.*;
 import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
 import de.hf.myfinance.valuation.persistence.entities.PositionKey;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
+import de.hf.myfinance.valuation.persistence.entities.TradeEntity;
 import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
 import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
@@ -107,8 +110,10 @@ public class DataReaderImpl implements DataReader{
 
     @Override
     public Flux<Trade> findTradesByKey(String depotBusinessKey, String securityBusinessKey) {
-        var positionkey = new PositionKey(depotBusinessKey, securityBusinessKey);
-        return tradeRepository.findByPositionKey(positionkey).map(tradeMapper::entityToApi);
+        return tradeRepository.findByDepotBusinessKeyAndSecurityBusinessKey(depotBusinessKey, securityBusinessKey).switchIfEmpty(handleNotExisting()).map(tradeMapper::entityToApi);
+    }
+    private Flux<TradeEntity> handleNotExisting(){
+        return Flux.error(new MFException(MFMsgKey.UNKNOWN_INSTRUMENT_EXCEPTION, "No Trades for this Id available."));
     }
 
     private ValueCurve positionToValueCurve(PositionEntity position){

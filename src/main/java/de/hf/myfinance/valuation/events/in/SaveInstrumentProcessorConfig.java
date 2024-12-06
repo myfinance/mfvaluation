@@ -8,7 +8,6 @@ import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Mono;
@@ -24,7 +23,6 @@ public class SaveInstrumentProcessorConfig {
     private final ValuationEventHandler valuationEventHandler;
     protected static final String AUDIT_MSG_TYPE="SaveInstrumentProcessor_Event";
 
-    @Autowired
     public SaveInstrumentProcessorConfig(InstrumentMapper instrumentMapper, AuditService auditService, InstrumentRepository instrumentRepository, ValuationEventHandler valuationEventHandler) {
         this.instrumentMapper = instrumentMapper;
         this.auditService = auditService;

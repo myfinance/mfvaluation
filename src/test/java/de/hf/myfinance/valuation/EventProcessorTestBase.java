@@ -83,9 +83,27 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     @Qualifier("saveMarketDataProcessor")
     protected Consumer<Event<String, EndOfDayPrices>> saveMarketDataProcessor;
 
+    @Autowired
+    @Qualifier("positionProcessor")
+    protected Consumer<Event<String, Trade>> positionProcessor;
+
+    @Autowired
+    @Qualifier("savePositionProcessor")
+    protected Consumer<Event<String, ValueCurve>> savePositionProcessor;
+
+    @Autowired
+    @Qualifier("positionValueProcessor")
+    protected Consumer<Event<String, ValueCurve>> positionValueProcessor;
+
+    @Autowired
+    @Qualifier("savePositionValueProcessor")
+    protected Consumer<Event<String, ValueCurve>> savePositionValueProcessor;
+
     String instrumentProcessorBindingName = "saveInstrumentProcessor-in-0";
     String cashflowProcessorBindingName = "saveCashflowsProcessor-in-0";
     String valuationDataChangedBindingName = "valuationDataChanged-out-0";
+    String positionSavedBindingName = "positionSaved-out-0";
+    String positionValueCalculatedBindingName = "positionValueCalculated-out-0";
 
     JsonHelper jsonHelper = new JsonHelper();
 
@@ -107,7 +125,7 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     String eqDesc = "anEquity";
     String eqKey = eqDesc + "@14";
     String depotDesc = "testdepot";
-    String depotKey = giroDesc + "@11";
+    String depotKey = depotDesc + "@11";
 
 
     @BeforeEach
@@ -118,9 +136,12 @@ public class EventProcessorTestBase extends MongoDbTestBase {
         endOfDayPricesRepository.deleteAll().block();
         positionRepository.deleteAll().block();
         positionvalueRepository.deleteAll().block();
+        tradeRepository.deleteAll().block();
         purgeMessages(instrumentProcessorBindingName);
         purgeMessages(cashflowProcessorBindingName);
         purgeMessages(valuationDataChangedBindingName);
+        purgeMessages(positionSavedBindingName);
+        purgeMessages(positionValueCalculatedBindingName);
     }
 
     protected void purgeMessages(String bindingName) {
