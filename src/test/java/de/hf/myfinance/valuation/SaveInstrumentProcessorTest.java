@@ -2,6 +2,7 @@ package de.hf.myfinance.valuation;
 
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.AdditionalMaps;
+import de.hf.myfinance.restmodel.AdditionalProperties;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.restmodel.InstrumentType;
 import de.hf.testhelper.JsonHelper;
@@ -64,6 +65,10 @@ public class SaveInstrumentProcessorTest extends EventProcessorTestBase {
         var desc = "testDepot";
         var depot = new Instrument(desc, desc, InstrumentType.DEPOT, true);
 
+        var properties = new HashMap<AdditionalProperties, String>();
+        properties.put(AdditionalProperties.VALUEBUDGETID, "valueBudgetId");
+        depot.setAdditionalProperties(properties);
+
         Event<String, Instrument> createEvent = new Event<>(Event.Type.CREATE, depot.getBusinesskey(), depot);
         saveInstrumentProcessor.accept(createEvent);
 
@@ -74,6 +79,7 @@ public class SaveInstrumentProcessorTest extends EventProcessorTestBase {
         assertEquals(desc, savedinstrument.getBusinesskey());
         assertEquals(InstrumentType.DEPOT, savedinstrument.getInstrumentType());
         assertTrue(savedinstrument.isActive());
+        assertEquals("valueBudgetId", savedinstrument.getValueBudget());
 
         var messages = getMessages("valuationDataChanged-out-0");
         assertEquals(1, messages.size());

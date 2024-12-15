@@ -4,7 +4,9 @@ package de.hf.myfinance.valuation.events.in;
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
+import de.hf.myfinance.restmodel.AdditionalProperties;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.restmodel.InstrumentType;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
@@ -47,6 +49,10 @@ public class SaveInstrumentProcessorConfig {
                                 e.setAdditionalMaps(instrumentEntity.getAdditionalMaps());
                                 e.setAdditionalProperties(instrumentEntity.getAdditionalProperties());
                                 e.setActive(instrumentEntity.isActive());
+                                /* to simplify finding alle instruments with a specific valuebudget */
+                                if(instrumentEntity.getAdditionalProperties().containsKey(AdditionalProperties.VALUEBUDGETID)){
+                                    e.setValuebudget(instrumentEntity.getAdditionalProperties().get(AdditionalProperties.VALUEBUDGETID));
+                                }
                                 return e;
                             })
                             .flatMap(e -> instrumentRepository.save(e))

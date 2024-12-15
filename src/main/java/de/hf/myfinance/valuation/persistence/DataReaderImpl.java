@@ -134,4 +134,9 @@ public class DataReaderImpl implements DataReader{
         valueCurve.setValueCurve(new TreeMap<LocalDate,Double>(positionValue.getPositionValueCurve()));
         return valueCurve;
     }
+
+    @Override
+    public Flux<Instrument> findByValueBudget(String valueBudget){
+        return instrumentRepository.findByValueBudget(valueBudget).map(e-> instrumentMapper.entityToApi(e));
+    }
 }

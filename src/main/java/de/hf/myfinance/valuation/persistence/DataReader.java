@@ -16,4 +16,5 @@ public interface DataReader {
     Mono<ValueCurve> findPositonByKey(String depotBusinessKey, String securityBusinessKey);
     Flux<Trade> findTradesByKey(String depotBusinessKey, String securityBusinessKey);
     Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey);
+    Flux<Instrument> findByValueBudget(String valueBudget);
 }

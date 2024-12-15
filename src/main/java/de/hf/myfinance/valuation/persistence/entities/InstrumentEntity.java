@@ -27,6 +27,7 @@ public class InstrumentEntity implements java.io.Serializable {
     @Indexed(unique = true)
     private String businesskey;
     private String parentBusinesskey;
+    private String valueBudget;
 
     private Map<AdditionalMaps, Map<String, String>> additionalMaps = new HashMap<>();
     private Map<AdditionalProperties, String> additionalProperties = new HashMap<>();
@@ -112,4 +113,10 @@ public class InstrumentEntity implements java.io.Serializable {
         this.additionalLists = additionalLists;
     }
 
+    public String getValueBudget() {
+        return valueBudget;
+    }
+    public void setValuebudget(String valueBudget) {
+        this.valueBudget = valueBudget;
+    }
 }

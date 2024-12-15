@@ -10,5 +10,6 @@ import reactor.core.publisher.Mono;
 public interface InstrumentRepository extends ReactiveCrudRepository<InstrumentEntity, String> {
     Mono<InstrumentEntity> findByBusinesskey(String businesskey);
     Flux<InstrumentEntity> findByParentBusinesskey(String parentBusinesskey);
+    Flux<InstrumentEntity> findByValueBudget(String valueBudget);
     Flux<InstrumentEntity> findByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType);
 }
