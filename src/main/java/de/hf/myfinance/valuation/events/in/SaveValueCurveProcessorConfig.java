@@ -56,6 +56,9 @@ public class SaveValueCurveProcessorConfig  {
                                 if(e.getParentBusinesskey()!=null && !e.getParentBusinesskey().isEmpty()){
                                     valuationEventHandler.sendValuationEvent(e.getParentBusinesskey());
                                 }
+                                if(e.getLinkedInstrumentKey()!=null && !e.getLinkedInstrumentKey().isEmpty()){
+                                    valuationEventHandler.sendValuationEvent(e.getLinkedInstrumentKey());
+                                }
                                 return Mono.just("done");
                             }).block();
                     break;

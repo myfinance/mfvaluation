@@ -8,14 +8,14 @@
     <parent>
 		<groupId>de.hf.myfinance</groupId>
 		<artifactId>root</artifactId>
-		<version>0.24.0-alpha-220b3a94ef55359889cb21272dad29630ad0cd07</version>
+		<version>0.24.0-alpha-e31bfceaf2489299e47bd17ddf7257a455dfacd2</version>
         <!--<version>0.0.0-0-SNAPSHOT</version>-->
 		<relativePath/> 
 	</parent>
     <properties>
         <NEXUS_URL>192.168.100.73:31001</NEXUS_URL>
         <!--<MFFrameWork.Version>0.0.0-0-SNAPSHOT</MFFrameWork.Version>-->
-        <MFFrameWork.Version>0.24.0-alpha-220b3a94ef55359889cb21272dad29630ad0cd07</MFFrameWork.Version>
+        <MFFrameWork.Version>0.24.0-alpha-e31bfceaf2489299e47bd17ddf7257a455dfacd2</MFFrameWork.Version>
         <jib.container-name>holgerfischer/myfinance-mfvaluation:</jib.container-name>
     </properties>
 

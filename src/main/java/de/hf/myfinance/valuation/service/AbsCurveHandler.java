@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import de.hf.framework.audit.AuditService;
 import de.hf.myfinance.restmodel.ValueCurve;
@@ -29,10 +30,14 @@ public class AbsCurveHandler {
         return Mono.just(valueCurve);
     }
 
-    protected LocalDate calcCurveStartDate(List<ValueCurve> valueCurves) {
+    protected List<TreeMap<LocalDate, Double>> extractMapsFromValueCurve(List<ValueCurve> valueCurves){
+        return valueCurves.stream().map(vc -> vc.getValueCurve()).collect(Collectors.toList());
+    }
+
+    protected LocalDate calcCurveStartDate(List<TreeMap<LocalDate, Double>> valueCurves) {
         LocalDate startDate = LocalDate.now();
         for (var childValueCurve : valueCurves) {
-            LocalDate minDate = childValueCurve.getValueCurve().firstKey();
+            LocalDate minDate = childValueCurve.firstKey();
             if(minDate.isBefore(startDate)) {
                 startDate = minDate;
             }

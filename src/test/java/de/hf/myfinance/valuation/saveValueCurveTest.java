@@ -4,12 +4,9 @@ import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.testhelper.JsonHelper;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDate;
 import java.util.TreeMap;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -42,7 +39,7 @@ public class saveValueCurveTest  extends EventProcessorTestBase {
     }
 
     @Test
-    void saveValueCurveTriggerParent() {
+    void saveValueCurveTriggerParentAndLinkedInstrument() {
 
         LocalDate transactionDate = LocalDate.of(2022, 1, 1);
         var instrumentBusinesKey = "instrumentBusinesskey";
@@ -52,6 +49,7 @@ public class saveValueCurveTest  extends EventProcessorTestBase {
         valueMap.put(transactionDate, 100.0);
         valueCurve.setValueCurve(valueMap);
         valueCurve.setParentBusinesskey("parentKey");
+        valueCurve.setLinkedInstrumentKey("linkedKey");
 
         Event creatEvent = new Event(Event.Type.CREATE, instrumentBusinesKey, valueCurve);
         saveValueCurveProcessor.accept(creatEvent);
@@ -65,12 +63,17 @@ public class saveValueCurveTest  extends EventProcessorTestBase {
         assertEquals(100.0, curve.getValueCurve().get(transactionDate));
 
         var messages = getMessages(valuationDataChangedBindingName);
-        assertEquals(1, messages.size());
+        assertEquals(2, messages.size());
         JsonHelper jsonHelper = new JsonHelper();
         var eventtype = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("eventType");
         assertEquals("START", eventtype);
         var key = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("key");
         assertEquals("parentKey", key);
+
+        eventtype = (String)jsonHelper.convertJsonStringToMap((messages.get(1))).get("eventType");
+        assertEquals("START", eventtype);
+        key = (String)jsonHelper.convertJsonStringToMap((messages.get(1))).get("key");
+        assertEquals("linkedKey", key);
     }
 
     @Test

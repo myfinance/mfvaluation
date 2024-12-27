@@ -18,6 +18,7 @@ public class ValueCurveEntity {
 
     private Map<LocalDate, Double> valueCurve;
     private String parentBusinesskey;
+    private String linkedInstrumentKey;
 
     @Indexed(unique = true)
     private String instrumentBusinesskey;
@@ -55,5 +56,12 @@ public class ValueCurveEntity {
     }
     public void setParentBusinesskey(String parentBusinesskey) {
         this.parentBusinesskey = parentBusinesskey;
+    }
+    public String getLinkedInstrumentKey() {
+        return this.linkedInstrumentKey;
+    }
+
+    public void setLinkedInstrumentKey(String linkedInstrumentKey) {
+        this.linkedInstrumentKey = linkedInstrumentKey;
     }
 }

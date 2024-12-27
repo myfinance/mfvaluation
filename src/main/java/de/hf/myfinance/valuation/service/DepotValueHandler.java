@@ -18,7 +18,7 @@ public class DepotValueHandler  extends PortfolioValueHandler{
     public Mono<Void> calcValueCurve() {
         return getAllPositionValuesForDepotId()
         .collectList()
-        .flatMap(this::getCombinedValueCurve)
+        .flatMap(this::extractAndGetCombinedValueCurve)
         .switchIfEmpty(createZeroCurve())
         .flatMap(this::sendValueCurveCalculatedEvent);
     }
