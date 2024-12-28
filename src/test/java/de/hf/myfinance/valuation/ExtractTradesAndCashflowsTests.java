@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
@@ -43,20 +45,26 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         extractCashflowsProcessor.accept(creatEvent);
 
         final List<String> messages = getMessages("extractedCashflows-out-0");
+
+
+        var keyList = new ArrayList<String>();
+        keyList.add(bgtKey);
+        keyList.add(giroKey);
         assertEquals(2, messages.size());
         JsonHelper jsonHelper = new JsonHelper();
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        compareCashflowEvent(desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
-        compareCashflowEvent(desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
     }
 
-    private void compareCashflowEvent(String desc, LocalDate transactionDate, double value, LinkedHashMap data) {
+    private void compareCashflowEvent(ArrayList<String> keyList, String desc, LocalDate transactionDate, double value, LinkedHashMap data) {
         assertEquals(transactionDate.toString(), data.get("transactiondate"));
         assertEquals(value, data.get("value"));
         assertEquals(desc, data.get("description"));
-        if(!data.get("instrumentBusinesskey").equals(bgtKey)) {
-            assertEquals(giroKey, data.get("instrumentBusinesskey"));
-        }
+
+        var key = data.get("instrumentBusinesskey");
+        assertTrue(keyList.contains(key));
+        keyList.remove(key);
     }
 
     @Test
@@ -76,10 +84,16 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
 
         final List<String> messages = getMessages("extractedCashflows-out-0");
         assertEquals(2, messages.size());
+
+
+        var keyList = new ArrayList<String>();
+        keyList.add(bgtKey);
+        keyList.add(giroKey);
+
         JsonHelper jsonHelper = new JsonHelper();
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        compareCashflowEvent(desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
-        compareCashflowEvent(desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
     }
 
     @Test
@@ -99,12 +113,19 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         extractCashflowsProcessor.accept(creatEvent);
 
         List<String> messages = getMessages("extractedCashflows-out-0");
-        assertEquals(2, messages.size());
+        assertEquals(4, messages.size());
+        var keyList = new ArrayList<String>();
+        keyList.add(bgtKey);
+        keyList.add(giroKey);
+        keyList.add(depotKey);
+        keyList.add(securityKey);
         JsonHelper jsonHelper = new JsonHelper();
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        compareCashflowEvent(desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
-        compareCashflowEvent(desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
-    
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(2))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(3))).get("data"));
+
         messages = getMessages("extractedTrade-out-0");
         assertEquals(1, messages.size());
         jsonHelper = new JsonHelper();
@@ -129,11 +150,18 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         extractCashflowsProcessor.accept(creatEvent);
 
         List<String> messages = getMessages("extractedCashflows-out-0");
-        assertEquals(2, messages.size());
+        assertEquals(4, messages.size());
+        var keyList = new ArrayList<String>();
+        keyList.add(bgtKey);
+        keyList.add(giroKey);
+        keyList.add(depotKey);
+        keyList.add(securityKey);
         JsonHelper jsonHelper = new JsonHelper();
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        compareCashflowEvent(desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
-        compareCashflowEvent(desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(2))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(3))).get("data"));
     
         messages = getMessages("extractedTrade-out-0");
         assertEquals(1, messages.size());

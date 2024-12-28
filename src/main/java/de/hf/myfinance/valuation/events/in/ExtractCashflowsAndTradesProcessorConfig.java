@@ -46,6 +46,9 @@ public class ExtractCashflowsAndTradesProcessorConfig {
                         }
                         trade.setTradeDate(transaction.getTransactiondate());
                         extractedTradeEventHandler.sendExtractedTradeEvent(trade);
+                        var value = transaction.getCashflows().values().iterator().next();
+                        extractedCashflowsEventHandler.sendExtractedCashflowsEvent(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(), trade.getDepotBusinessKey(), value));
+                        extractedCashflowsEventHandler.sendExtractedCashflowsEvent(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(), trade.getSecurityBusinessKey(), value));
                     }
                     break;
 
@@ -60,6 +63,9 @@ public class ExtractCashflowsAndTradesProcessorConfig {
                         }
                         trade.setTradeDate(transaction.getTransactiondate());
                         extractedTradeEventHandler.sendExtractedTradeEvent(trade);
+                        var value = transaction.getCashflows().values().iterator().next();
+                        extractedCashflowsEventHandler.sendExtractedCashflowsEvent(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(), trade.getDepotBusinessKey(), value));
+                        extractedCashflowsEventHandler.sendExtractedCashflowsEvent(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(), trade.getSecurityBusinessKey(), value));
                     }
                     break;
 
