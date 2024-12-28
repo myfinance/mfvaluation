@@ -222,11 +222,6 @@ public class ValuationTest  extends EventProcessorTestBase {
         messages = getMessages("valuationDataChanged-out-0");
         assertEquals(1, messages.size());
 
-        var eq = new Instrument(eqKey, eqDesc, InstrumentType.EQUITY, true);
-        creatEvent = new Event(Event.Type.CREATE, eqKey, eq);
-        saveInstrumentProcessor.accept(creatEvent);
-        messages = getMessages("valuationDataChanged-out-0");
-        assertEquals(1, messages.size());
 
         var datebeforFirstTrade = LocalDate.of(2021, 12, 31);
         var firstTradeDate = LocalDate.of(2022, 1, 1);
@@ -235,57 +230,37 @@ public class ValuationTest  extends EventProcessorTestBase {
         var transactionDate = LocalDate.of(2022, 1, 4);
         var dateAftertransactionDate = LocalDate.of(2022, 1, 5);
 
-        var positionCurve = new TreeMap<LocalDate, Double>();
-        positionCurve.put(datebeforFirstTrade, 0.0);
-        positionCurve.put(firstTradeDate, 10.0);
-        positionCurve.put(datebetweeenTrades, 10.0);
-        positionCurve.put(secTradeDate, 5.0);
-        ValueCurve position = new ValueCurve(eqKey);
-        position.setParentBusinesskey(depotKey);
-        position.setValueCurve(positionCurve);
-        creatEvent = new Event(Event.Type.CREATE, depotKey, position);
-        savePositionValueProcessor.accept(creatEvent);
+        var valueCurve = new ValueCurve(depotKey);
+        var valueMap = new TreeMap<LocalDate, Double>();
+        valueMap.put(datebeforFirstTrade, 0.0);
+        valueMap.put(firstTradeDate, 10.0);
+        valueMap.put(datebetweeenTrades, 10.0);
+        valueMap.put(secTradeDate, 5.0);
+        valueCurve.setValueCurve(valueMap);
 
-        var valuationEvent = new Event(Event.Type.START, depotKey, depotKey);
-        valuationProcessor.accept(valuationEvent);
-         messages = getMessages("valueCurveCalculated-out-0");
-        assertEquals(1, messages.size());
-
-        JsonHelper jsonHelper = new JsonHelper();
-        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-
-        var curve = (LinkedHashMap) data.get("valueCurve");
-        assertEquals(0.0, curve.get(datebeforFirstTrade.toString()));
-        assertEquals(10.0, curve.get(firstTradeDate.toString()));
-        assertEquals(10.0, curve.get(datebetweeenTrades.toString()));
-        assertEquals(5.0, curve.get(secTradeDate.toString()));
+        creatEvent = new Event(Event.Type.CREATE, depotKey, valueCurve);
+        saveValueCurveProcessor.accept(creatEvent);
 
 
-        var linkedInstrumentKey = (String) data.get("linkedInstrumentKey");
-        assertEquals(budgetKey, linkedInstrumentKey);
-
-
-
-        
         var desc = "testcashflow";
         var cashflow = new Cashflow(desc, transactionDate, budgetKey, 100.0);
         var cashflowEEvent = new Event(Event.Type.CREATE, budgetKey, cashflow);
         saveCashflowProcessor.accept(cashflowEEvent);
 
-        valuationEvent = new Event(Event.Type.START, budgetKey, budgetKey);
+        var valuationEvent = new Event(Event.Type.START, budgetKey, budgetKey);
         valuationProcessor.accept(valuationEvent);
         messages = getMessages("valueCurveCalculated-out-0");
         assertEquals(1, messages.size());
 
-        data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
 
         var newCurve = (LinkedHashMap) data.get("valueCurve");
-        /*assertEquals(0.0, newCurve.get(datebeforFirstTrade.toString()));
+        assertEquals(0.0, newCurve.get(datebeforFirstTrade.toString()));
         assertEquals(10.0, newCurve.get(firstTradeDate.toString()));
         assertEquals(10.0, newCurve.get(datebetweeenTrades.toString()));
         assertEquals(5.0, newCurve.get(secTradeDate.toString()));
         assertEquals(105.0, newCurve.get(transactionDate.toString()));
-        assertEquals(105.0, newCurve.get(dateAftertransactionDate.toString()));*/
+        assertEquals(105.0, newCurve.get(dateAftertransactionDate.toString()));
 
     }
 

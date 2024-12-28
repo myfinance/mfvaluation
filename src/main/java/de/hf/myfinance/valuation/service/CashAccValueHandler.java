@@ -34,7 +34,9 @@ public class CashAccValueHandler extends AbsValueHandler {
     protected Mono<TreeMap<LocalDate, Double>> addLinkedInstrumentValues(TreeMap<LocalDate, Double> valueCurve) {
         if(instrument.getInstrumentType().equals(InstrumentType.BUDGET)){
             return dataReader.findByValueBudget(instrument.getBusinesskey())
-                .flatMap(i->dataReader.findValueCurveByInstrumentBusinesskey(i.getBusinesskey()))
+                .flatMap(i->{
+                    return dataReader.findValueCurveByInstrumentBusinesskey(i.getBusinesskey());
+                })
                 .collectList()
                 .flatMap(c->{
                         var curves = extractMapsFromValueCurve(c);
