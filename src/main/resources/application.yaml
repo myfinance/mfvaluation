@@ -28,7 +28,7 @@ spring.data.mongodb:
 spring:
   cloud:
     function:
-      definition: valuationProcessor;positionProcessor;saveInstrumentProcessor;saveCashflowsProcessor;saveMarketDataProcessor;extractCashflowsAndTradesProcessor;saveTradeProcessor;saveValueCurveProcessor,positionValueProcessor,savePositionProcessor,savePositionValueProcessor
+      definition: extractCashflowsAndTradesProcessor;saveTradeProcessor;saveCashflowsProcessor;saveInstrumentProcessor;saveMarketDataProcessor;valuationProcessor;positionProcessor;saveValueCurveProcessor;positionValueProcessor;savePositionProcessor;savePositionValueProcessor
 
 spring.cloud.stream:
   defaultBinder: rabbit
