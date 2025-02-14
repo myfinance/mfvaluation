@@ -430,4 +430,269 @@ public class ValuationTest  extends EventProcessorTestBase {
         saveValueCurveProcessor.accept(createEvent);
     }
 
+    @Test
+    void realestateValuation() {
+
+        var entity = new Instrument(realestateKey, realestateDesc, InstrumentType.REALESTATE, true);
+        var yieldgoaldate = "2025-01-01";
+        var yieldgoalvalue = "5";
+        var yieldgoals = new HashMap<String, String>();
+        yieldgoals.put(yieldgoaldate, yieldgoalvalue);
+        Map<AdditionalMaps, Map<String, String>> additionalMaps = new HashMap<>();
+        additionalMaps.put(AdditionalMaps.YIELDGOAL, yieldgoals);
+        var profitdate = "2025-01-01";
+        var profitvalue = "1000";
+        var profits = new HashMap<String, String>();
+        profits.put(profitdate, profitvalue);
+        additionalMaps.put(AdditionalMaps.REALESTATEPROFITS, profits);
+        entity.setAdditionalMaps(additionalMaps);
+
+        var properties = new HashMap<AdditionalProperties, String>();
+        properties.put(AdditionalProperties.VALUEBUDGETID, bgtKey);
+        entity.setAdditionalProperties(properties);
+
+        var creatEvent = new Event(Event.Type.CREATE, realestateKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, realestateKey, realestateKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(240000.0, curve.get(i)));
+
+        assertEquals(2, curve.size());
+        var dateOfFirstValueChange = LocalDate.of(2025,1,1);
+        assertEquals(240000.0, curve.get(dateOfFirstValueChange.toString()));
+        assertEquals(0.0, curve.get(dateOfFirstValueChange.minusDays(1).toString()));
+
+        var linkedInstrumentKey = (String) data.get("linkedInstrumentKey");
+        assertEquals(bgtKey, linkedInstrumentKey);
+
+    }
+
+    @Test
+    void deprecationObjectValuation() {
+
+        var entity = new Instrument(deprecationObjectKey, deprecationObjectDesc, InstrumentType.DEPRECATIONOBJECT, true);
+        var creatEvent = new Event(Event.Type.CREATE, deprecationObjectKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, deprecationObjectKey, deprecationObjectKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
+    void lifeinsuranceValuation() {
+
+        var entity = new Instrument(lifeInsurenceKey, lifeInsurenceDesc, InstrumentType.LIFEINSURANCE, true);
+        var creatEvent = new Event(Event.Type.CREATE, lifeInsurenceKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, lifeInsurenceKey, lifeInsurenceKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
+    void loanValuation() {
+
+        var entity = new Instrument(loanKey, loanDesc, InstrumentType.LOAN, true);
+        var creatEvent = new Event(Event.Type.CREATE, loanKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, loanKey, loanKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
+    void moneyAtCallValuation() {
+
+        var entity = new Instrument(moneyAtCallKey, moneyAtCallDesc, InstrumentType.MONEYATCALL, true);
+        var creatEvent = new Event(Event.Type.CREATE, moneyAtCallKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, moneyAtCallKey, moneyAtCallKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
+    void timeDepositValuation() {
+
+        var entity = new Instrument(timeDepositKey, timeDepositDesc, InstrumentType.TIMEDEPOSIT, true);
+        var creatEvent = new Event(Event.Type.CREATE, timeDepositKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, timeDepositKey, timeDepositKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
+    void buildingSavingAccValuation() {
+
+        var entity = new Instrument(buildingsavingAccountKey, buildingsavingAccountDesc, InstrumentType.BUILDINGSAVINGACCOUNT, true);
+        var creatEvent = new Event(Event.Type.CREATE, buildingsavingAccountKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, buildingsavingAccountKey, buildingsavingAccountKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
+    void fondValuation() {
+
+        var entity = new Instrument(fondKey, fondDesc, InstrumentType.FONDS, true);
+        var creatEvent = new Event(Event.Type.CREATE, fondKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, fondKey, fondKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
+    void etfValuation() {
+
+        var entity = new Instrument(etfKey, etfDesc, InstrumentType.ETF, true);
+        var creatEvent = new Event(Event.Type.CREATE, etfKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, etfKey, etfKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
+    @Test
+    void bondValuation() {
+
+        var entity = new Instrument(bondKey, bondDesc, InstrumentType.BOND, true);
+        var creatEvent = new Event(Event.Type.CREATE, bondKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var valuationEvent = new Event(Event.Type.START, bondKey, bondKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var curve = (LinkedHashMap) data.get("valueCurve");
+        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+    }
+
 }

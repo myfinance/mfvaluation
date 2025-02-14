@@ -111,6 +111,7 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     String giroKey = giroDesc + "@1";
     String tenantDesc = "tenant";
     String tenantKey = tenantDesc + "@6";
+    String bgtKey = "testbudget@10";
     String accountPfDesc = "acountPf";
     String accountPfKey = accountPfDesc + "@8";
     String budgetPfDesc = "budgetPf";
@@ -126,6 +127,29 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     String eqKey = eqDesc + "@14";
     String depotDesc = "testdepot";
     String depotKey = depotDesc + "@11";
+
+    String realestateDesc = "newRealestate";
+    String realestateKey = realestateDesc+"@21";
+    String deprecationObjectDesc = "newDeprecationObject";
+    String deprecationObjectKey = deprecationObjectDesc+"@20";
+    String lifeInsurenceDesc = "newlifeInsurence";
+    String lifeInsurenceKey = lifeInsurenceDesc+"@19";
+    String loanDesc = "newLoan";
+    String loanKey = loanDesc+"@22";
+    String iban = "de0000000001";
+    String moneyAtCallDesc = "newMoneyAtCall";
+    String moneyAtCallKey = iban+"@2";
+    String timeDepositDesc = "newTimeDeposit";
+    String timeDepositKey = iban+"@3";
+    String buildingsavingAccountDesc = "newBuildingsavingAccount";
+    String buildingsavingAccountKey = iban+"@4";
+    String isin = "de0000000001";
+    String etfDesc = "newEtf";
+    String etfKey = isin.toUpperCase()+"@16";
+    String fondDesc = "newFond";
+    String fondKey = isin.toUpperCase()+"@15";
+    String bondDesc = "newBond";
+    String bondKey = isin.toUpperCase()+"@18";
 
 
     @BeforeEach

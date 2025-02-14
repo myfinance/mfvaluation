@@ -41,6 +41,7 @@ public class ValueHandlerFactory {
             case SECURITY:
                 valueHandler = new SecurityValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
                 break;
+            case LOAN:
             case CASHACCOUNT:
                 valueHandler = new CashAccValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
                 break;
@@ -54,9 +55,14 @@ public class ValueHandlerFactory {
                 valueHandler = new DepotValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
                 break;
             case REALESTATE:
+                valueHandler = new RealestateValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
+                break;
             case DEPRECATIONOBJECT:
+                valueHandler = new DeprecationObjectValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
+                break;
             case LIVEINSURANCE:
-            case LOAN:
+                valueHandler = new LifeInsuranceValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
+                break;
             case UNKNOWN:
             default:
                 throw new MFException(MFMsgKey.UNKNOWN_INSTRUMENTTYPE_EXCEPTION, "Type:" + instrument.getInstrumentType());
