@@ -23,7 +23,8 @@ public class RealestateValueHandler  extends AbsValueHandler{
 
         var yieldGoals = instrument.getAdditionalMaps().get(AdditionalMaps.YIELDGOAL);
         var profits = instrument.getAdditionalMaps().get(AdditionalMaps.REALESTATEPROFITS);
-        var dateStrings = yieldGoals.keySet();
+        var dateStrings = new HashSet<String>();
+        dateStrings.addAll(yieldGoals.keySet());
         dateStrings.addAll(profits.keySet());
         var dates = new ArrayList<LocalDate>();
 

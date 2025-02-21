@@ -467,7 +467,6 @@ public class ValuationTest  extends EventProcessorTestBase {
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
 
         var curve = (LinkedHashMap) data.get("valueCurve");
-        curve.keySet().forEach(i->assertEquals(240000.0, curve.get(i)));
 
         assertEquals(2, curve.size());
         var dateOfFirstValueChange = LocalDate.of(2025,1,1);
@@ -482,7 +481,18 @@ public class ValuationTest  extends EventProcessorTestBase {
     @Test
     void deprecationObjectValuation() {
 
+        var acquisitionDate = LocalDate.of(2025,1,1);
+        Double acquisitionValue = 364.0;
+        var maturityDate = LocalDate.of(2025,12,31);
+
         var entity = new Instrument(deprecationObjectKey, deprecationObjectDesc, InstrumentType.DEPRECATIONOBJECT, true);
+        var properties = new HashMap<AdditionalProperties, String>();
+        properties.put(AdditionalProperties.VALUEBUDGETID, bgtKey);
+        properties.put(AdditionalProperties.ACQUISITIONDATE, acquisitionDate.toString());
+        properties.put(AdditionalProperties.ACQUISITIONVALUE, acquisitionValue.toString());
+        properties.put(AdditionalProperties.MATURITYDATE, maturityDate.toString());
+        entity.setAdditionalProperties(properties);
+
         var creatEvent = new Event(Event.Type.CREATE, deprecationObjectKey, entity);
         saveInstrumentProcessor.accept(creatEvent);
 
@@ -499,7 +509,15 @@ public class ValuationTest  extends EventProcessorTestBase {
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
 
         var curve = (LinkedHashMap) data.get("valueCurve");
-        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+        assertEquals(366, curve.size());
+        assertEquals(0.0, curve.get(acquisitionDate.minusDays(1).toString()));
+        assertEquals(acquisitionValue, curve.get(acquisitionDate.toString()));
+        assertEquals(acquisitionValue-1, curve.get(acquisitionDate.plusDays(1).toString()));
+        assertEquals(acquisitionValue-2, curve.get(acquisitionDate.plusDays(2).toString()));
+        assertEquals(0.0, curve.get(maturityDate.toString()));
+
+        var linkedInstrumentKey = (String) data.get("linkedInstrumentKey");
+        assertEquals(bgtKey, linkedInstrumentKey);
 
     }
 
@@ -507,6 +525,18 @@ public class ValuationTest  extends EventProcessorTestBase {
     void lifeinsuranceValuation() {
 
         var entity = new Instrument(lifeInsurenceKey, lifeInsurenceDesc, InstrumentType.LIFEINSURANCE, true);
+        var surrenderValueDate = "2025-01-01";
+        var surrenderValue = "1000.0";
+        var surrenderValues = new HashMap<String, String>();
+        surrenderValues.put(surrenderValueDate, surrenderValue);
+        Map<AdditionalMaps, Map<String, String>> additionalMaps = new HashMap<>();
+        additionalMaps.put(AdditionalMaps.SURRENDERVALUES, surrenderValues);
+        entity.setAdditionalMaps(additionalMaps);
+
+        var properties = new HashMap<AdditionalProperties, String>();
+        properties.put(AdditionalProperties.VALUEBUDGETID, bgtKey);
+        entity.setAdditionalProperties(properties);
+
         var creatEvent = new Event(Event.Type.CREATE, lifeInsurenceKey, entity);
         saveInstrumentProcessor.accept(creatEvent);
 
@@ -523,7 +553,14 @@ public class ValuationTest  extends EventProcessorTestBase {
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
 
         var curve = (LinkedHashMap) data.get("valueCurve");
-        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+        assertEquals(2, curve.size());
+        var dateOfFirstValueChange = LocalDate.of(2025,1,1);
+        assertEquals(1000.0, curve.get(dateOfFirstValueChange.toString()));
+        assertEquals(0.0, curve.get(dateOfFirstValueChange.minusDays(1).toString()));
+
+        var linkedInstrumentKey = (String) data.get("linkedInstrumentKey");
+        assertEquals(bgtKey, linkedInstrumentKey);
 
     }
 
@@ -549,6 +586,33 @@ public class ValuationTest  extends EventProcessorTestBase {
         var curve = (LinkedHashMap) data.get("valueCurve");
         curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
 
+
+        LocalDate transactionDate = LocalDate.of(2025, 1, 1);
+        var desc = "kreditrauszahlung";
+        var cashflow = new Cashflow(desc, transactionDate, loanKey, -1000.0);
+        var cashflowEEvent = new Event(Event.Type.CREATE, loanKey, cashflow);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+        LocalDate redemptionDate = LocalDate.of(2025, 1, 3);
+        desc = "tilgung";
+        cashflow = new Cashflow(desc, redemptionDate, loanKey, 100.0);
+        cashflowEEvent = new Event(Event.Type.CREATE, loanKey, cashflow);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+        valuationEvent = new Event(Event.Type.START, loanKey, loanKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var newCurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(4, newCurve.size());
+        assertEquals(0.0, newCurve.get(transactionDate.minusDays(1).toString()));
+        assertEquals(-1000.0, newCurve.get(transactionDate.toString()));
+        assertEquals(-1000.0, newCurve.get(transactionDate.plusDays(1).toString()));
+        assertEquals(-900.0, newCurve.get(transactionDate.plusDays(2).toString()));
+
     }
 
     @Test
@@ -572,6 +636,26 @@ public class ValuationTest  extends EventProcessorTestBase {
 
         var curve = (LinkedHashMap) data.get("valueCurve");
         curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+
+        LocalDate transactionDate = LocalDate.of(2025, 1, 1);
+        var desc = "transaction";
+        var cashflow = new Cashflow(desc, transactionDate, moneyAtCallKey, 1000.0);
+        var cashflowEEvent = new Event(Event.Type.CREATE, moneyAtCallKey, cashflow);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+
+        valuationEvent = new Event(Event.Type.START, moneyAtCallKey, moneyAtCallKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var newCurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(2, newCurve.size());
+        assertEquals(1000.0, newCurve.get(transactionDate.toString()));
+        assertEquals(0.0, newCurve.get(transactionDate.minusDays(1).toString()));
+
 
     }
 
@@ -597,6 +681,25 @@ public class ValuationTest  extends EventProcessorTestBase {
         var curve = (LinkedHashMap) data.get("valueCurve");
         curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
 
+        LocalDate transactionDate = LocalDate.of(2025, 1, 1);
+        var desc = "transaction";
+        var cashflow = new Cashflow(desc, transactionDate, timeDepositKey, 1000.0);
+        var cashflowEEvent = new Event(Event.Type.CREATE, timeDepositKey, cashflow);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+
+        valuationEvent = new Event(Event.Type.START, timeDepositKey, timeDepositKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var newCurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(2, newCurve.size());
+        assertEquals(1000.0, newCurve.get(transactionDate.toString()));
+        assertEquals(0.0, newCurve.get(transactionDate.minusDays(1).toString()));
+
     }
 
     @Test
@@ -621,6 +724,25 @@ public class ValuationTest  extends EventProcessorTestBase {
         var curve = (LinkedHashMap) data.get("valueCurve");
         curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
 
+        LocalDate transactionDate = LocalDate.of(2025, 1, 1);
+        var desc = "transaction";
+        var cashflow = new Cashflow(desc, transactionDate, buildingsavingAccountKey, 1000.0);
+        var cashflowEEvent = new Event(Event.Type.CREATE, buildingsavingAccountKey, cashflow);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+
+        valuationEvent = new Event(Event.Type.START, buildingsavingAccountKey, buildingsavingAccountKey);
+        valuationProcessor.accept(valuationEvent);
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+
+        data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var newCurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(2, newCurve.size());
+        assertEquals(1000.0, newCurve.get(transactionDate.toString()));
+        assertEquals(0.0, newCurve.get(transactionDate.minusDays(1).toString()));
+
     }
 
     @Test
@@ -634,16 +756,28 @@ public class ValuationTest  extends EventProcessorTestBase {
         var messages = getMessages("valuationDataChanged-out-0");
         assertEquals(1, messages.size());
 
+
+        var prices = new EndOfDayPrices();
+        prices.setInstrumentBusinesskey(fondKey);
+        var pricemap = new HashMap<LocalDate, EndOfDayPrice>();
+        var price = new EndOfDayPrice(100, "EUR@13");
+        pricemap.put(LocalDate.of(2022,12,1), price);
+        var pice2 = new EndOfDayPrice(200, "EUR@13");
+        pricemap.put(LocalDate.of(2022,12,2), pice2);
+        prices.setPrices(pricemap);
+        creatEvent = new Event(Event.Type.CREATE, prices.getInstrumentBusinesskey(), prices);
+        saveMarketDataProcessor.accept(creatEvent);
         var valuationEvent = new Event(Event.Type.START, fondKey, fondKey);
         valuationProcessor.accept(valuationEvent);
+
+
         messages = getMessages("valueCurveCalculated-out-0");
         assertEquals(1, messages.size());
-
-        JsonHelper jsonHelper = new JsonHelper();
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
 
-        var curve = (LinkedHashMap) data.get("valueCurve");
-        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+        var eqcurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(100.0, eqcurve.get("2022-12-01"));
+        assertEquals(200.0, eqcurve.get("2022-12-02"));
 
     }
 
@@ -658,16 +792,27 @@ public class ValuationTest  extends EventProcessorTestBase {
         var messages = getMessages("valuationDataChanged-out-0");
         assertEquals(1, messages.size());
 
+        var prices = new EndOfDayPrices();
+        prices.setInstrumentBusinesskey(etfKey);
+        var pricemap = new HashMap<LocalDate, EndOfDayPrice>();
+        var price = new EndOfDayPrice(100, "EUR@13");
+        pricemap.put(LocalDate.of(2022,12,1), price);
+        var pice2 = new EndOfDayPrice(200, "EUR@13");
+        pricemap.put(LocalDate.of(2022,12,2), pice2);
+        prices.setPrices(pricemap);
+        creatEvent = new Event(Event.Type.CREATE, prices.getInstrumentBusinesskey(), prices);
+        saveMarketDataProcessor.accept(creatEvent);
         var valuationEvent = new Event(Event.Type.START, etfKey, etfKey);
         valuationProcessor.accept(valuationEvent);
+
+
         messages = getMessages("valueCurveCalculated-out-0");
         assertEquals(1, messages.size());
-
-        JsonHelper jsonHelper = new JsonHelper();
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
 
-        var curve = (LinkedHashMap) data.get("valueCurve");
-        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
+        var eqcurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(100.0, eqcurve.get("2022-12-01"));
+        assertEquals(200.0, eqcurve.get("2022-12-02"));
 
     }
 
@@ -682,17 +827,27 @@ public class ValuationTest  extends EventProcessorTestBase {
         var messages = getMessages("valuationDataChanged-out-0");
         assertEquals(1, messages.size());
 
+        var prices = new EndOfDayPrices();
+        prices.setInstrumentBusinesskey(bondKey);
+        var pricemap = new HashMap<LocalDate, EndOfDayPrice>();
+        var price = new EndOfDayPrice(100, "EUR@13");
+        pricemap.put(LocalDate.of(2022,12,1), price);
+        var pice2 = new EndOfDayPrice(200, "EUR@13");
+        pricemap.put(LocalDate.of(2022,12,2), pice2);
+        prices.setPrices(pricemap);
+        creatEvent = new Event(Event.Type.CREATE, prices.getInstrumentBusinesskey(), prices);
+        saveMarketDataProcessor.accept(creatEvent);
         var valuationEvent = new Event(Event.Type.START, bondKey, bondKey);
         valuationProcessor.accept(valuationEvent);
+
+
         messages = getMessages("valueCurveCalculated-out-0");
         assertEquals(1, messages.size());
-
-        JsonHelper jsonHelper = new JsonHelper();
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
 
-        var curve = (LinkedHashMap) data.get("valueCurve");
-        curve.keySet().forEach(i->assertEquals(0.0, curve.get(i)));
-
+        var eqcurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(100.0, eqcurve.get("2022-12-01"));
+        assertEquals(200.0, eqcurve.get("2022-12-02"));
     }
 
 }
