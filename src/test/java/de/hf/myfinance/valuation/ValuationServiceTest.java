@@ -1,9 +1,10 @@
 package de.hf.myfinance.valuation;
 
+import de.hf.myfinance.event.Event;
+import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.myfinance.valuation.service.ValuationService;
-import de.hf.testhelper.MongoDbTestBase;
 import reactor.core.publisher.Flux;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Testcontainers
-public class ValuationServiceTest extends MongoDbTestBase {
+public class ValuationServiceTest extends EventProcessorTestBase {
 
     @Autowired
     ValueCurveRepository valueCurveRepository;
@@ -211,5 +212,49 @@ public class ValuationServiceTest extends MongoDbTestBase {
         assertEquals(210, resultMap.get("testKey2"));
 
 
+    }
+
+
+    @Test
+    void getAvgExpensesOfLastYear_noExpenses() {
+
+        var desc = "testeinkommen";
+        LocalDate transactionDate = LocalDate.of(LocalDate.now().getYear(), 1, 2);
+        var cashflow = new Cashflow(desc, transactionDate, giroKey, 100.0);
+        var cashflowEEvent = new Event(Event.Type.CREATE, giroKey, cashflow);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+
+        var avgExpenses = valuationService.getAvgExpensesOfLastYear(giroKey).block();
+        assertEquals(0, avgExpenses);
+    }
+
+    @Test
+    void getAvgExpensesOfLastYear_singleExpenses() {
+        var desc = "testeinkommen";
+        LocalDate transactionDate = LocalDate.now().minusMonths(2);
+        var cashflow = new Cashflow(desc, transactionDate, giroKey, -120.0);
+        var cashflowEEvent = new Event(Event.Type.CREATE, giroKey, cashflow);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+        var avgExpenses = valuationService.getAvgExpensesOfLastYear(giroKey).block();
+        assertEquals(-10, avgExpenses);
+    }
+
+    @Test
+    void listInstrumentCashflows() {
+        var desc = "testeinkommen";
+        LocalDate transactionDate = LocalDate.of(2024, 1, 2);
+        var cashflow = new Cashflow(desc, transactionDate, giroKey, 100.0);
+        var cashflowEEvent = new Event(Event.Type.CREATE, giroKey, cashflow);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+        desc = "testausgabe";
+        var cashflow2 = new Cashflow(desc, transactionDate, giroKey, -10.0);
+        var cashflowEEvent2 = new Event(Event.Type.CREATE, giroKey, cashflow2);
+        saveCashflowProcessor.accept(cashflowEEvent);
+
+        var result = valuationService.listInstrumentCashflows(giroKey, transactionDate.minusDays(1), transactionDate.plusDays(1)).collectList().block();
+        assertEquals(2, result.size());
     }
 }

@@ -1,24 +1,21 @@
 package de.hf.myfinance.valuation.api;
 
 import de.hf.myfinance.restapi.ValuationApi;
+import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.service.ValuationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 import de.hf.framework.utils.ServiceUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 @RestController
 public class ValuationApiImpl implements ValuationApi {
     ServiceUtil serviceUtil;
     ValuationService valuationService;
 
-    @Autowired
     public ValuationApiImpl(ValuationService valuationService, ServiceUtil serviceUtil) {
         this.serviceUtil = serviceUtil;
         this.valuationService = valuationService;
@@ -40,9 +37,13 @@ public class ValuationApiImpl implements ValuationApi {
     }
 
     @Override
-    public Flux<Map<String, Double>> getValues(List<String> businesskeys, LocalDate date) {
-        return valuationService.getValues(businesskeys, date);
+    public Mono<Double> getAvgExpensesOfLastYear(String businesskey) {
+        return valuationService.getAvgExpensesOfLastYear(businesskey);
     }
 
+    @Override
+    public Flux<Cashflow> listCashflows4Instrument(String businesskey, LocalDate startDate, LocalDate endDate) {
+        return valuationService.listInstrumentCashflows(businesskey, startDate, endDate);
+    }
 
 }

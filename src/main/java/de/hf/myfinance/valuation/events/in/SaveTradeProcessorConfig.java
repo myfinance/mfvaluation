@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
-import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Trade;
 import de.hf.myfinance.valuation.events.out.TradeSavedEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.TradeMapper;

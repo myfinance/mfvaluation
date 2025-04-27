@@ -36,10 +36,9 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         var desc = "testeinkommen";
         LocalDate transactionDate = LocalDate.of(2022, 1, 1);
         var transaction = new Transaction(desc, transactionDate, TransactionType.INCOME);
-        var cashflows = new HashMap<String, Double>();
-        cashflows.put(bgtKey, 100.0);
-        cashflows.put(giroKey, 100.0);
-        transaction.setCashflows(cashflows);
+        transaction.setAccKey(giroKey);
+        transaction.setBudgetKey(bgtKey);
+        transaction.setValue(100.0);
 
         Event creatEvent = new Event(Event.Type.CREATE, transaction.hashCode(), transaction);
         extractCashflowsProcessor.accept(creatEvent);
@@ -74,10 +73,9 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         var desc = "testeinkommen";
         LocalDate transactionDate = LocalDate.of(2022, 1, 1);
         var transaction = new Transaction(desc, transactionDate, TransactionType.INCOME);
-        var cashflows = new HashMap<String, Double>();
-        cashflows.put(bgtKey, 100.0);
-        cashflows.put(giroKey, 100.0);
-        transaction.setCashflows(cashflows);
+        transaction.setAccKey(giroKey);
+        transaction.setBudgetKey(bgtKey);
+        transaction.setValue(100.0);
 
         Event creatEvent = new Event(Event.Type.DELETE, transaction.hashCode(), transaction);
         extractCashflowsProcessor.accept(creatEvent);
@@ -103,11 +101,12 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         var desc = "testTrade";
         LocalDate transactionDate = LocalDate.of(2022, 1, 1);
         var transaction = new Transaction(desc, transactionDate, TransactionType.BUY);
-        var cashflows = new HashMap<String, Double>();
-        cashflows.put(bgtKey, -100.0);
-        cashflows.put(giroKey, -100.0);
-        transaction.setCashflows(cashflows);
-        transaction.setTradeInfo(new Trade(depotKey, securityKey, 10.0));
+        transaction.setAccKey(giroKey);
+        transaction.setBudgetKey(bgtKey);
+        transaction.setValue(100.0);
+        transaction.setAmount(10.0);
+        transaction.setDepotBusinessKey(depotKey);
+        transaction.setSecurityBusinessKey(securityKey);
 
         var creatEvent = new Event(Event.Type.CREATE, transaction.hashCode(), transaction);
         extractCashflowsProcessor.accept(creatEvent);
@@ -140,11 +139,12 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         var desc = "testTrade";
         LocalDate transactionDate = LocalDate.of(2022, 1, 1);
         var transaction = new Transaction(desc, transactionDate, TransactionType.SELL);
-        var cashflows = new HashMap<String, Double>();
-        cashflows.put(bgtKey, 100.0);
-        cashflows.put(giroKey, 100.0);
-        transaction.setCashflows(cashflows);
-        transaction.setTradeInfo(new Trade(depotKey, securityKey, 10.0));
+        transaction.setAccKey(giroKey);
+        transaction.setBudgetKey(bgtKey);
+        transaction.setValue(100.0);
+        transaction.setAmount(10.0);
+        transaction.setDepotBusinessKey(depotKey);
+        transaction.setSecurityBusinessKey(securityKey);
 
         var creatEvent = new Event(Event.Type.CREATE, transaction.hashCode(), transaction);
         extractCashflowsProcessor.accept(creatEvent);

@@ -7,7 +7,6 @@ import de.hf.myfinance.restmodel.EndOfDayPrices;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
 import de.hf.myfinance.valuation.persistence.repositories.EndOfDayPricesRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Mono;
@@ -23,7 +22,6 @@ public class SaveMarketDataProcessorConfig {
     private final ValuationEventHandler valuationEventHandler;
     protected static final String AUDIT_MSG_TYPE="SaveMarketDataProcessor_Event";
 
-    @Autowired
     public SaveMarketDataProcessorConfig(EndOfDayPricesMapper endOfDayPricesMapper, EndOfDayPricesRepository endOfDayPricesRepository, AuditService auditService, ValuationEventHandler valuationEventHandler) {
         this.endOfDayPricesMapper = endOfDayPricesMapper;
         this.endOfDayPricesRepository = endOfDayPricesRepository;

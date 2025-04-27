@@ -3,6 +3,9 @@ package de.hf.myfinance.valuation.service;
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.exceptions.MFException;
 import de.hf.myfinance.exception.MFMsgKey;
+import de.hf.myfinance.restmodel.Cashflow;
+import de.hf.myfinance.restmodel.Transaction;
+import de.hf.myfinance.restmodel.TransactionType;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import org.springframework.stereotype.Component;
@@ -11,6 +14,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,6 +95,88 @@ public class ValuationService {
             adjValueCurve.put(currentDate, value);
         }
         return adjValueCurve;
+    }
+
+    public List<Cashflow> generateCashflows(Transaction transaction, boolean isDelete){
+        var cashflows = new ArrayList<Cashflow>();
+        var value = transaction.getValue();
+        if(isDelete) {
+            value = value * (-1);
+        }
+        if(transaction.getTransactionType().equals(TransactionType.INCOME)){
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getAccKey(), value));
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value));
+        }
+        if(transaction.getTransactionType().equals(TransactionType.EXPENSE)){
+            value = value * (-1);
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getAccKey(), value));
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value));
+        }
+        if(transaction.getTransactionType().equals(TransactionType.BUDGETTRANSFER)){
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getTrgBudgetKey(), value));
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value * (-1)));
+        }
+        if(transaction.getTransactionType().equals(TransactionType.TRANSFER)){
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getTrgAccKey(), value));
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getAccKey(), value * (-1)));
+        }
+        if(transaction.getTransactionType().equals(TransactionType.BUY)){
+            value = value * (-1);
+            getTradeCashflows(transaction, cashflows, value);
+        }
+        if(transaction.getTransactionType().equals(TransactionType.SELL)){
+            getTradeCashflows(transaction, cashflows, value);
+        }
+        if(transaction.getTransactionType().equals(TransactionType.DEPOTCASHFLOW)){
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getAccKey(), value));
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value));
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getSecurityBusinessKey(), value));
+        }
+        if(transaction.getTransactionType().equals(TransactionType.INTERESTS)){
+            var accCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getAccKey(), value);
+            accCashflow.setIsInterest(true);
+            cashflows.add(accCashflow);
+            var bgtCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value);
+            bgtCashflow.setIsInterest(true);
+            cashflows.add(bgtCashflow);
+            var securityCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getSecurityBusinessKey(), value);
+            securityCashflow.setIsInterest(true);
+            cashflows.add(securityCashflow);
+        }
+        return cashflows;
+    }
+
+    private void getTradeCashflows(Transaction transaction, ArrayList<Cashflow> cashflows, double value) {
+        var accCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getAccKey(), value);
+        accCashflow.setIsTrade(true);
+        cashflows.add(accCashflow);
+        var bgtCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value);
+        bgtCashflow.setIsTrade(true);
+        cashflows.add(bgtCashflow);
+        var depotCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getDepotBusinessKey(), value);
+        depotCashflow.setIsTrade(true);
+        cashflows.add(depotCashflow);
+        var securityCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getSecurityBusinessKey(), value);
+        securityCashflow.setIsTrade(true);
+        cashflows.add(securityCashflow);
+    }
+
+    public Flux<Cashflow> listInstrumentCashflows(String businesskey, LocalDate startDate, LocalDate endDate) {
+        return dataReader.findAllCashflow4Instrument(businesskey)    
+            .filter(cashflow -> 
+                !cashflow.getTransactiondate().isBefore(startDate) &&
+                !cashflow.getTransactiondate().isAfter(endDate)
+            );
+    }
+
+    public Mono<Double> getAvgExpensesOfLastYear(String businesskey){
+        LocalDate today = LocalDate.now();
+        // Get the previous month
+        YearMonth lastMonth = YearMonth.from(today).minusMonths(1);
+        // Get the last day of the last month
+        LocalDate lastDayOfLastMonth = lastMonth.atEndOfMonth();
+        return listInstrumentCashflows(businesskey, lastDayOfLastMonth.minusYears(1), lastDayOfLastMonth)
+            .filter(c->c.getValue()<0).map(Cashflow::getValue).reduce(0.0,Double::sum).map(s->s/12);
     }
 
 }
