@@ -10,6 +10,7 @@ import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
+import de.hf.myfinance.valuation.persistence.entities.PositionKey;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
 import de.hf.myfinance.valuation.persistence.repositories.PositionValueRepository;
 import reactor.core.publisher.Mono;
@@ -38,11 +39,18 @@ public class SavePositionValueProcessorConfig {
             switch (event.getEventType()) {
 
                 case CREATE:
-                    var positionValueEntity = new PositionValueEntity(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey(), positionValueCurve.getValueCurve());
-                    positionValueRepository.save(positionValueEntity).flatMap(e -> {
-                        valuationEventHandler.sendValuationEvent(depotId);
+                    positionValueRepository.findByPositionKey(new PositionKey(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey()))
+                        .switchIfEmpty(Mono.just(new PositionValueEntity(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey(), positionValueCurve.getValueCurve())))
+                        .flatMap(p->{
+                            p.setPositionValueCurve(positionValueCurve.getValueCurve());
+                            return positionValueRepository.save(p);
+                        })
+                        .flatMap(e -> {
+                            valuationEventHandler.sendValuationEvent(depotId);
                             return Mono.just("done");
                         }).block();
+
+                        break;
 
                 default:
                     String errorMessage = "Incorrect event type: " + event.getEventType() + ", expected a Create event";

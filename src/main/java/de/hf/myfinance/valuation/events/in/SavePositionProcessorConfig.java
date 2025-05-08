@@ -11,6 +11,7 @@ import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.PositionSavedEventHandler;
 import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
+import de.hf.myfinance.valuation.persistence.entities.PositionKey;
 import de.hf.myfinance.valuation.persistence.repositories.PositionRepository;
 import reactor.core.publisher.Mono;
 
@@ -39,11 +40,17 @@ public class SavePositionProcessorConfig {
             switch (event.getEventType()) {
 
                 case CREATE:
-                    var positionEntity = new PositionEntity(positionCurve.getParentBusinesskey(), positionCurve.getInstrumentBusinesskey(), positionCurve.getValueCurve());
-                    positionRepository.save(positionEntity).flatMap(e -> {
+                    positionRepository.findByPositionKey(new PositionKey(positionCurve.getParentBusinesskey(), positionCurve.getInstrumentBusinesskey()))
+                        .switchIfEmpty(Mono.just(new PositionEntity(positionCurve.getParentBusinesskey(), positionCurve.getInstrumentBusinesskey(), positionCurve.getValueCurve())))
+                        .flatMap(p->{
+                            p.setPositionCurve(positionCurve.getValueCurve());
+                            return positionRepository.save(p);
+                        })
+                        .flatMap(e -> {
                             positionSavedEventHandler.sendPositionSavedEvent(positionCurve);
                             return Mono.just("done");
                         }).block();
+                        break;
 
                 default:
                     String errorMessage = "Incorrect event type: " + event.getEventType() + ", expected a Create event";
