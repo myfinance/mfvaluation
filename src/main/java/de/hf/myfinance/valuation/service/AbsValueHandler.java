@@ -60,7 +60,6 @@ public abstract class AbsValueHandler extends AbsCurveHandler implements ValueHa
     }
 
     protected Mono<TreeMap<LocalDate, Double>> extractAndGetCombinedValueCurve(List<ValueCurve>  valueCurves) {
-        
         return getCombinedValueCurve(extractMapsFromValueCurve(valueCurves));
     }
 

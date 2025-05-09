@@ -34,7 +34,6 @@ public class SavePositionValueProcessorConfig {
         return event -> {
             auditService.saveMessage("Process message in SavePositionValueProcessorConfig created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
             var positionValueCurve = event.getData();
-            var depotId = event.getKey();
             auditService.saveMessage("save positions for id=" + positionValueCurve.getInstrumentBusinesskey(), Severity.DEBUG, AUDIT_MSG_TYPE);
             switch (event.getEventType()) {
 
@@ -44,11 +43,9 @@ public class SavePositionValueProcessorConfig {
                         .flatMap(p->{
                             p.setPositionValueCurve(positionValueCurve.getValueCurve());
                             return positionValueRepository.save(p);
-                        })
-                        .flatMap(e -> {
-                            valuationEventHandler.sendValuationEvent(depotId);
-                            return Mono.just("done");
                         }).block();
+                        auditService.saveMessage("positions saved", Severity.INFO, AUDIT_MSG_TYPE);
+                        valuationEventHandler.sendValuationEvent(positionValueCurve.getParentBusinesskey());
 
                         break;
 
