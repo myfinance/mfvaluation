@@ -2,6 +2,9 @@ package de.hf.myfinance.valuation;
 
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.Cashflow;
+import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
+import de.hf.myfinance.valuation.persistence.entities.PositionKey;
+import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
 import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.myfinance.valuation.service.ValuationService;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -256,5 +260,77 @@ public class ValuationServiceTest extends EventProcessorTestBase {
 
         var result = valuationService.listInstrumentCashflows(giroKey, transactionDate.minusDays(1), transactionDate.plusDays(1)).collectList().block();
         assertEquals(2, result.size());
+    }
+
+    @Test
+    void getPositionsTest() {
+        var positionCurve = new PositionEntity();
+        positionCurve.setPositionKey(new PositionKey(depotKey, eqKey));
+        var positionMap = new TreeMap<LocalDate, Double>();
+        positionMap.put(LocalDate.of(2022,1,1), 10.0);
+        positionMap.put(LocalDate.of(2022,1,2), 20.0);
+        positionCurve.setPositionCurve(positionMap);
+        positionRepository.save(positionCurve).block();
+
+        var positionValueCurve = new PositionValueEntity();
+        positionValueCurve.setPositionKey(new PositionKey(depotKey, eqKey));
+        var valueMap = new TreeMap<LocalDate, Double>();
+        valueMap.put(LocalDate.of(2022,1,1), 100.0);
+        valueMap.put(LocalDate.of(2022,1,2), 220.0);
+        positionValueCurve.setPositionValueCurve(valueMap);
+        positionvalueRepository.save(positionValueCurve).block();
+
+        var depotkey2 = "depotkey2";
+
+        var positionCurve2 = new PositionEntity();
+        positionCurve2.setPositionKey(new PositionKey(depotkey2, eqKey));
+        var positionMap2 = new TreeMap<LocalDate, Double>();
+        positionMap2.put(LocalDate.of(2022,1,1), 5.0);
+        positionCurve2.setPositionCurve(positionMap2);
+        positionRepository.save(positionCurve2).block();
+
+        var positionValueCurve2 = new PositionValueEntity();
+        positionValueCurve2.setPositionKey(new PositionKey(depotkey2, eqKey));
+        var valueMap2 = new TreeMap<LocalDate, Double>();
+        valueMap2.put(LocalDate.of(2022,1,1), 50.0);
+        positionValueCurve2.setPositionValueCurve(valueMap2);
+        positionvalueRepository.save(positionValueCurve2).block();
+
+        var securitykey2 = "securitykey2";
+
+        var positionCurve3 = new PositionEntity();
+        positionCurve3.setPositionKey(new PositionKey(depotkey2, securitykey2));
+        var positionMap3 = new TreeMap<LocalDate, Double>();
+        positionMap3.put(LocalDate.of(2022,1,1), 20.0);
+        positionCurve3.setPositionCurve(positionMap3);
+        positionRepository.save(positionCurve3).block();
+
+        var positionValueCurve3 = new PositionValueEntity();
+        positionValueCurve3.setPositionKey(new PositionKey(depotkey2, securitykey2));
+        var valueMap3 = new TreeMap<LocalDate, Double>();
+        valueMap3.put(LocalDate.of(2022,1,1), 50.0);
+        positionValueCurve3.setPositionValueCurve(valueMap3);
+        positionvalueRepository.save(positionValueCurve3).block();
+
+        var depotlist = new ArrayList<String>();
+        depotlist.add(depotKey);
+        depotlist.add(depotkey2);
+        var result = valuationService.getPositions(depotlist).collectList().block();
+
+        assertEquals(3, result.size());
+        var positionDepot1Sec1 = result.stream().filter(p->p.getDepotId().equals(depotKey) && p.getSecurityId().equals(eqKey)).findFirst();
+        assertTrue(positionDepot1Sec1.isPresent());
+        assertEquals(20.0, positionDepot1Sec1.get().getAmount());
+        assertEquals(220.0, positionDepot1Sec1.get().getValue());
+
+        var positionDepot1Sec2 = result.stream().filter(p->p.getDepotId().equals(depotkey2) && p.getSecurityId().equals(eqKey)).findFirst();
+        assertTrue(positionDepot1Sec2.isPresent());
+        assertEquals(5.0, positionDepot1Sec2.get().getAmount());
+        assertEquals(50.0, positionDepot1Sec2.get().getValue());
+
+        var positionDepot1Sec3 = result.stream().filter(p->p.getDepotId().equals(depotkey2) && p.getSecurityId().equals(securitykey2)).findFirst();
+        assertTrue(positionDepot1Sec3.isPresent());
+        assertEquals(20.0, positionDepot1Sec3.get().getAmount());
+        assertEquals(50.0, positionDepot1Sec3.get().getValue());
     }
 }

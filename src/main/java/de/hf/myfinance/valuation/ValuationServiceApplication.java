@@ -3,6 +3,7 @@ package de.hf.myfinance.valuation;
 import de.hf.myfinance.valuation.persistence.entities.InstrumentEntity;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,5 +67,7 @@ public class ValuationServiceApplication {
 		resolver.resolveIndexFor(InstrumentEntity.class).forEach(e -> indexOps.ensureIndex(e));
 
 	}
+
+
 
 }

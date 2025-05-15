@@ -1,5 +1,7 @@
 package de.hf.myfinance.valuation.persistence.repositories;
 
+import java.util.List;
+
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 import reactor.core.publisher.Flux;
@@ -11,4 +13,5 @@ public interface PositionValueRepository extends ReactiveCrudRepository<Position
     Flux<PositionValueEntity> findByPositionKeyDepotBusinessKey(String depotBusinessKey);
     Mono<PositionValueEntity> findByPositionKey(PositionKey positionKey);
     Mono<Long> deleteByPositionKey(PositionKey positionKey);
+    Flux<PositionValueEntity> findByPositionKey_DepotBusinessKeyIn(List<String> depotBusinessKeys);
 }

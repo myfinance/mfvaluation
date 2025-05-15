@@ -1,5 +1,7 @@
 package de.hf.myfinance.valuation.persistence;
 
+import java.util.List;
+
 import de.hf.myfinance.restmodel.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -17,4 +19,6 @@ public interface DataReader {
     Flux<Trade> findTradesByKey(String depotBusinessKey, String securityBusinessKey);
     Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey);
     Flux<Instrument> findByValueBudget(String valueBudget);
+    Flux<ValueCurve> findAllPostions(List<String> depots);
+    Flux<ValueCurve> findAllPostionValues(List<String> depots);
 }

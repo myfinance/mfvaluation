@@ -4,6 +4,7 @@ import de.hf.framework.audit.AuditService;
 import de.hf.framework.exceptions.MFException;
 import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.restmodel.Cashflow;
+import de.hf.myfinance.restmodel.Position;
 import de.hf.myfinance.restmodel.Transaction;
 import de.hf.myfinance.restmodel.TransactionType;
 import de.hf.myfinance.restmodel.ValueCurve;
@@ -20,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class ValuationService {
@@ -177,6 +180,64 @@ public class ValuationService {
         LocalDate lastDayOfLastMonth = lastMonth.atEndOfMonth();
         return listInstrumentCashflows(businesskey, lastDayOfLastMonth.minusYears(1), lastDayOfLastMonth)
             .filter(c->c.getValue()<0).map(Cashflow::getValue).reduce(0.0,Double::sum).map(s->s/12);
+    }
+
+    public Flux<Position> getPositions(List<String> depots) {
+        var postions = dataReader.findAllPostions(depots).map(this::mapPositionValueCurveToPosition);
+        var postionValues = dataReader.findAllPostionValues(depots).map(this::mapPositionValueValueCurveToPosition);
+
+        var result = Mono.zip(
+            postions.collectList(),
+            postionValues.collectList()
+        ).map(tuple -> {
+            List<Position> pos = tuple.getT1();
+            List<Position> values = tuple.getT2();
+        
+            // Create map from flux2 for fast lookup
+            Map<String, Position> map = values.stream()
+                .collect(Collectors.toMap(
+                    p -> p.getDepotId() + ":" + p.getSecurityId(),
+                    Function.identity()
+                ));
+        
+            List<Position> mergedList = new ArrayList<>();
+        
+            for (Position p1 : pos) {
+                String key = p1.getDepotId() + ":" + p1.getSecurityId();
+                Position positionValue = map.remove(key); // remove to avoid double-use
+        
+                if (positionValue != null) {
+                    p1.setValue(positionValue.getValue());
+                    mergedList.add(p1);
+                } else {
+                    mergedList.add(p1);
+                }
+            }
+        
+            // Add any remaining positions from flux2 (non-matching)
+            mergedList.addAll(map.values());
+        
+            return Flux.fromIterable(mergedList);
+        });
+        return result.flatMapMany(Function.identity());
+    }
+
+    private Position mapPositionValueCurveToPosition(ValueCurve valueCurve) {
+        // Construct Position from valueCurve data
+        Position position = new Position(valueCurve.getParentBusinesskey(), null, valueCurve.getInstrumentBusinesskey(), null, null);
+        var values = valueCurve.getValueCurve();
+        Double latestValue = values.isEmpty() ? null : values.lastEntry().getValue();
+        position.setAmount(latestValue);
+        return position;
+    }
+
+    private Position mapPositionValueValueCurveToPosition(ValueCurve valueCurve) {
+        // Construct Position from valueCurve data
+        Position position = new Position(valueCurve.getParentBusinesskey(), null, valueCurve.getInstrumentBusinesskey(), null, null);
+        var values = valueCurve.getValueCurve();
+        Double latestValue = values.isEmpty() ? null : values.lastEntry().getValue();
+        position.setValue(latestValue);
+        return position;
     }
 
 }

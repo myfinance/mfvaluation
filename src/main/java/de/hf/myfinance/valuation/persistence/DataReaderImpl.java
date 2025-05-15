@@ -20,6 +20,7 @@ import de.hf.myfinance.valuation.persistence.repositories.PositionValueRepositor
 import de.hf.myfinance.valuation.persistence.repositories.TradeRepository;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 
+import java.util.List;
 import java.util.TreeMap;
 import java.time.LocalDate;
 
@@ -138,5 +139,15 @@ public class DataReaderImpl implements DataReader{
     @Override
     public Flux<Instrument> findByValueBudget(String valueBudget){
         return instrumentRepository.findByValueBudget(valueBudget).map(e-> instrumentMapper.entityToApi(e));
+    }
+
+    @Override
+    public Flux<ValueCurve> findAllPostions(List<String> depots) {
+        return positionRepository.findByPositionKey_DepotBusinessKeyIn(depots).map(this::positionToValueCurve);
+    }
+
+    @Override
+    public Flux<ValueCurve> findAllPostionValues(List<String> depots) {
+        return positionValueRepository.findByPositionKey_DepotBusinessKeyIn(depots).map(this::positionValueToValueCurve);
     }
 }
