@@ -115,6 +115,12 @@ public class ValuationService {
             cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getAccKey(), value));
             cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value));
         }
+        if(transaction.getTransactionType().equals(TransactionType.LIFEINSURANCEEXPENSE)){
+            value = value * (-1);
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getAccKey(), value));
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value));
+            cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getInsuranceKey(), value));
+        }
         if(transaction.getTransactionType().equals(TransactionType.BUDGETTRANSFER)){
             cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getTrgBudgetKey(), value));
             cashflows.add(new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value * (-1)));

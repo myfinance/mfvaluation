@@ -1,7 +1,6 @@
 package de.hf.myfinance.valuation;
 
 import de.hf.myfinance.event.Event;
-import de.hf.myfinance.restmodel.Trade;
 import de.hf.myfinance.restmodel.Transaction;
 import de.hf.myfinance.restmodel.TransactionType;
 import de.hf.testhelper.JsonHelper;
@@ -11,7 +10,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -28,9 +26,10 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
     String giroKey = "newGiro@1";
     String depotKey = "depot@11";
     String securityKey = "equity@14";
+    String lifeinsurranceKey = "lv@1";
 
     @Test
-    void createTransaction() {
+    void createCreateCashflow4Income() {
 
 
         var desc = "testeinkommen";
@@ -54,6 +53,36 @@ public class ExtractTradesAndCashflowsTests extends EventProcessorTestBase {
         var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
         compareCashflowEvent(keyList, desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
         compareCashflowEvent(keyList, desc, transactionDate, 100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
+    }
+
+    @Test
+    void createCreateCashflow4LifeIncurrence() {
+
+
+        var desc = "lv";
+        LocalDate transactionDate = LocalDate.of(2022, 1, 1);
+        var transaction = new Transaction(desc, transactionDate, TransactionType.LIFEINSURANCEEXPENSE);
+        transaction.setAccKey(giroKey);
+        transaction.setBudgetKey(bgtKey);
+        transaction.setInsuranceKey(lifeinsurranceKey);
+        transaction.setValue(100.0);
+
+        Event creatEvent = new Event(Event.Type.CREATE, transaction.hashCode(), transaction);
+        extractCashflowsProcessor.accept(creatEvent);
+
+        final List<String> messages = getMessages("extractedCashflows-out-0");
+
+
+        var keyList = new ArrayList<String>();
+        keyList.add(bgtKey);
+        keyList.add(giroKey);
+        keyList.add(lifeinsurranceKey);
+        assertEquals(3, messages.size());
+        JsonHelper jsonHelper = new JsonHelper();
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(1))).get("data"));
+        compareCashflowEvent(keyList, desc, transactionDate, -100.0, (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(2))).get("data"));
     }
 
     private void compareCashflowEvent(ArrayList<String> keyList, String desc, LocalDate transactionDate, double value, LinkedHashMap data) {
