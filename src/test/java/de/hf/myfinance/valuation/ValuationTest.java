@@ -850,4 +850,38 @@ public class ValuationTest  extends EventProcessorTestBase {
         assertEquals(200.0, eqcurve.get("2022-12-02"));
     }
 
+    @Test
+    void kryptoValuation() {
+
+        var entity = new Instrument(kryptoKey, kryptoDesc, InstrumentType.KRYPTO, true);
+        var creatEvent = new Event(Event.Type.CREATE, kryptoKey, entity);
+        saveInstrumentProcessor.accept(creatEvent);
+
+
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(1, messages.size());
+
+        var prices = new EndOfDayPrices();
+        prices.setInstrumentBusinesskey(kryptoKey);
+        var pricemap = new HashMap<LocalDate, EndOfDayPrice>();
+        var price = new EndOfDayPrice(100, "EUR@13");
+        pricemap.put(LocalDate.of(2022,12,1), price);
+        var pice2 = new EndOfDayPrice(200, "EUR@13");
+        pricemap.put(LocalDate.of(2022,12,2), pice2);
+        prices.setPrices(pricemap);
+        creatEvent = new Event(Event.Type.CREATE, prices.getInstrumentBusinesskey(), prices);
+        saveMarketDataProcessor.accept(creatEvent);
+        var valuationEvent = new Event(Event.Type.START, kryptoKey, kryptoKey);
+        valuationProcessor.accept(valuationEvent);
+
+
+        messages = getMessages("valueCurveCalculated-out-0");
+        assertEquals(1, messages.size());
+        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+
+        var eqcurve = (LinkedHashMap) data.get("valueCurve");
+        assertEquals(100.0, eqcurve.get("2022-12-01"));
+        assertEquals(200.0, eqcurve.get("2022-12-02"));
+    }
+
 }

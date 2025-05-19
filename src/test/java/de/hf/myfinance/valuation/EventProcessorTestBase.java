@@ -150,6 +150,8 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     String fondKey = isin.toUpperCase()+"@15";
     String bondDesc = "newBond";
     String bondKey = isin.toUpperCase()+"@18";
+    String kryptoDesc = "newKrypto";
+    String kryptoKey = isin.toUpperCase()+"@23";
 
 
     @BeforeEach
