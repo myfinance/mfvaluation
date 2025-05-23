@@ -62,7 +62,8 @@ public class PositionValueHandler extends AbsCurveHandler{
             
             positionCurve.getValueCurve().entrySet().forEach(entry -> {
                 var instrumentValue = AbsValueHandler.extractValueFromCurve(priceCurve, entry.getKey());
-                positionValueCurve.put(entry.getKey(), entry.getValue()*instrumentValue);
+                var positionValue  = round(entry.getValue()*instrumentValue, 2);
+                positionValueCurve.put(entry.getKey(), positionValue);
             });
             var currentDate = positionCurve.getValueCurve().lastKey();
             var currentPosition = positionCurve.getValueCurve().get(currentDate);

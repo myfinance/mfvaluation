@@ -1,5 +1,7 @@
 package de.hf.myfinance.valuation.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +59,13 @@ public class AbsCurveHandler {
         return lastEntry.getValue();
     }
 
+    public double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
 
     /**
      * builds a Curve from the given ValuePerDateMap. The Curve starts with Value 0 before the first Date with a Value and sets a Value for every Day till the Date of the last change of the Value
@@ -81,7 +90,7 @@ public class AbsCurveHandler {
             lastDate=nextExistingDate.plusDays(1);
             var currentValue = valuePerDateMap.get(nextExistingDate);
             value += currentValue;
-            curve.put(nextExistingDate, value);
+            curve.put(nextExistingDate, round(value, 6));
         }
 
         return Mono.just(curve);

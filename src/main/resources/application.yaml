@@ -69,35 +69,35 @@ spring.cloud.stream:
   bindings.valuationDataChanged-out-0:
     destination: valuationDataChanged
     producer:
-      required-groups: valuationDataChangedAuditGroup
+      required-groups: valuationGroup
   bindings.extractedCashflows-out-0:
     destination: extractedCashflows
     producer:
-      required-groups: extractedCashflowsAuditGroup
+      required-groups: saveCashflow4ValuationGroup
   bindings.valueCurveCalculated-out-0:
     destination: valueCurveCalculated
     producer:
-      required-groups: valueCurveCalculatedAuditGroup
+      required-groups: saveValueCurveGroup
   bindings.extractedTrade-out-0:
     destination: extractedTrade
     producer:
-      required-groups: extractedTradeAuditGroup   
+      required-groups: saveTradeGroup   
   bindings.tradeSaved-out-0:
     destination: tradeSavedForPositionBuilding
     producer:
-      required-groups: tradeSavedForPositionBuildingAuditGroup 
+      required-groups: calcPositionGroup 
   bindings.positionBuilded-out-0:
     destination: positionBuilded
     producer:
-      required-groups: positionBuildedAuditGroup  
+      required-groups: savePostionGroup  
   bindings.positionSaved-out-0:
     destination: positionSaved
     producer:
-      required-groups: positionSavedAuditGroup   
+      required-groups: calcPositionValueGroup   
   bindings.positionValueCalculated-out-0:
     destination: positionValueCalculated
     producer:
-      required-groups: positionValueCalculatedAuditGroup                          
+      required-groups: savePositionValueGroup                          
  
 
 spring.rabbitmq:
