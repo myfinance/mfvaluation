@@ -14,4 +14,5 @@ public interface PositionRepository  extends ReactiveCrudRepository<PositionEnti
     Mono<Long> deleteByPositionKey(PositionKey positionKey);
 
     Flux<PositionEntity> findByPositionKey_DepotBusinessKeyIn(List<String> depotBusinessKeys);
+    Flux<PositionEntity> findByPositionKey_SecurityBusinessKey(String securityBusinessKey);
 }

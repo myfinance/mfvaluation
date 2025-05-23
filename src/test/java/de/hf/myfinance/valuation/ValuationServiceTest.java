@@ -10,7 +10,6 @@ import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.myfinance.valuation.service.ValuationService;
 import reactor.core.publisher.Flux;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,10 +34,6 @@ public class ValuationServiceTest extends EventProcessorTestBase {
     @Autowired
     ValuationService valuationService;
 
-    @BeforeEach
-    void setupDb() {
-        valueCurveRepository.deleteAll().block();
-    }
 
     @Test
     void getValueCurveAllDatesAvailable() {

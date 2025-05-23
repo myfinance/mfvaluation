@@ -54,12 +54,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         expectedCurve.put(datebetweeenTrades, 20.0);
         expectedCurve.put(secTradeDate, 10.0);
 
-        var position = new ValueCurve();
-        position.setInstrumentBusinesskey(eqKey);
-        position.setParentBusinesskey(depotKey);
-        position.setValueCurve(positionCurve);
-
-        var creatEvent = new Event(Event.Type.START, eqKey, position);
+        var creatEvent = new Event(Event.Type.START, eqKey, depotKey);
         positionValueProcessor.accept(creatEvent);
 
         var messages = getMessages(positionValueCalculatedBindingName);
@@ -108,12 +103,8 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         expectedCurve.put(datebetweeenTrades, 20.0);
         expectedCurve.put(secTradeDate, 10.0);
 
-        var position = new ValueCurve();
-        position.setInstrumentBusinesskey(eqKey);
-        position.setParentBusinesskey(depotKey);
-        position.setValueCurve(positionCurve);
 
-        var creatEvent = new Event(Event.Type.START, eqKey, position);
+        var creatEvent = new Event(Event.Type.START, eqKey, depotKey);
         positionValueProcessor.accept(creatEvent);
 
         var messages = getMessages(positionValueCalculatedBindingName);
@@ -168,12 +159,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         expectedCurve.put(dayAftersecTradeDate, 10.0);
         expectedCurve.put(secDayAftersecTradeDate, 5.0);
 
-        var position = new ValueCurve();
-        position.setInstrumentBusinesskey(eqKey);
-        position.setParentBusinesskey(depotKey);
-        position.setValueCurve(positionCurve);
-
-        var creatEvent = new Event(Event.Type.START, eqKey, position);
+        var creatEvent = new Event(Event.Type.START, eqKey, depotKey);
         positionValueProcessor.accept(creatEvent);
 
         var messages = getMessages(positionValueCalculatedBindingName);

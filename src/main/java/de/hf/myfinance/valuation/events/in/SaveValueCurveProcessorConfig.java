@@ -5,12 +5,16 @@ import de.hf.framework.audit.AuditType;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
+import de.hf.myfinance.valuation.events.out.PositionSavedEventHandler;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
+import de.hf.myfinance.valuation.persistence.DataReader;
 import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
 import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
@@ -22,14 +26,18 @@ public class SaveValueCurveProcessorConfig  {
     private final ValueCurveRepository valueCurveRepository;
     private final ValueCurveMapper valueCurveMapper;
     private final ValuationEventHandler valuationEventHandler;
+    private final DataReader reader;
+    private final PositionSavedEventHandler positionSavedEventHandler;
     protected static final String AUDIT_MSG_TYPE="SaveCashFlowProcessor_Event";
 
-    public SaveValueCurveProcessorConfig( AuditService auditService, ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper, ValuationEventHandler valuationEventHandler) {
+    public SaveValueCurveProcessorConfig( AuditService auditService, ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper, ValuationEventHandler valuationEventHandler, DataReader reader, PositionSavedEventHandler positionSavedEventHandler) {
 
         this.auditService = auditService;
         this.valueCurveRepository = valueCurveRepository;
         this.valueCurveMapper = valueCurveMapper;
         this.valuationEventHandler = valuationEventHandler;
+        this.reader = reader;
+        this.positionSavedEventHandler=positionSavedEventHandler;
     }
 
     @Bean
@@ -59,7 +67,12 @@ public class SaveValueCurveProcessorConfig  {
                                 if(e.getLinkedInstrumentKey()!=null && !e.getLinkedInstrumentKey().isEmpty()){
                                     valuationEventHandler.sendValuationEvent(e.getLinkedInstrumentKey());
                                 }
-                                return Mono.just("done");
+                                return reader.findPositonBySecurityKey(e.getInstrumentBusinesskey()).collectList().flatMap(positionList->{
+                                    positionList.stream().forEach(position->{
+                                        positionSavedEventHandler.sendPositionSavedEvent(position.getInstrumentBusinesskey(),position.getParentBusinesskey());
+                                    });
+                                    return Mono.just("done");
+                                });
                             }).block();
                     break;
 

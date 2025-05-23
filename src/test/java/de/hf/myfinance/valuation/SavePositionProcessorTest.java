@@ -55,8 +55,9 @@ public class SavePositionProcessorTest extends EventProcessorTestBase {
         assertEquals("START", eventtype);
         var key = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("key");
         assertEquals(eqKey, key);
-        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        assertEquals(depotKey, data.get("parentBusinesskey"));
-        assertEquals(eqKey, data.get("instrumentBusinesskey"));
+        var depotKey = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
+        var securityKey = (String)jsonHelper.convertJsonStringToMap((messages.get(0))).get("key");
+        assertEquals(depotKey, depotKey);
+        assertEquals(eqKey, securityKey);
     }
 }

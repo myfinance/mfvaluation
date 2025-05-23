@@ -47,7 +47,7 @@ public class SavePositionProcessorConfig {
                             return positionRepository.save(p);
                         })
                         .flatMap(e -> {
-                            positionSavedEventHandler.sendPositionSavedEvent(positionCurve);
+                            positionSavedEventHandler.sendPositionSavedEvent(e.getPositionKey().getSecurityBusinessKey(),e.getPositionKey().getDepotBusinessKey());
                             return Mono.just("done");
                         }).block();
                         break;

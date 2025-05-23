@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
-import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.service.ValueHandlerFactory;
 
 @Configuration
@@ -24,15 +23,16 @@ public class PositionValueProcessorConfig {
     }
 
     @Bean
-    public Consumer<Event<String, ValueCurve>> positionValueProcessor() {
+    public Consumer<Event<String, String>> positionValueProcessor() {
         return event -> {
             auditService.saveMessage("Process message in PositionValueProcessorConfig created at:" + event.getEventCreatedAt(), Severity.DEBUG, AUDIT_MSG_TYPE);
-            var positionCurve = event.getData();
-            auditService.saveMessage("valuate positions for id=" + positionCurve.getInstrumentBusinesskey(), Severity.DEBUG, AUDIT_MSG_TYPE);
+            var securityId = event.getKey();
+            var depotId = event.getData();
+            auditService.saveMessage("valuate positions for id=" + securityId, Severity.DEBUG, AUDIT_MSG_TYPE);
             switch (event.getEventType()) {
 
                 case START:
-                    valueHandlerFactory.getPositionHandler(positionCurve.getParentBusinesskey(), positionCurve.getInstrumentBusinesskey()).calcPositionValueCurve().block();
+                    valueHandlerFactory.getPositionHandler(depotId, securityId).calcPositionValueCurve().block();
                     break;
 
                 default:

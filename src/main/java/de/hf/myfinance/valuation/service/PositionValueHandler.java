@@ -71,7 +71,8 @@ public class PositionValueHandler extends AbsCurveHandler{
                 currentDate=currentDate.plusDays(1);
                 var lastPriceDay = priceCurve.lastKey();
                 while(!currentDate.isAfter(lastPriceDay)){
-                    positionValueCurve.put(currentDate, currentPosition*priceCurve.get(currentDate));
+                    var price = AbsValueHandler.extractValueFromCurve(priceCurve, currentDate);
+                    positionValueCurve.put(currentDate, currentPosition*price);
                     currentDate = currentDate.plusDays(1);
                 }
             }

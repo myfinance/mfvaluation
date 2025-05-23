@@ -129,6 +129,11 @@ public class DataReaderImpl implements DataReader{
         return positionValueRepository.findByPositionKeyDepotBusinessKey(depotBusinessKey).map(this::positionValueToValueCurve);
     }
 
+    @Override
+    public Flux<ValueCurve> findPositonBySecurityKey(String securityKey){
+        return positionRepository.findByPositionKey_SecurityBusinessKey(securityKey).map(this::positionToValueCurve);
+    }
+
     private ValueCurve positionValueToValueCurve(PositionValueEntity positionValue){
         var valueCurve = new ValueCurve(positionValue.getPositionKey().getSecurityBusinessKey());
         valueCurve.setParentBusinesskey(positionValue.getPositionKey().getDepotBusinessKey());

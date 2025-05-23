@@ -93,7 +93,7 @@ public class EventProcessorTestBase extends MongoDbTestBase {
 
     @Autowired
     @Qualifier("positionValueProcessor")
-    protected Consumer<Event<String, ValueCurve>> positionValueProcessor;
+    protected Consumer<Event<String, String>> positionValueProcessor;
 
     @Autowired
     @Qualifier("savePositionValueProcessor")
