@@ -148,9 +148,6 @@ public class ValuationService {
             var bgtCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getBudgetKey(), value);
             bgtCashflow.setIsInterest(true);
             cashflows.add(bgtCashflow);
-            var securityCashflow = new Cashflow(transaction.getDescription(),transaction.getTransactiondate(),transaction.getSecurityBusinessKey(), value);
-            securityCashflow.setIsInterest(true);
-            cashflows.add(securityCashflow);
         }
         return cashflows;
     }
