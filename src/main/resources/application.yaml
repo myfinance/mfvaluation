@@ -7,8 +7,8 @@ env:
 
 logging:
   level:
-    root: INFO
-    de.hf.myfinance: DEBUG
+    root: ERROR
+    de.hf.myfinance: ERROR
 
 springdoc:
   swagger-ui.path: /openapi/swagger-ui.html
