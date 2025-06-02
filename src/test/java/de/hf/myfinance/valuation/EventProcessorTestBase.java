@@ -13,6 +13,7 @@ import de.hf.myfinance.valuation.persistence.repositories.PositionRepository;
 import de.hf.myfinance.valuation.persistence.repositories.PositionValueRepository;
 import de.hf.myfinance.valuation.persistence.repositories.TradeRepository;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
+import de.hf.myfinance.valuation.service.MessageDuplicationFilter;
 import de.hf.testhelper.JsonHelper;
 import de.hf.testhelper.MongoDbTestBase;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +78,7 @@ public class EventProcessorTestBase extends MongoDbTestBase {
 
     @Autowired
     @Qualifier("valuationProcessor")
-    protected Consumer<Event<String, Instrument>> valuationProcessor;
+    protected Consumer<Event<String, String>> valuationProcessor;
 
     @Autowired
     @Qualifier("saveMarketDataProcessor")
@@ -99,9 +100,13 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     @Qualifier("savePositionValueProcessor")
     protected Consumer<Event<String, ValueCurve>> savePositionValueProcessor;
 
+    @Autowired
+    protected MessageDuplicationFilter messageDuplicationFilter;
+
     String instrumentProcessorBindingName = "saveInstrumentProcessor-in-0";
     String cashflowProcessorBindingName = "saveCashflowsProcessor-in-0";
     String valuationDataChangedBindingName = "valuationDataChanged-out-0";
+    String valueCurveCalculatedBindingName = "valueCurveCalculated-out-0";
     String positionSavedBindingName = "positionSaved-out-0";
     String positionValueCalculatedBindingName = "positionValueCalculated-out-0";
 
@@ -168,6 +173,9 @@ public class EventProcessorTestBase extends MongoDbTestBase {
         purgeMessages(valuationDataChangedBindingName);
         purgeMessages(positionSavedBindingName);
         purgeMessages(positionValueCalculatedBindingName);
+        purgeMessages(valueCurveCalculatedBindingName);
+        messageDuplicationFilter.clear();
+
     }
 
     protected void purgeMessages(String bindingName) {

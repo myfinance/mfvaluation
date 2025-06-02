@@ -20,5 +20,13 @@ public class MessageDuplicationFilter {
     public void processKey(String key) {
         keys.remove(key);
     }
+
+    public void clear() {
+        keys.clear();
+    }
+
+    public List<String> getKeys(){
+        return keys;
+    }
     
 }

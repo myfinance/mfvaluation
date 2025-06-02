@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.*;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValuationTest  extends EventProcessorTestBase {
@@ -171,6 +172,7 @@ public class ValuationTest  extends EventProcessorTestBase {
         position.setParentBusinesskey(depotKey);
         position.setValueCurve(positionCurve);
         creatEvent = new Event(Event.Type.CREATE, depotKey, position);
+        messageDuplicationFilter.clear();
         savePositionValueProcessor.accept(creatEvent);
         messages = getMessages("valuationDataChanged-out-0");
         assertEquals(1, messages.size());
@@ -183,6 +185,7 @@ public class ValuationTest  extends EventProcessorTestBase {
         position.setParentBusinesskey(depotKey);
         position.setValueCurve(positionCurve);
         creatEvent = new Event(Event.Type.CREATE, depotKey, position);
+        messageDuplicationFilter.clear();
         savePositionValueProcessor.accept(creatEvent);
         messages = getMessages("valuationDataChanged-out-0");
         assertEquals(1, messages.size());
@@ -201,6 +204,59 @@ public class ValuationTest  extends EventProcessorTestBase {
         assertEquals(10.0, curve.get(datebetweeenTrades.toString()));
         assertEquals(20.0, curve.get(secTradeDate.toString()));
 
+    }
+
+    @Test
+    void messageDuplicationFilterTest() {
+
+        var depotEntity = new Instrument(depotKey, depotDesc, InstrumentType.DEPOT, true);
+        var creatEvent = new Event(Event.Type.CREATE, depotKey, depotEntity);
+        saveInstrumentProcessor.accept(creatEvent);
+        assertTrue(messageDuplicationFilter.isAlreadyQueued(depotKey));
+
+        var eq = new Instrument(eqKey, eqDesc, InstrumentType.EQUITY, true);
+        creatEvent = new Event(Event.Type.CREATE, eqKey, eq);
+        saveInstrumentProcessor.accept(creatEvent);
+        assertTrue(messageDuplicationFilter.isAlreadyQueued(eqKey));
+        assertEquals(2, messageDuplicationFilter.getKeys().size());
+
+        String eqDesc2= "anEquity2";
+        String eqKey2 = eqDesc2 + "@14";
+        var eq2 = new Instrument(eqKey2, eqDesc2, InstrumentType.EQUITY, true);
+        creatEvent = new Event(Event.Type.CREATE, eqKey2, eq2);
+        saveInstrumentProcessor.accept(creatEvent);
+        assertTrue(messageDuplicationFilter.isAlreadyQueued(eqKey2));
+        assertEquals(3, messageDuplicationFilter.getKeys().size());
+
+        var datebeforFirstTrade = LocalDate.of(2021, 12, 31);
+        var firstTradeDate = LocalDate.of(2022, 1, 1);
+        var datebetweeenTrades = LocalDate.of(2022, 1, 2);
+        var secTradeDate = LocalDate.of(2022, 1, 3);
+
+        var positionCurve = new TreeMap<LocalDate, Double>();
+        positionCurve.put(datebeforFirstTrade, 0.0);
+        positionCurve.put(firstTradeDate, 10.0);
+        ValueCurve position = new ValueCurve(eqKey);
+        position.setParentBusinesskey(depotKey);
+        position.setValueCurve(positionCurve);
+        creatEvent = new Event(Event.Type.CREATE, depotKey, position);
+        savePositionValueProcessor.accept(creatEvent);
+        assertEquals(3, messageDuplicationFilter.getKeys().size());
+
+        positionCurve = new TreeMap<LocalDate, Double>();
+        positionCurve.put(datebetweeenTrades, 0.0);
+        positionCurve.put(secTradeDate, 10.0);
+        position = new ValueCurve(eqKey2);
+        position.setParentBusinesskey(depotKey);
+        position.setValueCurve(positionCurve);
+        creatEvent = new Event(Event.Type.CREATE, depotKey, position);
+        savePositionValueProcessor.accept(creatEvent);
+
+        var valuationEvent = new Event(Event.Type.START, depotKey, depotKey);
+        valuationProcessor.accept(valuationEvent);
+         
+        var messages = getMessages("valuationDataChanged-out-0");
+        assertEquals(3, messages.size());
     }
 
     @Test
