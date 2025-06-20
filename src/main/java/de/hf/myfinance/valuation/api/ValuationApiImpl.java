@@ -53,4 +53,9 @@ public class ValuationApiImpl implements ValuationApi {
         return valuationService.getPositions(depots);
     }
 
+    @Override
+    public Mono<ValueCurve> recalcAndGetValueCurve(String businesskey) {
+        return valuationService.recalcAndGetValueCurve(businesskey);
+    }
+
 }

@@ -3,7 +3,6 @@ package de.hf.myfinance.valuation.events.in;
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
-import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.valuation.service.MessageDuplicationFilter;
 import de.hf.myfinance.valuation.service.ValueHandlerFactory;
 import org.springframework.context.annotation.Bean;

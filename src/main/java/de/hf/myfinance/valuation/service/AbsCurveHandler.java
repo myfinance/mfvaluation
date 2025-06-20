@@ -84,7 +84,7 @@ public class AbsCurveHandler {
 
             LocalDate nextExistingDate = iter.next();
             while(lastDate.isBefore(nextExistingDate)){
-                curve.put(lastDate, value);
+                curve.put(lastDate, round(value, 6));
                 lastDate=lastDate.plusDays(1);
             }
             lastDate=nextExistingDate.plusDays(1);

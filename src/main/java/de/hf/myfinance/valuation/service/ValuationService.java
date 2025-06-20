@@ -28,10 +28,12 @@ import java.util.stream.Collectors;
 public class ValuationService {
     private final DataReader dataReader;
     private final AuditService auditService;
+    private final ValueHandlerFactory valueHandlerFactory;
 
-    public ValuationService(DataReader dataReader, AuditService auditService) {
+    public ValuationService(DataReader dataReader, AuditService auditService, ValueHandlerFactory valueHandlerFactory) {
         this.dataReader = dataReader;
         this.auditService = auditService;
+        this.valueHandlerFactory = valueHandlerFactory;
     }
 
     public Mono<Double> getValue(String businesskey, LocalDate date) {
@@ -243,4 +245,7 @@ public class ValuationService {
         return position;
     }
 
+    public Mono<ValueCurve> recalcAndGetValueCurve(String businesskey){
+        return valueHandlerFactory.getValueHandler(businesskey).flatMap(i->i.calcValueCurve()).then(this.getValueCurve(businesskey, LocalDate.of(2012,1,1), LocalDate.now()) );
+    }
 }
