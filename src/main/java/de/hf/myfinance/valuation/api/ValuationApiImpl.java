@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ValuationApiImpl implements ValuationApi {
@@ -56,6 +57,11 @@ public class ValuationApiImpl implements ValuationApi {
     @Override
     public Mono<ValueCurve> recalcAndGetValueCurve(String businesskey) {
         return valuationService.recalcAndGetValueCurve(businesskey);
+    }
+
+    @Override
+    public Mono<Map<String, Double>> getLinkedValues(String businesskey, LocalDate valueDate) {
+        return valuationService.getLinkedValues(businesskey,valueDate);
     }
 
 }

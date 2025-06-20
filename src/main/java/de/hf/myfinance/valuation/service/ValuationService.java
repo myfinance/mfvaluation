@@ -248,4 +248,20 @@ public class ValuationService {
     public Mono<ValueCurve> recalcAndGetValueCurve(String businesskey){
         return valueHandlerFactory.getValueHandler(businesskey).flatMap(i->i.calcValueCurve()).then(this.getValueCurve(businesskey, LocalDate.of(2012,1,1), LocalDate.now()) );
     }
+
+    public Mono<Map<String,Double>> getLinkedValues(String businesskey, LocalDate valueDate){
+        return dataReader.findByValueBudget(businesskey)                
+            .flatMap(i->{
+                return dataReader.findValueCurveByInstrumentBusinesskey(i.getBusinesskey());
+            })
+            .flatMap(c -> fillCurveGaps(c, valueDate, valueDate))
+            .collectList()
+            .flatMap(c->{
+                var valueMap = new HashMap<String,Double>();
+                c.forEach(value->{
+                    valueMap.put(value.getInstrumentBusinesskey(), value.getValueCurve().get(valueDate));
+                });
+                return Mono.just(valueMap);
+            });
+    }
 }
