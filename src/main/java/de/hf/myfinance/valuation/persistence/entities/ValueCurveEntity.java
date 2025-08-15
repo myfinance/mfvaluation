@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Document(collection = "curves")
@@ -19,6 +20,7 @@ public class ValueCurveEntity {
     private Map<LocalDate, Double> valueCurve;
     private String parentBusinesskey;
     private String linkedInstrumentKey;
+    private LocalDateTime lastUpdateTs;
 
     @Indexed(unique = true)
     private String instrumentBusinesskey;
@@ -63,5 +65,12 @@ public class ValueCurveEntity {
 
     public void setLinkedInstrumentKey(String linkedInstrumentKey) {
         this.linkedInstrumentKey = linkedInstrumentKey;
+    }
+
+    public LocalDateTime getLastUpdateTs() {
+        return lastUpdateTs;
+    }
+    public void setLastUpdateTs(LocalDateTime lastUpdateTs) {
+        this.lastUpdateTs = lastUpdateTs;
     }
 }

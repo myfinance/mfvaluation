@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,11 @@ public class ValuationApiImpl implements ValuationApi {
     @Override
     public Mono<Double> getValue(String businesskey, LocalDate date) {
         return valuationService.getValue(businesskey, date);
+    }
+
+    @Override
+    public Mono<LocalDateTime> getValueTs(String businesskey) {
+        return valuationService.getValueTs(businesskey);
     }
 
     @Override

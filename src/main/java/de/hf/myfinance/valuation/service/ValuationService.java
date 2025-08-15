@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +40,13 @@ public class ValuationService {
     public Mono<Double> getValue(String businesskey, LocalDate date) {
         return dataReader.findValueCurveByInstrumentBusinesskey(businesskey).flatMap(c -> extractValueFromCurve(c, date));
     }
+
+    public Mono<LocalDateTime> getValueTs(String businesskey) {
+        return dataReader.findValueCurveByInstrumentBusinesskey(businesskey).flatMap(c -> {
+            return Mono.just(c.getLastUpdateTs());
+        });
+    }
+
 
     public Flux<Map<String,Double>> getValues(List<String> businesskeys, LocalDate date) {
         return Flux.fromIterable(businesskeys).flatMap(b->{

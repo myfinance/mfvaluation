@@ -14,9 +14,9 @@ import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.function.Consumer;
 
 @Configuration
@@ -56,6 +56,7 @@ public class SaveValueCurveProcessorConfig  {
                                 e.setValueCurve(valueCurve.getValueCurve());
                                 e.setParentBusinesskey(valueCurve.getParentBusinesskey());
                                 e.setInstrumentBusinesskey(valueCurve.getInstrumentBusinesskey());
+                                e.setLastUpdateTs(LocalDateTime.now());
                                 return e;
                             })
                             .flatMap(e -> valueCurveRepository.save(e))
