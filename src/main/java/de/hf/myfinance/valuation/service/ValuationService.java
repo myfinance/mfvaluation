@@ -43,6 +43,7 @@ public class ValuationService {
 
     public Mono<LocalDateTime> getValueTs(String businesskey) {
         return dataReader.findValueCurveByInstrumentBusinesskey(businesskey).flatMap(c -> {
+            if(c.getLastUpdateTs()==null) return Mono.just(LocalDateTime.MIN);
             return Mono.just(c.getLastUpdateTs());
         });
     }
