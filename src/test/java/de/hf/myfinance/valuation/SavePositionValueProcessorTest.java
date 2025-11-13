@@ -2,6 +2,7 @@ package de.hf.myfinance.valuation;
 
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
+import de.hf.myfinance.valuation.persistence.entities.ValuationType;
 import de.hf.testhelper.JsonHelper;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +40,7 @@ public class SavePositionValueProcessorTest extends EventProcessorTestBase {
         assertEquals(1, positionValues.size());
         assertEquals(eqKey, positionValues.get(0).getPositionKey().getSecurityBusinessKey());
         assertEquals(depotKey, positionValues.get(0).getPositionKey().getDepotBusinessKey());
+        assertEquals(ValuationType.MARKETVALUE, positionValues.get(0).getPositionKey().getValuationType());
 
         var savedPositionValueCurve = positionValues.get(0).getPositionValueCurve();
         assertEquals(4, savedPositionValueCurve.size());

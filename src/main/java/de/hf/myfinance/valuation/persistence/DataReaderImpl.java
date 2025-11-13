@@ -7,6 +7,7 @@ import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
 import de.hf.myfinance.valuation.persistence.entities.PositionKey;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
 import de.hf.myfinance.valuation.persistence.entities.TradeEntity;
+import de.hf.myfinance.valuation.persistence.entities.ValuationType;
 import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
 import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
@@ -126,7 +127,7 @@ public class DataReaderImpl implements DataReader{
 
     @Override
     public Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey){
-        return positionValueRepository.findByPositionKeyDepotBusinessKey(depotBusinessKey).map(this::positionValueToValueCurve);
+        return positionValueRepository.findByPositionKeyDepotBusinessKey(depotBusinessKey, ValuationType.MARKETVALUE).map(this::positionValueToValueCurve);
     }
 
     @Override
@@ -153,6 +154,6 @@ public class DataReaderImpl implements DataReader{
 
     @Override
     public Flux<ValueCurve> findAllPostionValues(List<String> depots) {
-        return positionValueRepository.findByPositionKey_DepotBusinessKeyIn(depots).map(this::positionValueToValueCurve);
+        return positionValueRepository.findByPositionKey_DepotBusinessKeyIn(depots, ValuationType.MARKETVALUE).map(this::positionValueToValueCurve);
     }
 }
