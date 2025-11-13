@@ -8,7 +8,9 @@ import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
 import de.hf.framework.exceptions.MFException;
 import de.hf.myfinance.exception.MFMsgKey;
+import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Trade;
+import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.PositionBuildedEventHandler;
 import de.hf.myfinance.valuation.events.out.PositionValueCalculatedEventHandler;
@@ -45,23 +47,83 @@ public class PositionValueHandler extends AbsCurveHandler{
     }
 
     public Mono<Void> calcPositionValueCurve() {
-        return dataReader.findPositonByKey(depotId, securityId).flatMap(this::positionValueCurveCalculation).flatMap(this::sendPositionValueCalculatedEvent);
+        Mono<ValueCurve> positionCurveMono = dataReader.findPositonByKey(depotId, securityId);
+        Mono<ValueCurve> priceCurveMono = dataReader.findValueCurveByInstrumentBusinesskey(securityId);
+        Mono<List<Trade>> tradesMono = dataReader.findTradesByKey(depotId, securityId).collectList();
+        Mono<List<Cashflow>> cashflowsMono = dataReader.findAllCashflow4Instrument(securityId).collectList();
+
+        return Mono.zip(positionCurveMono, priceCurveMono, tradesMono, cashflowsMono)
+                .flatMapMany(tuple -> { // Changed to flatMapMany
+                    ValueCurve positionCurve = tuple.getT1();
+                    ValueCurve priceCurve = tuple.getT2();
+                    List<Trade> trades = tuple.getT3();
+                    List<Cashflow> cashflows = tuple.getT4();
+                    return positionValueCurveCalculation(positionCurve, priceCurve, trades, cashflows);
+                })
+                .flatMap(this::sendPositionValueCalculatedEvent)
+                .then(); // Add .then() to convert Flux<Void> to Mono<Void>
     }
 
     protected Mono<TreeMap<LocalDate, Double>> positionCurveCalculation(List<Trade> trades) {
         return buildCurveFromValueMap(convert2TradeAmountPerDayMap(trades));
     }
 
-    protected Mono<TreeMap<LocalDate, Double>> positionValueCurveCalculation(ValueCurve positionCurve) {
-        return dataReader.findValueCurveByInstrumentBusinesskey(positionCurve.getInstrumentBusinesskey()).flatMap(v->{
+    protected Flux<ValueCurve> positionValueCurveCalculation(ValueCurve positionCurve, ValueCurve priceCurve, List<Trade> trades, List<Cashflow> cashflows) {
+            TreeMap<LocalDate, Double> staticValueCurve = new TreeMap<>();
+            TreeMap<LocalDate, Double> prudentValueCurve = new TreeMap<>();
+            TreeMap<LocalDate, Double> marketValueCurve = new TreeMap<>();
+            TreeMap<LocalDate, Double> indexValueCurve = new TreeMap<>();
+            
+            LocalDate startDate = positionCurve.getValueCurve().firstKey();
+            LocalDate endDate = LocalDate.now(); // Or priceCurve.getValueCurve().lastKey() if prices are not available for future
+
+            LocalDate currentDate = startDate;
+            while (!currentDate.isAfter(endDate)) {
+                double positionValue = AbsValueHandler.extractValueFromCurve(positionCurve.getValueCurve(), currentDate);
+                
+                // MARKETVALUE calculation
+                double currentPrice = AbsValueHandler.extractValueFromCurve(priceCurve.getValueCurve(), currentDate);
+                double marketValue = round(currentPrice * positionValue, 2);
+                marketValueCurve.put(currentDate, marketValue);
+
+                // Other ValuationType calculations will go here later
+
+                currentDate = currentDate.plusDays(1);
+            }
+            
+            ValueCurve marketValueCurveObject = new ValueCurve(securityId);
+            marketValueCurveObject.setValueCurve(marketValueCurve);
+            marketValueCurveObject.setParentBusinesskey(depotId);
+            marketValueCurveObject.setValuationType(ValuationType.MARKETVALUE);
+
+            // Create ValueCurve objects for other types (initially empty)
+            ValueCurve staticValueCurveObject = new ValueCurve(securityId);
+            staticValueCurveObject.setValueCurve(staticValueCurve);
+            staticValueCurveObject.setParentBusinesskey(depotId);
+            staticValueCurveObject.setValuationType(ValuationType.STATIC);
+
+            ValueCurve prudentValueCurveObject = new ValueCurve(securityId);
+            prudentValueCurveObject.setValueCurve(prudentValueCurve);
+            prudentValueCurveObject.setParentBusinesskey(depotId);
+            prudentValueCurveObject.setValuationType(ValuationType.PRUDENT);
+
+            ValueCurve indexValueCurveObject = new ValueCurve(securityId);
+            indexValueCurveObject.setValueCurve(indexValueCurve);
+            indexValueCurveObject.setParentBusinesskey(depotId);
+            indexValueCurveObject.setValuationType(ValuationType.INDEX);
+
+
+            return Flux.just(marketValueCurveObject, staticValueCurveObject, prudentValueCurveObject, indexValueCurveObject);
+    }
+
+        protected Mono<ValueCurve> oldpositionValueCurveCalculation(ValueCurve positionCurve, ValueCurve priceCurve, List<Trade> trades, List<Cashflow> cashflows) {
             var result = new ValueCurve();
             result.setInstrumentBusinesskey(positionCurve.getInstrumentBusinesskey());
             result.setParentBusinesskey(positionCurve.getParentBusinesskey());
             TreeMap<LocalDate, Double> positionValueCurve = new TreeMap<>();
-            var priceCurve = v.getValueCurve();
             
             positionCurve.getValueCurve().entrySet().forEach(entry -> {
-                var instrumentValue = AbsValueHandler.extractValueFromCurve(priceCurve, entry.getKey());
+                var instrumentValue = AbsValueHandler.extractValueFromCurve(priceCurve.getValueCurve(), entry.getKey());
                 var positionValue  = round(entry.getValue()*instrumentValue, 2);
                 positionValueCurve.put(entry.getKey(), positionValue);
             });
@@ -69,16 +131,19 @@ public class PositionValueHandler extends AbsCurveHandler{
             var currentPosition = positionCurve.getValueCurve().get(currentDate);
             if(currentPosition>0){
                 currentDate=currentDate.plusDays(1);
-                var lastPriceDay = priceCurve.lastKey();
+                var lastPriceDay = priceCurve.getValueCurve().lastKey();
                 while(!currentDate.isAfter(lastPriceDay)){
-                    var price = AbsValueHandler.extractValueFromCurve(priceCurve, currentDate);
+                    var price = AbsValueHandler.extractValueFromCurve(priceCurve.getValueCurve(), currentDate);
                     positionValueCurve.put(currentDate, currentPosition*price);
                     currentDate = currentDate.plusDays(1);
                 }
             }
+            var valueCurveObject = new ValueCurve(securityId);
+            valueCurveObject.setValueCurve(positionValueCurve);
+            valueCurveObject.setParentBusinesskey(depotId);
+            valueCurveObject.setValuationType(ValuationType.MARKETVALUE);
 
-            return Mono.just(positionValueCurve);
-        });
+            return Mono.just(valueCurveObject);
     }
 
     private TreeMap<LocalDate, Double> convert2TradeAmountPerDayMap(List<Trade> trades) {
@@ -102,12 +167,9 @@ public class PositionValueHandler extends AbsCurveHandler{
         return Mono.just("").then();
     }
 
-    protected Mono<Void> sendPositionValueCalculatedEvent(TreeMap<LocalDate, Double> curve) {
+    protected Mono<Void> sendPositionValueCalculatedEvent(ValueCurve curve) {
         auditService.saveMessage(" new positionValuecurve calculated for instrument: " + securityId + " and depot:"+depotId, Severity.INFO, AUDIT_MSG_TYPE);
-        var valueCurveObject = new ValueCurve(securityId);
-        valueCurveObject.setValueCurve(curve);
-        valueCurveObject.setParentBusinesskey(depotId);
-        positionValueCalculatedEventHandler.sendPositionValueCalculatedEvent(valueCurveObject);
+        positionValueCalculatedEventHandler.sendPositionValueCalculatedEvent(curve);
         return Mono.just("").then();
     }
     
