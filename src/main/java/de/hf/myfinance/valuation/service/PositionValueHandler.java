@@ -94,16 +94,13 @@ public class PositionValueHandler extends AbsCurveHandler{
                 marketValueCurve.put(loopDate, marketValue);
 
                 // STATIC calculation
-                
                 List<Trade> tradesOnDay = trades.stream().filter(t -> t.getTradeDate().equals(loopDate)).collect(Collectors.toList());
                 double totalTradeAmountOnDay = tradesOnDay.stream().mapToDouble(Trade::getAmount).sum();
                 double totalCostToday = currentPrice * totalTradeAmountOnDay;
                 if(totalTradeAmountOnDay<0){
                     totalCostToday = avgPrice * totalTradeAmountOnDay;
                 }
-                
                 staticValuePreviousDay = staticValuePreviousDay + totalCostToday;
-                
                 if (positionAmountToday == 0) {
                     staticValueCurve.put(loopDate, 0.0);
                 } else {
@@ -113,6 +110,13 @@ public class PositionValueHandler extends AbsCurveHandler{
                     avgPrice = round(staticValuePreviousDay/positionAmountToday, 2);
                 }
                 currentDate = currentDate.plusDays(1);
+
+                // PRUDENT calculation
+                double prudentValue = round(currentPrice * positionAmountToday, 2);
+                if(prudentValue>staticValuePreviousDay){
+                    prudentValue = round(staticValuePreviousDay+(prudentValue-staticValuePreviousDay)*0.7,2);
+                }
+                prudentValueCurve.put(loopDate, prudentValue);
             }
             
             ValueCurve marketValueCurveObject = new ValueCurve(securityId);
