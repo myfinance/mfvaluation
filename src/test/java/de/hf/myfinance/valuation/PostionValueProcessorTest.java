@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import de.hf.myfinance.event.Event;
-import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
+import de.hf.myfinance.valuation.persistence.entities.TradeEntity;
 import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
 import de.hf.testhelper.JsonHelper;
 
@@ -47,31 +47,66 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         instrumentValueCurve.setValueCurve(instrumentCurve);
         valueCurveRepository.save(instrumentValueCurve).block();
 
+        tradeRepository.save(new TradeEntity(depotKey, eqKey, 10.0, firstTradeDate)).block();
+        tradeRepository.save(new TradeEntity(depotKey, eqKey, -5.0, secTradeDate)).block();
 
-        var expectedCurve = new TreeMap<LocalDate, Double>();
-        expectedCurve.put(datebeforFirstTrade, 0.0);
-        expectedCurve.put(firstTradeDate, 10.0);
-        expectedCurve.put(datebetweeenTrades, 20.0);
-        expectedCurve.put(secTradeDate, 10.0);
+
+        var expectedMarketValueCurve = new TreeMap<LocalDate, Double>();
+        expectedMarketValueCurve.put(datebeforFirstTrade, 0.0);
+        expectedMarketValueCurve.put(firstTradeDate, 10.0);
+        expectedMarketValueCurve.put(datebetweeenTrades, 20.0);
+        expectedMarketValueCurve.put(secTradeDate, 10.0);
+
+        var expectedStaticValueCurve = new TreeMap<LocalDate, Double>();
+        expectedStaticValueCurve.put(datebeforFirstTrade, 0.0);
+        expectedStaticValueCurve.put(firstTradeDate, 10.0);
+        expectedStaticValueCurve.put(datebetweeenTrades, 10.0);
+        expectedStaticValueCurve.put(secTradeDate, 5.0);
 
         var creatEvent = new Event(Event.Type.START, eqKey, depotKey);
         positionValueProcessor.accept(creatEvent);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         var messages = getMessages(positionValueCalculatedBindingName);
-        assertEquals(1, messages.size());
-        JsonHelper jsonHelper = new JsonHelper();
-        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        var newCurve = (LinkedHashMap) data.get("valueCurve");
-        assertEquals(4, newCurve.size());
-        assertEquals(expectedCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
-        assertEquals(expectedCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
-        assertEquals(expectedCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
-        assertEquals(expectedCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
-        var instrumentBusinesskey = (String) data.get("instrumentBusinesskey");
-        assertEquals(eqKey, instrumentBusinesskey);
-        var parentBusinesskey = (String) data.get("parentBusinesskey");
-        assertEquals(depotKey, parentBusinesskey);
+        assertEquals(4, messages.size()); // Changed from 1 to 4
 
+        JsonHelper jsonHelper = new JsonHelper();
+        for (String message : messages) {
+            var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap(message).get("data");
+            var valuationType = (String) data.get("valuationType");
+            var newCurve = (LinkedHashMap) data.get("valueCurve");
+
+            switch (valuationType) {
+                case "MARKETVALUE":
+                    assertEquals(expectedMarketValueCurve.size(), newCurve.size());
+                    assertEquals(expectedMarketValueCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
+                    assertEquals(expectedMarketValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
+                    assertEquals(expectedMarketValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
+                    assertEquals(expectedMarketValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
+                    break;
+                case "STATIC":
+                    assertEquals(expectedStaticValueCurve.size(), newCurve.size());
+                    assertEquals(expectedStaticValueCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
+                    assertEquals(expectedStaticValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
+                    assertEquals(expectedStaticValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
+                    assertEquals(expectedStaticValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
+                    break;
+                case "PRUDENT":
+                case "INDEX":
+                    break;
+                default:
+                    // Handle unexpected valuation types if necessary
+                    break;
+            }
+            var instrumentBusinesskey = (String) data.get("instrumentBusinesskey");
+            assertEquals(eqKey, instrumentBusinesskey);
+            var parentBusinesskey = (String) data.get("parentBusinesskey");
+            assertEquals(depotKey, parentBusinesskey);
+        }
     }
 
     @Test
@@ -96,31 +131,66 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         instrumentValueCurve.setValueCurve(instrumentCurve);
         valueCurveRepository.save(instrumentValueCurve).block();
 
+        tradeRepository.save(new TradeEntity(depotKey, eqKey, 10.0, firstTradeDate)).block();
+        tradeRepository.save(new TradeEntity(depotKey, eqKey, -5.0, secTradeDate)).block();
 
-        var expectedCurve = new TreeMap<LocalDate, Double>();
-        expectedCurve.put(datebeforFirstTrade, 0.0);
-        expectedCurve.put(firstTradeDate, 20.0);
-        expectedCurve.put(datebetweeenTrades, 20.0);
-        expectedCurve.put(secTradeDate, 10.0);
+        var expectedMarketValueCurve = new TreeMap<LocalDate, Double>();
+        expectedMarketValueCurve.put(datebeforFirstTrade, 0.0);
+        expectedMarketValueCurve.put(firstTradeDate, 20.0);
+        expectedMarketValueCurve.put(datebetweeenTrades, 20.0);
+        expectedMarketValueCurve.put(secTradeDate, 10.0);
+
+        var expectedStaticValueCurve = new TreeMap<LocalDate, Double>();
+        expectedStaticValueCurve.put(datebeforFirstTrade, 0.0);
+        expectedStaticValueCurve.put(firstTradeDate, 20.0);
+        expectedStaticValueCurve.put(datebetweeenTrades, 20.0);
+        expectedStaticValueCurve.put(secTradeDate, 10.0);
 
 
         var creatEvent = new Event(Event.Type.START, eqKey, depotKey);
         positionValueProcessor.accept(creatEvent);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         var messages = getMessages(positionValueCalculatedBindingName);
-        assertEquals(1, messages.size());
+        assertEquals(4, messages.size()); // Changed from 1 to 4
+
         JsonHelper jsonHelper = new JsonHelper();
-        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        var newCurve = (LinkedHashMap) data.get("valueCurve");
-        assertEquals(4, newCurve.size());
-        assertEquals(expectedCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
-        assertEquals(expectedCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
-        assertEquals(expectedCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
-        assertEquals(expectedCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
-        var instrumentBusinesskey = (String) data.get("instrumentBusinesskey");
-        assertEquals(eqKey, instrumentBusinesskey);
-        var parentBusinesskey = (String) data.get("parentBusinesskey");
-        assertEquals(depotKey, parentBusinesskey);
+        for (String message : messages) {
+            var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap(message).get("data");
+            var valuationType = (String) data.get("valuationType");
+            var newCurve = (LinkedHashMap) data.get("valueCurve");
+
+            switch (valuationType) {
+                case "MARKETVALUE":
+                    assertEquals(expectedMarketValueCurve.size(), newCurve.size());
+                    assertEquals(expectedMarketValueCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
+                    assertEquals(expectedMarketValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
+                    assertEquals(expectedMarketValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
+                    assertEquals(expectedMarketValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
+                    break;
+                case "STATIC":
+                    assertEquals(expectedStaticValueCurve.size(), newCurve.size());
+                    assertEquals(expectedStaticValueCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
+                    assertEquals(expectedStaticValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
+                    assertEquals(expectedStaticValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
+                    assertEquals(expectedStaticValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
+                    break;
+                case "PRUDENT":
+                case "INDEX":
+                    break;
+                default:
+                    // Handle unexpected valuation types if necessary
+                    break;
+            }
+            var instrumentBusinesskey = (String) data.get("instrumentBusinesskey");
+            assertEquals(eqKey, instrumentBusinesskey);
+            var parentBusinesskey = (String) data.get("parentBusinesskey");
+            assertEquals(depotKey, parentBusinesskey);
+        }
     }
 
     @Test
@@ -139,6 +209,9 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         positionCurve.put(secTradeDate, 5.0);
         positionRepository.save(new PositionEntity(depotKey, eqKey, positionCurve)).block();
 
+        tradeRepository.save(new TradeEntity(depotKey, eqKey, 10.0, firstTradeDate)).block();
+        tradeRepository.save(new TradeEntity(depotKey, eqKey, -5.0, secTradeDate)).block();
+
         var instrumentCurve = new TreeMap<LocalDate, Double>();
         instrumentCurve.put(datebetweeenTrades, 1.0);
         instrumentCurve.put(secTradeDate, 2.0);
@@ -151,33 +224,68 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         valueCurveRepository.save(instrumentValueCurve).block();
 
 
-        var expectedCurve = new TreeMap<LocalDate, Double>();
-        expectedCurve.put(datebeforFirstTrade, 0.0);
-        expectedCurve.put(firstTradeDate, 10.0);
-        expectedCurve.put(datebetweeenTrades, 10.0);
-        expectedCurve.put(secTradeDate, 10.0);
-        expectedCurve.put(dayAftersecTradeDate, 10.0);
-        expectedCurve.put(secDayAftersecTradeDate, 5.0);
+        var expectedMarketValueCurve = new TreeMap<LocalDate, Double>();
+        expectedMarketValueCurve.put(datebeforFirstTrade, 0.0);
+        expectedMarketValueCurve.put(firstTradeDate, 10.0);
+        expectedMarketValueCurve.put(datebetweeenTrades, 10.0);
+        expectedMarketValueCurve.put(secTradeDate, 10.0);
+        expectedMarketValueCurve.put(dayAftersecTradeDate, 10.0);
+        expectedMarketValueCurve.put(secDayAftersecTradeDate, 5.0);
+
+        var expectedStaticValueCurve = new TreeMap<LocalDate, Double>();
+        expectedStaticValueCurve.put(datebeforFirstTrade, 0.0);
+        expectedStaticValueCurve.put(firstTradeDate, 10.0);
+        expectedStaticValueCurve.put(datebetweeenTrades, 10.0);
+        expectedStaticValueCurve.put(secTradeDate, 5.0);
+        expectedStaticValueCurve.put(dayAftersecTradeDate, 5.0);
+        expectedStaticValueCurve.put(secDayAftersecTradeDate, 5.0);
 
         var creatEvent = new Event(Event.Type.START, eqKey, depotKey);
         positionValueProcessor.accept(creatEvent);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
 
         var messages = getMessages(positionValueCalculatedBindingName);
-        assertEquals(1, messages.size());
+        assertEquals(4, messages.size()); // Changed from 1 to 4
+
         JsonHelper jsonHelper = new JsonHelper();
-        var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap((messages.get(0))).get("data");
-        var newCurve = (LinkedHashMap) data.get("valueCurve");
-        assertEquals(6, newCurve.size());
-        assertEquals(expectedCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
-        assertEquals(expectedCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
-        assertEquals(expectedCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
-        assertEquals(expectedCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
-        assertEquals(expectedCurve.get(dayAftersecTradeDate), newCurve.get(dayAftersecTradeDate.toString()));
-        assertEquals(expectedCurve.get(secDayAftersecTradeDate), newCurve.get(secDayAftersecTradeDate.toString()));
-        var instrumentBusinesskey = (String) data.get("instrumentBusinesskey");
-        assertEquals(eqKey, instrumentBusinesskey);
-        var parentBusinesskey = (String) data.get("parentBusinesskey");
-        assertEquals(depotKey, parentBusinesskey);
+        for (String message : messages) {
+            var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap(message).get("data");
+            var valuationType = (String) data.get("valuationType");
+            var newCurve = (LinkedHashMap) data.get("valueCurve");
+
+            switch (valuationType) {
+                case "MARKETVALUE":
+                    assertEquals(expectedMarketValueCurve.size(), newCurve.size());
+                    assertEquals(expectedMarketValueCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
+                    assertEquals(expectedMarketValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
+                    assertEquals(expectedMarketValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
+                    assertEquals(expectedMarketValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
+                    assertEquals(expectedMarketValueCurve.get(dayAftersecTradeDate), newCurve.get(dayAftersecTradeDate.toString()));
+                    assertEquals(expectedMarketValueCurve.get(secDayAftersecTradeDate), newCurve.get(secDayAftersecTradeDate.toString()));
+                    break;
+                case "STATIC":
+                    assertEquals(expectedStaticValueCurve.size(), newCurve.size());
+                    assertEquals(expectedStaticValueCurve.get(datebeforFirstTrade), newCurve.get(datebeforFirstTrade.toString()));
+                    assertEquals(expectedStaticValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
+                    assertEquals(expectedStaticValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
+                    assertEquals(expectedStaticValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
+                    break;
+                case "PRUDENT":
+                case "INDEX":
+                    break;
+                default:
+                    // Handle unexpected valuation types if necessary
+                    break;
+            }
+            var instrumentBusinesskey = (String) data.get("instrumentBusinesskey");
+            assertEquals(eqKey, instrumentBusinesskey);
+            var parentBusinesskey = (String) data.get("parentBusinesskey");
+            assertEquals(depotKey, parentBusinesskey);
+        }
     }
 
 }

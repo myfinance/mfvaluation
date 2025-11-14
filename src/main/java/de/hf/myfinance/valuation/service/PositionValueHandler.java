@@ -3,6 +3,7 @@ package de.hf.myfinance.valuation.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import de.hf.framework.audit.AuditService;
 import de.hf.framework.audit.Severity;
@@ -75,19 +76,42 @@ public class PositionValueHandler extends AbsCurveHandler{
             TreeMap<LocalDate, Double> indexValueCurve = new TreeMap<>();
             
             LocalDate startDate = positionCurve.getValueCurve().firstKey();
-            LocalDate endDate = LocalDate.now(); // Or priceCurve.getValueCurve().lastKey() if prices are not available for future
+            LocalDate endDate = positionCurve.getValueCurve().lastKey(); 
 
             LocalDate currentDate = startDate;
-            while (!currentDate.isAfter(endDate)) {
-                double positionValue = AbsValueHandler.extractValueFromCurve(positionCurve.getValueCurve(), currentDate);
+            double staticValuePreviousDay = 0.0;
+            var lastPriceDay = priceCurve.getValueCurve().lastKey();
+            double positionAmountToday = 0;
+            double avgPrice =0;
+            while (!currentDate.isAfter(endDate) || (positionAmountToday>0 && !currentDate.isAfter(lastPriceDay))) {
+                final LocalDate loopDate = currentDate; // Make a final copy for use in lambdas
+
+                positionAmountToday = AbsValueHandler.extractValueFromCurve(positionCurve.getValueCurve(), loopDate);
                 
                 // MARKETVALUE calculation
-                double currentPrice = AbsValueHandler.extractValueFromCurve(priceCurve.getValueCurve(), currentDate);
-                double marketValue = round(currentPrice * positionValue, 2);
-                marketValueCurve.put(currentDate, marketValue);
+                double currentPrice = AbsValueHandler.extractValueFromCurve(priceCurve.getValueCurve(), loopDate);
+                double marketValue = round(currentPrice * positionAmountToday, 2);
+                marketValueCurve.put(loopDate, marketValue);
 
-                // Other ValuationType calculations will go here later
-
+                // STATIC calculation
+                
+                List<Trade> tradesOnDay = trades.stream().filter(t -> t.getTradeDate().equals(loopDate)).collect(Collectors.toList());
+                double totalTradeAmountOnDay = tradesOnDay.stream().mapToDouble(Trade::getAmount).sum();
+                double totalCostToday = currentPrice * totalTradeAmountOnDay;
+                if(totalTradeAmountOnDay<0){
+                    totalCostToday = avgPrice * totalTradeAmountOnDay;
+                }
+                
+                staticValuePreviousDay = staticValuePreviousDay + totalCostToday;
+                
+                if (positionAmountToday == 0) {
+                    staticValueCurve.put(loopDate, 0.0);
+                } else {
+                    staticValueCurve.put(loopDate, staticValuePreviousDay);
+                }
+                if(positionAmountToday>0){
+                    avgPrice = round(staticValuePreviousDay/positionAmountToday, 2);
+                }
                 currentDate = currentDate.plusDays(1);
             }
             
@@ -96,7 +120,6 @@ public class PositionValueHandler extends AbsCurveHandler{
             marketValueCurveObject.setParentBusinesskey(depotId);
             marketValueCurveObject.setValuationType(ValuationType.MARKETVALUE);
 
-            // Create ValueCurve objects for other types (initially empty)
             ValueCurve staticValueCurveObject = new ValueCurve(securityId);
             staticValueCurveObject.setValueCurve(staticValueCurve);
             staticValueCurveObject.setParentBusinesskey(depotId);
