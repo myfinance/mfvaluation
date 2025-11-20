@@ -78,7 +78,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         }
 
         var messages = getMessages(positionValueCalculatedBindingName);
-        assertEquals(4, messages.size()); // Changed from 1 to 4
+        assertEquals(3, messages.size()); // Changed from 1 to 4
 
         JsonHelper jsonHelper = new JsonHelper();
         for (String message : messages) {
@@ -107,8 +107,6 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
                     assertEquals(expectedPrudentValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
                     assertEquals(expectedPrudentValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
                     assertEquals(expectedPrudentValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
-                    break;
-                case "INDEX":
                     break;
                 default:
                     // Handle unexpected valuation types if necessary
@@ -177,7 +175,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         }
 
         var messages = getMessages(positionValueCalculatedBindingName);
-        assertEquals(4, messages.size()); // Changed from 1 to 4
+        assertEquals(3, messages.size()); // Changed from 1 to 4
 
         JsonHelper jsonHelper = new JsonHelper();
         for (String message : messages) {
@@ -206,8 +204,6 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
                     assertEquals(expectedPrudentValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
                     assertEquals(expectedPrudentValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
                     assertEquals(expectedPrudentValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
-                    break;
-                case "INDEX":
                     break;
                 default:
                     // Handle unexpected valuation types if necessary
@@ -274,7 +270,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         }
 
         var messages = getMessages(positionValueCalculatedBindingName);
-        assertEquals(4, messages.size()); // Changed from 1 to 4
+        assertEquals(3, messages.size()); // Changed from 1 to 4
 
         JsonHelper jsonHelper = new JsonHelper();
         for (String message : messages) {
@@ -303,8 +299,6 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
                     assertEquals(expectedPrudentValueCurve.get(firstTradeDate), newCurve.get(firstTradeDate.toString()));
                     assertEquals(expectedPrudentValueCurve.get(datebetweeenTrades), newCurve.get(datebetweeenTrades.toString()));
                     assertEquals(expectedPrudentValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
-                    break;
-                case "INDEX":
                     break;
                 default:
                     // Handle unexpected valuation types if necessary
@@ -382,7 +376,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         }
 
         var messages = getMessages(positionValueCalculatedBindingName);
-        assertEquals(4, messages.size()); // Changed from 1 to 4
+        assertEquals(3, messages.size()); // Changed from 1 to 4
 
         JsonHelper jsonHelper = new JsonHelper();
         for (String message : messages) {
@@ -417,8 +411,6 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
                     assertEquals(expectedPrudentValueCurve.get(secTradeDate), newCurve.get(secTradeDate.toString()));
                     assertEquals(expectedPrudentValueCurve.get(dayAftersecTradeDate), newCurve.get(dayAftersecTradeDate.toString()));
                     assertEquals(expectedPrudentValueCurve.get(secDayAftersecTradeDate), newCurve.get(secDayAftersecTradeDate.toString()));
-                    break;
-                case "INDEX":
                     break;
                 default:
                     // Handle unexpected valuation types if necessary

@@ -10,7 +10,7 @@ import de.hf.framework.audit.Severity;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
-import de.hf.myfinance.valuation.persistence.entities.PositionKey;
+import de.hf.myfinance.valuation.persistence.entities.PositionValueKey;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
 import de.hf.myfinance.valuation.persistence.repositories.PositionValueRepository;
 import reactor.core.publisher.Mono;
@@ -38,7 +38,7 @@ public class SavePositionValueProcessorConfig {
             switch (event.getEventType()) {
 
                 case CREATE:
-                    positionValueRepository.findByPositionKey(new PositionKey(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey()))
+                    positionValueRepository.findByPositionValueKey(new PositionValueKey(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey(), positionValueCurve.getValuationType()))
                         .switchIfEmpty(Mono.just(new PositionValueEntity(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey(), positionValueCurve.getValueCurve())))
                         .flatMap(p->{
                             p.setPositionValueCurve(positionValueCurve.getValueCurve());

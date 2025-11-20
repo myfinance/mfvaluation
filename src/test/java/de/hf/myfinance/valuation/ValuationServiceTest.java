@@ -5,6 +5,7 @@ import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
 import de.hf.myfinance.valuation.persistence.entities.PositionKey;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
+import de.hf.myfinance.valuation.persistence.entities.PositionValueKey;
 import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import de.hf.myfinance.valuation.service.ValuationService;
@@ -268,7 +269,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         positionRepository.save(positionCurve).block();
 
         var positionValueCurve = new PositionValueEntity();
-        positionValueCurve.setPositionKey(new PositionKey(depotKey, eqKey));
+        positionValueCurve.setPositionValueKey(new PositionValueKey(depotKey, eqKey));
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 100.0);
         valueMap.put(LocalDate.of(2022,1,2), 220.0);
@@ -285,7 +286,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         positionRepository.save(positionCurve2).block();
 
         var positionValueCurve2 = new PositionValueEntity();
-        positionValueCurve2.setPositionKey(new PositionKey(depotkey2, eqKey));
+        positionValueCurve2.setPositionValueKey(new PositionValueKey(depotkey2, eqKey));
         var valueMap2 = new TreeMap<LocalDate, Double>();
         valueMap2.put(LocalDate.of(2022,1,1), 50.0);
         positionValueCurve2.setPositionValueCurve(valueMap2);
@@ -301,7 +302,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         positionRepository.save(positionCurve3).block();
 
         var positionValueCurve3 = new PositionValueEntity();
-        positionValueCurve3.setPositionKey(new PositionKey(depotkey2, securitykey2));
+        positionValueCurve3.setPositionValueKey(new PositionValueKey(depotkey2, securitykey2));
         var valueMap3 = new TreeMap<LocalDate, Double>();
         valueMap3.put(LocalDate.of(2022,1,1), 50.0);
         positionValueCurve3.setPositionValueCurve(valueMap3);

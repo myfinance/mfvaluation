@@ -70,4 +70,9 @@ public class ValuationApiImpl implements ValuationApi {
         return valuationService.getLinkedValues(businesskey,valueDate);
     }
 
+    @Override
+    public Mono<String> recalcAllCurves() {
+        return valuationService.recalcAllCurves();
+    }
+
 }

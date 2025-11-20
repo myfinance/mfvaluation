@@ -73,7 +73,6 @@ public class PositionValueHandler extends AbsCurveHandler{
             TreeMap<LocalDate, Double> staticValueCurve = new TreeMap<>();
             TreeMap<LocalDate, Double> prudentValueCurve = new TreeMap<>();
             TreeMap<LocalDate, Double> marketValueCurve = new TreeMap<>();
-            TreeMap<LocalDate, Double> indexValueCurve = new TreeMap<>();
             
             LocalDate startDate = positionCurve.getValueCurve().firstKey();
             LocalDate endDate = positionCurve.getValueCurve().lastKey(); 
@@ -134,13 +133,8 @@ public class PositionValueHandler extends AbsCurveHandler{
             prudentValueCurveObject.setParentBusinesskey(depotId);
             prudentValueCurveObject.setValuationType(ValuationType.PRUDENT);
 
-            ValueCurve indexValueCurveObject = new ValueCurve(securityId);
-            indexValueCurveObject.setValueCurve(indexValueCurve);
-            indexValueCurveObject.setParentBusinesskey(depotId);
-            indexValueCurveObject.setValuationType(ValuationType.INDEX);
 
-
-            return Flux.just(marketValueCurveObject, staticValueCurveObject, prudentValueCurveObject, indexValueCurveObject);
+            return Flux.just(marketValueCurveObject, staticValueCurveObject, prudentValueCurveObject);
     }
 
         protected Mono<ValueCurve> oldpositionValueCurveCalculation(ValueCurve positionCurve, ValueCurve priceCurve, List<Trade> trades, List<Cashflow> cashflows) {

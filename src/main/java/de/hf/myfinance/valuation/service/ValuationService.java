@@ -258,6 +258,13 @@ public class ValuationService {
         return valueHandlerFactory.getValueHandler(businesskey).flatMap(i->i.calcValueCurve()).then(this.getValueCurve(businesskey, LocalDate.of(2012,1,1), LocalDate.now()) );
     }
 
+    public Mono<String> recalcAllCurves(){
+        return dataReader.findAll()
+            .flatMap(i -> valueHandlerFactory.getValueHandler(i.getBusinesskey())
+                .flatMap(vh -> vh.calcValueCurve()))
+            .then(Mono.just("Recalculation successful"));
+    }
+
     public Mono<Map<String,Double>> getLinkedValues(String businesskey, LocalDate valueDate){
         return dataReader.findByValueBudget(businesskey)                
             .flatMap(i->{

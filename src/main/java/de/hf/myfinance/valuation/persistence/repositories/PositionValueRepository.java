@@ -7,12 +7,12 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
-import de.hf.myfinance.valuation.persistence.entities.ValuationType;
-import de.hf.myfinance.valuation.persistence.entities.PositionKey;
+import de.hf.myfinance.valuation.persistence.entities.PositionValueKey;
+import de.hf.myfinance.restmodel.ValuationType;
 
 public interface PositionValueRepository extends ReactiveCrudRepository<PositionValueEntity, String>{
-    Flux<PositionValueEntity> findByPositionKeyDepotBusinessKey(String depotBusinessKey, ValuationType valuationType);
-    Mono<PositionValueEntity> findByPositionKey(PositionKey positionKey);
-    Mono<Long> deleteByPositionKey(PositionKey positionKey);
-    Flux<PositionValueEntity> findByPositionKey_DepotBusinessKeyIn(List<String> depotBusinessKeys, ValuationType valuationType);
+    Flux<PositionValueEntity> findByPositionValueKeyDepotBusinessKey(String depotBusinessKey, ValuationType valuationType);
+    Mono<PositionValueEntity> findByPositionValueKey(PositionValueKey positionValueKey);
+    Mono<Long> deleteByPositionValueKey(PositionValueKey positionValueKey);
+    Flux<PositionValueEntity> findByPositionValueKey_DepotBusinessKeyIn(List<String> depotBusinessKeys, ValuationType valuationType);
 }

@@ -5,27 +5,21 @@ import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "positionvalues")
 public class PositionValueEntity {
     @Id
-    private String positionValueId;
+    private PositionValueKey positionValueKey;
     @Version
     private Integer version;
 
-    @Indexed(unique = true)
-    private PositionKey positionKey;
     private Map<LocalDate, Double> positionValueCurve;
 
     public PositionValueEntity(){}
 
-    public PositionValueEntity(String positionValueId) {
-        this.positionValueId = positionValueId;
-    }
     public PositionValueEntity(String depotBusinessKey, String securityBusinessKey, Map<LocalDate, Double> positionValueCurve) {
-        this.positionKey = new PositionKey(depotBusinessKey,securityBusinessKey);
+        this.positionValueKey = new PositionValueKey(depotBusinessKey,securityBusinessKey);
         this.positionValueCurve = positionValueCurve;
      }
   
@@ -37,11 +31,11 @@ public class PositionValueEntity {
         this.positionValueCurve = positionValueCurve;
      }
 
-     public PositionKey getPositionKey() {
-        return this.positionKey;
+     public PositionValueKey getPositionValueKey() {
+        return this.positionValueKey;
      }
   
-     public void setPositionKey(PositionKey positionKey) {
-        this.positionKey = positionKey;
+     public void setPositionValueKey(PositionValueKey positionValueKey) {
+        this.positionValueKey = positionValueKey;
      }
 }
