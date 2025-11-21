@@ -6,13 +6,17 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueKey;
-import de.hf.myfinance.restmodel.ValuationType;
+
+import org.springframework.data.mongodb.repository.Query;
 
 public interface PositionValueRepository extends ReactiveCrudRepository<PositionValueEntity, PositionValueKey>{
-    Flux<PositionValueEntity> findByPositionValueKeyDepotBusinessKey(String depotBusinessKey, ValuationType valuationType);
+    @Query("{ 'positionValueKey.depotBusinessKey' : ?0, 'positionValueKey.valuationType' : ?1 }")
+    Flux<PositionValueEntity> findByDepotBusinessKeyAndValuationType(String depotBusinessKey, ValuationType valuationType);
     Mono<PositionValueEntity> findByPositionValueKey(PositionValueKey positionValueKey);
     Mono<Long> deleteByPositionValueKey(PositionValueKey positionValueKey);
-    Flux<PositionValueEntity> findByPositionValueKey_DepotBusinessKeyIn(List<String> depotBusinessKeys, ValuationType valuationType);
+    @Query("{ 'positionValueKey.depotBusinessKey' : { $in: ?0 }, 'positionValueKey.valuationType' : ?1 }")
+    Flux<PositionValueEntity> findByDepotBusinessKeyInAndValuationType(List<String> depotBusinessKeys, ValuationType valuationType);
 }
