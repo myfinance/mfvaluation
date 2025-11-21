@@ -38,14 +38,17 @@ public class SavePositionValueProcessorConfig {
             switch (event.getEventType()) {
 
                 case CREATE:
-                    positionValueRepository.findByPositionValueKey(new PositionValueKey(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey(), positionValueCurve.getValuationType()))
-                        .switchIfEmpty(Mono.just(new PositionValueEntity(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey(), positionValueCurve.getValueCurve())))
-                        .flatMap(p->{
-                            p.setPositionValueCurve(positionValueCurve.getValueCurve());
-                            return positionValueRepository.save(p);
-                        }).block();
-                        auditService.saveMessage("positions saved", Severity.INFO, AUDIT_MSG_TYPE);
-                        valuationEventHandler.sendValuationEvent(positionValueCurve.getParentBusinesskey());
+                    var key = new PositionValueKey(positionValueCurve.getParentBusinesskey(), positionValueCurve.getInstrumentBusinesskey(), positionValueCurve.getValuationType());
+                    var existingEntity = positionValueRepository.findById(key).block();
+                    if(existingEntity!=null) {
+                        existingEntity.setPositionValueCurve(positionValueCurve.getValueCurve());
+                        positionValueRepository.save(existingEntity).block();
+                    } else {
+                        var newEntity = new PositionValueEntity(key, positionValueCurve.getValueCurve());
+                        positionValueRepository.save(newEntity).block();
+                    }
+                    auditService.saveMessage("positions saved", Severity.INFO, AUDIT_MSG_TYPE);
+                    valuationEventHandler.sendValuationEvent(positionValueCurve.getParentBusinesskey());
 
                         break;
 

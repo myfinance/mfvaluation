@@ -10,7 +10,7 @@ import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueKey;
 import de.hf.myfinance.restmodel.ValuationType;
 
-public interface PositionValueRepository extends ReactiveCrudRepository<PositionValueEntity, String>{
+public interface PositionValueRepository extends ReactiveCrudRepository<PositionValueEntity, PositionValueKey>{
     Flux<PositionValueEntity> findByPositionValueKeyDepotBusinessKey(String depotBusinessKey, ValuationType valuationType);
     Mono<PositionValueEntity> findByPositionValueKey(PositionValueKey positionValueKey);
     Mono<Long> deleteByPositionValueKey(PositionValueKey positionValueKey);

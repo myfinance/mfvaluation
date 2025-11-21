@@ -22,6 +22,11 @@ public class PositionValueEntity {
         this.positionValueKey = new PositionValueKey(depotBusinessKey,securityBusinessKey);
         this.positionValueCurve = positionValueCurve;
      }
+
+   public PositionValueEntity(PositionValueKey positionValueKey, Map<LocalDate, Double> positionValueCurve) {
+        this.positionValueKey = positionValueKey;
+        this.positionValueCurve = positionValueCurve;
+     }
   
      public Map<LocalDate, Double> getPositionValueCurve() {
         return this.positionValueCurve;

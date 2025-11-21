@@ -103,7 +103,7 @@ public class PositionValueHandler extends AbsCurveHandler{
                 if (positionAmountToday == 0) {
                     staticValueCurve.put(loopDate, 0.0);
                 } else {
-                    staticValueCurve.put(loopDate, staticValuePreviousDay);
+                    staticValueCurve.put(loopDate, round(staticValuePreviousDay,2));
                 }
                 if(positionAmountToday>0){
                     avgPrice = round(staticValuePreviousDay/positionAmountToday, 2);
@@ -111,11 +111,11 @@ public class PositionValueHandler extends AbsCurveHandler{
                 currentDate = currentDate.plusDays(1);
 
                 // PRUDENT calculation
-                double prudentValue = round(currentPrice * positionAmountToday, 2);
+                double prudentValue = currentPrice * positionAmountToday;
                 if(prudentValue>staticValuePreviousDay){
-                    prudentValue = round(staticValuePreviousDay+(prudentValue-staticValuePreviousDay)*0.7,2);
+                    prudentValue = staticValuePreviousDay+(prudentValue-staticValuePreviousDay)*0.7;
                 }
-                prudentValueCurve.put(loopDate, prudentValue);
+                prudentValueCurve.put(loopDate, round(prudentValue,2));
             }
             
             ValueCurve marketValueCurveObject = new ValueCurve(securityId);

@@ -1,10 +1,11 @@
 package de.hf.myfinance.valuation.persistence.entities;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import de.hf.myfinance.restmodel.ValuationType;
 
-public class PositionValueKey {
+public class PositionValueKey implements Serializable {
     private String depotBusinessKey;
     private String securityBusinessKey;
     private ValuationType valuationType = ValuationType.MARKETVALUE;
