@@ -22,6 +22,7 @@ public class saveValueCurveTest  extends EventProcessorTestBase {
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(transactionDate, 100.0);
         valueCurve.setValueCurve(valueMap);
+        valueCurve.setValuationType(de.hf.myfinance.restmodel.ValuationType.MARKETVALUE);
 
         Event creatEvent = new Event(Event.Type.CREATE, instrumentBusinesKey, valueCurve);
         saveValueCurveProcessor.accept(creatEvent);
@@ -48,6 +49,7 @@ public class saveValueCurveTest  extends EventProcessorTestBase {
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(transactionDate, 100.0);
         valueCurve.setValueCurve(valueMap);
+        valueCurve.setValuationType(de.hf.myfinance.restmodel.ValuationType.MARKETVALUE);
         valueCurve.setParentBusinesskey("parentKey");
         valueCurve.setLinkedInstrumentKey("linkedKey");
 
@@ -86,6 +88,7 @@ public class saveValueCurveTest  extends EventProcessorTestBase {
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(transactionDate, 100.0);
         valueCurve.setValueCurve(valueMap);
+        valueCurve.setValuationType(de.hf.myfinance.restmodel.ValuationType.MARKETVALUE);
 
         Event creatEvent = new Event(Event.Type.CREATE, instrumentBusinesKey, valueCurve);
         saveValueCurveProcessor.accept(creatEvent);

@@ -2,6 +2,7 @@ package de.hf.myfinance.valuation.service;
 
 import de.hf.framework.audit.AuditService;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValueCurveCalculatedEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
@@ -24,7 +25,7 @@ public class DepotValueHandler  extends PortfolioValueHandler{
     }
 
     protected Flux<ValueCurve> getAllPositionValuesForDepotId() {
-        return dataReader.findPositonValueByDepotKey(instrument.getBusinesskey());
+        return dataReader.findPositonValueByDepotKey(instrument.getBusinesskey(), ValuationType.MARKETVALUE);
     }
 
 }

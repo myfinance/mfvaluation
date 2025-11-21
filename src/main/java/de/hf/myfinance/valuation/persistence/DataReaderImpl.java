@@ -125,8 +125,8 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
-    public Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey){
-        return positionValueRepository.findByDepotBusinessKeyAndValuationType(depotBusinessKey, ValuationType.MARKETVALUE).map(this::positionValueToValueCurve);
+    public Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey, ValuationType valuationType){
+        return positionValueRepository.findByDepotBusinessKeyAndValuationType(depotBusinessKey, valuationType).map(this::positionValueToValueCurve);
     }
 
     @Override
