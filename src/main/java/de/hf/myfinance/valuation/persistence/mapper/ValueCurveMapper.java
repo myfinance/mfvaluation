@@ -16,7 +16,6 @@ public interface ValueCurveMapper {
     ValueCurve entityToApi(ValueCurveEntity entity);
 
     @Mappings({
-            @Mapping(target = "curveid", ignore = true)
     })
     ValueCurveEntity apiToEntity(ValueCurve api);
 

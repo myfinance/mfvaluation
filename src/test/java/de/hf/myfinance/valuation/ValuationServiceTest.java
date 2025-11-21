@@ -38,15 +38,14 @@ public class ValuationServiceTest extends EventProcessorTestBase {
 
     @Test
     void getValueCurveAllDatesAvailable() {
-        var valueCurve = new ValueCurveEntity();
-        valueCurve.setInstrumentBusinesskey("testKey");
+        
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 100.0);
         valueMap.put(LocalDate.of(2022,1,2), 110.0);
         valueMap.put(LocalDate.of(2022,1,3), 120.0);
         valueMap.put(LocalDate.of(2022,1,4), 130.0);
         valueMap.put(LocalDate.of(2022,1,5), 140.0);
-        valueCurve.setValueCurve(valueMap);
+        var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
         var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,2), LocalDate.of(2022,1,4)).block();
@@ -60,15 +59,13 @@ public class ValuationServiceTest extends EventProcessorTestBase {
 
     @Test
     void getValueCurveSomeDatesBefore() {
-        var valueCurve = new ValueCurveEntity();
-        valueCurve.setInstrumentBusinesskey("testKey");
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 100.0);
         valueMap.put(LocalDate.of(2022,1,2), 110.0);
         valueMap.put(LocalDate.of(2022,1,3), 120.0);
         valueMap.put(LocalDate.of(2022,1,4), 130.0);
         valueMap.put(LocalDate.of(2022,1,5), 140.0);
-        valueCurve.setValueCurve(valueMap);
+        var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
         var result = valuationService.getValueCurve("testKey", LocalDate.of(2021,12,30), LocalDate.of(2022,1,4)).block();
@@ -85,15 +82,13 @@ public class ValuationServiceTest extends EventProcessorTestBase {
 
     @Test
     void getValueCurveSomeDatesAfter() {
-        var valueCurve = new ValueCurveEntity();
-        valueCurve.setInstrumentBusinesskey("testKey");
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 100.0);
         valueMap.put(LocalDate.of(2022,1,2), 110.0);
         valueMap.put(LocalDate.of(2022,1,3), 120.0);
         valueMap.put(LocalDate.of(2022,1,4), 130.0);
         valueMap.put(LocalDate.of(2022,1,5), 140.0);
-        valueCurve.setValueCurve(valueMap);
+        var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
         var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,3), LocalDate.of(2022,1,7)).block();
@@ -110,15 +105,13 @@ public class ValuationServiceTest extends EventProcessorTestBase {
 
     @Test
     void getValueCurveSomeDatesBeforeAndSomeDatesAfter() {
-        var valueCurve = new ValueCurveEntity();
-        valueCurve.setInstrumentBusinesskey("testKey");
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 100.0);
         valueMap.put(LocalDate.of(2022,1,2), 110.0);
         valueMap.put(LocalDate.of(2022,1,3), 120.0);
         valueMap.put(LocalDate.of(2022,1,4), 130.0);
         valueMap.put(LocalDate.of(2022,1,5), 140.0);
-        valueCurve.setValueCurve(valueMap);
+        var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
         var result = valuationService.getValueCurve("testKey", LocalDate.of(2021,12,30), LocalDate.of(2022,1,7)).block();
@@ -138,15 +131,13 @@ public class ValuationServiceTest extends EventProcessorTestBase {
 
     @Test
     void getValueCurveOnlyDatesAfter() {
-        var valueCurve = new ValueCurveEntity();
-        valueCurve.setInstrumentBusinesskey("testKey");
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 100.0);
         valueMap.put(LocalDate.of(2022,1,2), 110.0);
         valueMap.put(LocalDate.of(2022,1,3), 120.0);
         valueMap.put(LocalDate.of(2022,1,4), 130.0);
         valueMap.put(LocalDate.of(2022,1,5), 140.0);
-        valueCurve.setValueCurve(valueMap);
+        var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
         var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,7), LocalDate.of(2022,1,9)).block();
@@ -162,15 +153,13 @@ public class ValuationServiceTest extends EventProcessorTestBase {
 
     @Test
     void getValue() {
-        var valueCurve = new ValueCurveEntity();
-        valueCurve.setInstrumentBusinesskey("testKey");
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 100.0);
         valueMap.put(LocalDate.of(2022,1,2), 110.0);
         valueMap.put(LocalDate.of(2022,1,3), 120.0);
         valueMap.put(LocalDate.of(2022,1,4), 130.0);
         valueMap.put(LocalDate.of(2022,1,5), 140.0);
-        valueCurve.setValueCurve(valueMap);
+        var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
         var result = valuationService.getValue("testKey", LocalDate.of(2022,1,2)).block();
@@ -185,20 +174,16 @@ public class ValuationServiceTest extends EventProcessorTestBase {
 
     @Test
     void getValuesForListOfBusinessKeys() {
-        var valueCurve = new ValueCurveEntity();
-        valueCurve.setInstrumentBusinesskey("testKey");
         var valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 100.0);
         valueMap.put(LocalDate.of(2022,1,2), 110.0);
-        valueCurve.setValueCurve(valueMap);
+        var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
-        valueCurve = new ValueCurveEntity();
-        valueCurve.setInstrumentBusinesskey("testKey2");
         valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 200.0);
         valueMap.put(LocalDate.of(2022,1,2), 210.0);
-        valueCurve.setValueCurve(valueMap);
+        valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
         var listOfBusinessKeys = new ArrayList<String>();

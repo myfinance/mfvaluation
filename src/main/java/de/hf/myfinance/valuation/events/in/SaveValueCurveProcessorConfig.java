@@ -55,7 +55,6 @@ public class SaveValueCurveProcessorConfig  {
                             .map(e -> {
                                 e.setValueCurve(valueCurve.getValueCurve());
                                 e.setParentBusinesskey(valueCurve.getParentBusinesskey());
-                                e.setInstrumentBusinesskey(valueCurve.getInstrumentBusinesskey());
                                 e.setLastUpdateTs(LocalDateTime.now());
                                 return e;
                             })

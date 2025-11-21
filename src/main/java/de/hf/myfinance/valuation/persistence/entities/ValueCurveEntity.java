@@ -2,7 +2,6 @@ package de.hf.myfinance.valuation.persistence.entities;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
@@ -13,7 +12,7 @@ import java.util.Map;
 public class ValueCurveEntity {
 
     @Id
-    private String curveid;
+    private ValueCurveKey valueCurveKey;
     @Version
     private Integer version;
 
@@ -22,15 +21,17 @@ public class ValueCurveEntity {
     private String linkedInstrumentKey;
     private LocalDateTime lastUpdateTs;
 
-    @Indexed(unique = true)
-    private String instrumentBusinesskey;
+    public ValueCurveEntity(){} 
 
-    public String getCurveid() {
-        return curveid;
-    }
-    public void setCurveid(String curveid) {
-        this.curveid = curveid;
-    }
+    public ValueCurveEntity(String businessKey, Map<LocalDate, Double> valueCurve) {
+        this.valueCurveKey = new ValueCurveKey(businessKey);
+        this.valueCurve = valueCurve;
+     }
+
+   public ValueCurveEntity(ValueCurveKey valueCurveKey, Map<LocalDate, Double> valueCurve) {
+        this.valueCurveKey = valueCurveKey;
+        this.valueCurve = valueCurve;
+     }
 
     public Integer getVersion() {
         return version;
@@ -47,10 +48,7 @@ public class ValueCurveEntity {
     }
 
     public String getInstrumentBusinesskey() {
-        return instrumentBusinesskey;
-    }
-    public void setInstrumentBusinesskey(String instrumentBusinesskey) {
-        this.instrumentBusinesskey = instrumentBusinesskey;
+        return this.valueCurveKey.getInstrumentBusinesskey();
     }
 
     public String getParentBusinesskey() {
@@ -72,5 +70,12 @@ public class ValueCurveEntity {
     }
     public void setLastUpdateTs(LocalDateTime lastUpdateTs) {
         this.lastUpdateTs = lastUpdateTs;
+    }
+
+    public ValueCurveKey getValueCurveKey() {
+        return valueCurveKey;
+    }
+    public void setValueCurveKey(ValueCurveKey valueCurveKey) {
+        this.valueCurveKey = valueCurveKey;
     }
 }

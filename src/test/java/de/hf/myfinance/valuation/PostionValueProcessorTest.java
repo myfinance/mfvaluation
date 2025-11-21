@@ -42,9 +42,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         instrumentCurve.put(datebetweeenTrades, 2.0);
         instrumentCurve.put(secTradeDate, 2.0);
 
-        var instrumentValueCurve = new ValueCurveEntity();
-        instrumentValueCurve.setInstrumentBusinesskey(eqKey);
-        instrumentValueCurve.setValueCurve(instrumentCurve);
+        var instrumentValueCurve = new ValueCurveEntity(eqKey, instrumentCurve);
         valueCurveRepository.save(instrumentValueCurve).block();
 
         tradeRepository.save(new TradeEntity(depotKey, eqKey, 10.0, firstTradeDate)).block();
@@ -139,9 +137,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         instrumentCurve.put(datebetweeenTrades, 2.0);
         instrumentCurve.put(secTradeDate, 2.0);
 
-        var instrumentValueCurve = new ValueCurveEntity();
-        instrumentValueCurve.setInstrumentBusinesskey(eqKey);
-        instrumentValueCurve.setValueCurve(instrumentCurve);
+        var instrumentValueCurve = new ValueCurveEntity(eqKey, instrumentCurve);
         valueCurveRepository.save(instrumentValueCurve).block();
 
         tradeRepository.save(new TradeEntity(depotKey, eqKey, 10.0, firstTradeDate)).block();
@@ -233,9 +229,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         var instrumentCurve = new TreeMap<LocalDate, Double>();
         instrumentCurve.put(LocalDate.of(2021, 12, 30), 2.0);
 
-        var instrumentValueCurve = new ValueCurveEntity();
-        instrumentValueCurve.setInstrumentBusinesskey(eqKey);
-        instrumentValueCurve.setValueCurve(instrumentCurve);
+        var instrumentValueCurve = new ValueCurveEntity(eqKey, instrumentCurve);
         valueCurveRepository.save(instrumentValueCurve).block();
 
         tradeRepository.save(new TradeEntity(depotKey, eqKey, 10.0, firstTradeDate)).block();
@@ -336,9 +330,7 @@ public class PostionValueProcessorTest extends EventProcessorTestBase {
         instrumentCurve.put(dayAftersecTradeDate, 2.0);
         instrumentCurve.put(secDayAftersecTradeDate, 1.0);
 
-        var instrumentValueCurve = new ValueCurveEntity();
-        instrumentValueCurve.setInstrumentBusinesskey(eqKey);
-        instrumentValueCurve.setValueCurve(instrumentCurve);
+        var instrumentValueCurve = new ValueCurveEntity(eqKey, instrumentCurve);
         valueCurveRepository.save(instrumentValueCurve).block();
 
 
