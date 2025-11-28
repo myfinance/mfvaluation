@@ -38,8 +38,8 @@ public class ValuationService {
         this.valueHandlerFactory = valueHandlerFactory;
     }
 
-    public Mono<Double> getValue(String businesskey, LocalDate date) {
-        return dataReader.findValueCurve(businesskey, ValuationType.MARKETVALUE).flatMap(c -> extractValueFromCurve(c, date));
+    public Mono<Double> getValue(String businesskey, LocalDate date, ValuationType valType) {
+        return dataReader.findValueCurve(businesskey, valType).flatMap(c -> extractValueFromCurve(c, date));
     }
 
     public Mono<LocalDateTime> getValueTs(String businesskey) {
@@ -50,9 +50,9 @@ public class ValuationService {
     }
 
 
-    public Flux<Map<String,Double>> getValues(List<String> businesskeys, LocalDate date) {
+    public Flux<Map<String,Double>> getValues(List<String> businesskeys, LocalDate date, ValuationType valType) {
         return Flux.fromIterable(businesskeys).flatMap(b->{
-            return getValue(b, date).flatMap(v->{
+            return getValue(b, date, valType).flatMap(v->{
                 var returnValue = new HashMap<String,Double>();
                 returnValue.put(b,v);
                 return Mono.just(returnValue);
@@ -61,11 +61,11 @@ public class ValuationService {
         
     }
 
-    public Mono<ValueCurve> getValueCurve(String businesskey, LocalDate startDate, LocalDate endDate) {
+    public Mono<ValueCurve> getValueCurve(String businesskey, LocalDate startDate, LocalDate endDate, ValuationType valType) {
         if (startDate.isAfter(endDate) || startDate.getYear() < 1970) {
             throw new MFException(MFMsgKey.ILLEGAL_ARGUMENTS, "no valid dates:" + startDate +", " + endDate);
         }
-        return dataReader.findValueCurve(businesskey, ValuationType.MARKETVALUE).flatMap(c -> fillCurveGaps(c, startDate, endDate));
+        return dataReader.findValueCurve(businesskey, valType).flatMap(c -> fillCurveGaps(c, startDate, endDate));
     }
 
     private Mono<Double> extractValueFromCurve(final ValueCurve valueCurve, final LocalDate date) {
@@ -256,7 +256,7 @@ public class ValuationService {
     }
 
     public Mono<ValueCurve> recalcAndGetValueCurve(String businesskey){
-        return valueHandlerFactory.getValueHandler(businesskey).flatMap(i->i.calcValueCurve()).then(this.getValueCurve(businesskey, LocalDate.of(2012,1,1), LocalDate.now()) );
+        return valueHandlerFactory.getValueHandler(businesskey).flatMap(i->i.calcValueCurve()).then(this.getValueCurve(businesskey, LocalDate.of(2012,1,1), LocalDate.now(), ValuationType.MARKETVALUE) );
     }
 
     public Mono<String> recalcAllCurves(){
@@ -266,10 +266,10 @@ public class ValuationService {
             .then(Mono.just("Recalculation successful"));
     }
 
-    public Mono<Map<String,Double>> getLinkedValues(String businesskey, LocalDate valueDate){
+    public Mono<Map<String,Double>> getLinkedValues(String businesskey, LocalDate valueDate, ValuationType valType){
         return dataReader.findByValueBudget(businesskey)                
             .flatMap(i->{
-                return dataReader.findValueCurve(i.getBusinesskey(), ValuationType.MARKETVALUE);
+                return dataReader.findValueCurve(i.getBusinesskey(), valType);
             })
             .flatMap(c -> fillCurveGaps(c, valueDate, valueDate))
             .collectList()

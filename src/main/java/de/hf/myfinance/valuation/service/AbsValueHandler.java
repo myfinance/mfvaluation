@@ -5,6 +5,8 @@ import de.hf.framework.audit.Severity;
 import de.hf.myfinance.restmodel.AdditionalProperties;
 import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.restmodel.InstrumentType;
+import de.hf.myfinance.restmodel.InstrumentTypeGroup;
 import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValueCurveCalculatedEventHandler;
@@ -82,5 +84,16 @@ public abstract class AbsValueHandler extends AbsCurveHandler implements ValueHa
             currentDate = currentDate.plusDays(1);
         }
         return Mono.just(valueCurve);
+    }
+
+    protected Mono<ValueCurve> getValueCurve4ValuationType(Instrument instrument, ValuationType valuationType){
+        if(valuationType.equals(ValuationType.MARKETVALUE) ||
+            !(instrument.getInstrumentType().equals(InstrumentType.DEPOT) 
+                || instrument.getInstrumentType().getTypeGroup().equals(InstrumentTypeGroup.SECURITY)
+                || instrument.getInstrumentType().getTypeGroup().equals(InstrumentTypeGroup.PORTFOLIO)
+                || instrument.getInstrumentType().equals(InstrumentType.BUDGET) ) ){
+            return dataReader.findValueCurve(instrument.getBusinesskey(), ValuationType.MARKETVALUE);
+        }
+        return dataReader.findValueCurve(instrument.getBusinesskey(), valuationType);
     }
 }

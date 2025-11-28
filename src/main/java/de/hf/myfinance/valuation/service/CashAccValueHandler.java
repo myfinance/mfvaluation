@@ -27,15 +27,30 @@ public class CashAccValueHandler extends AbsValueHandler {
         return  dataReader.findAllCashflow4Instrument(instrument.getBusinesskey())
                 .switchIfEmpty(Flux.just(new Cashflow("empty Cashflow", LocalDate.now(), instrument.getBusinesskey(), 0.0)))
                 .collectList().flatMap(this::calcCurveFromCashflows)
-                .flatMap(this::addLinkedInstrumentValues)
-                .flatMap(this::sendValueCurveCalculatedEvent);
+                .flatMap(this::finalizeAndSendValueCurveCalculatedEvent);
     }
 
-    protected Mono<TreeMap<LocalDate, Double>> addLinkedInstrumentValues(TreeMap<LocalDate, Double> valueCurve) {
+    protected Mono<Void> finalizeAndSendValueCurveCalculatedEvent(TreeMap<LocalDate, Double> valueCurve) {
         if(instrument.getInstrumentType().equals(InstrumentType.BUDGET)){
-            return dataReader.findByValueBudget(instrument.getBusinesskey())
+            return Flux.just(ValuationType.MARKETVALUE, 
+                        ValuationType.STATIC, 
+                        ValuationType.PRUDENT)
+                .flatMap(valueType -> 
+                    addLinkedInstrumentValues(valueCurve, valueType)
+                    .flatMap(finalCurve -> {
+                        return sendValueCurveCalculatedEvent(finalCurve, valueType);
+                    })
+            ).then();
+        }
+        
+        return Mono.just(valueCurve).flatMap(this::sendValueCurveCalculatedEvent);
+
+    }
+
+    Mono<TreeMap<LocalDate, Double>> addLinkedInstrumentValues(TreeMap<LocalDate, Double> valueCurve, ValuationType valuationType) {
+        return dataReader.findByValueBudget(instrument.getBusinesskey())
                 .flatMap(i->{
-                    return dataReader.findValueCurve(i.getBusinesskey(), ValuationType.MARKETVALUE);
+                    return getValueCurve4ValuationType(i, valuationType);
                 })
                 .collectList()
                 .flatMap(c->{
@@ -45,10 +60,6 @@ public class CashAccValueHandler extends AbsValueHandler {
                 })
                 .flatMap(this::getCombinedValueCurve)
                 .switchIfEmpty(Mono.just(valueCurve));
-        }
-        
-        return Mono.just(valueCurve);
-
     }
 
 }

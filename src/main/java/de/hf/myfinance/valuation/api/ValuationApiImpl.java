@@ -3,6 +3,7 @@ package de.hf.myfinance.valuation.api;
 import de.hf.myfinance.restapi.ValuationApi;
 import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Position;
+import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.service.ValuationService;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,13 +32,13 @@ public class ValuationApiImpl implements ValuationApi {
     }
 
     @Override
-    public Mono<ValueCurve> getValueCurve(String businesskey, LocalDate startDate, LocalDate endDate) {
-        return valuationService.getValueCurve(businesskey, startDate, endDate);
+    public Mono<ValueCurve> getValueCurve(String businesskey, LocalDate startDate, LocalDate endDate, ValuationType valType) {
+        return valuationService.getValueCurve(businesskey, startDate, endDate, valType);
     }
 
     @Override
-    public Mono<Double> getValue(String businesskey, LocalDate date) {
-        return valuationService.getValue(businesskey, date);
+    public Mono<Double> getValue(String businesskey, LocalDate date, ValuationType valType) {
+        return valuationService.getValue(businesskey, date, valType);
     }
 
     @Override
@@ -66,8 +67,8 @@ public class ValuationApiImpl implements ValuationApi {
     }
 
     @Override
-    public Mono<Map<String, Double>> getLinkedValues(String businesskey, LocalDate valueDate) {
-        return valuationService.getLinkedValues(businesskey,valueDate);
+    public Mono<Map<String, Double>> getLinkedValues(String businesskey, LocalDate valueDate, ValuationType valType) {
+        return valuationService.getLinkedValues(businesskey,valueDate, valType);
     }
 
     @Override

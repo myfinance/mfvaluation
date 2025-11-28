@@ -2,6 +2,7 @@ package de.hf.myfinance.valuation;
 
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.Cashflow;
+import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
 import de.hf.myfinance.valuation.persistence.entities.PositionKey;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
@@ -48,7 +49,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
-        var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,2), LocalDate.of(2022,1,4)).block();
+        var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,2), LocalDate.of(2022,1,4), ValuationType.MARKETVALUE).block();
 
         assertEquals("testKey", result.getInstrumentBusinesskey());
         assertEquals(3, result.getValueCurve().keySet().size());
@@ -68,7 +69,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
-        var result = valuationService.getValueCurve("testKey", LocalDate.of(2021,12,30), LocalDate.of(2022,1,4)).block();
+        var result = valuationService.getValueCurve("testKey", LocalDate.of(2021,12,30), LocalDate.of(2022,1,4), ValuationType.MARKETVALUE).block();
 
         assertEquals("testKey", result.getInstrumentBusinesskey());
         assertEquals(6, result.getValueCurve().keySet().size());
@@ -91,7 +92,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
-        var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,3), LocalDate.of(2022,1,7)).block();
+        var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,3), LocalDate.of(2022,1,7), ValuationType.MARKETVALUE).block();
 
         assertEquals("testKey", result.getInstrumentBusinesskey());
         assertEquals(5, result.getValueCurve().keySet().size());
@@ -114,7 +115,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
-        var result = valuationService.getValueCurve("testKey", LocalDate.of(2021,12,30), LocalDate.of(2022,1,7)).block();
+        var result = valuationService.getValueCurve("testKey", LocalDate.of(2021,12,30), LocalDate.of(2022,1,7), ValuationType.MARKETVALUE).block();
 
         assertEquals("testKey", result.getInstrumentBusinesskey());
         assertEquals(9, result.getValueCurve().keySet().size());
@@ -140,7 +141,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
-        var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,7), LocalDate.of(2022,1,9)).block();
+        var result = valuationService.getValueCurve("testKey", LocalDate.of(2022,1,7), LocalDate.of(2022,1,9), ValuationType.MARKETVALUE).block();
 
         assertEquals("testKey", result.getInstrumentBusinesskey());
         assertEquals(3, result.getValueCurve().keySet().size());
@@ -162,13 +163,13 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         var valueCurve = new ValueCurveEntity("testKey",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
-        var result = valuationService.getValue("testKey", LocalDate.of(2022,1,2)).block();
+        var result = valuationService.getValue("testKey", LocalDate.of(2022,1,2), ValuationType.MARKETVALUE).block();
         assertEquals(110, result);
 
-        result = valuationService.getValue("testKey", LocalDate.of(2021,1,2)).block();
+        result = valuationService.getValue("testKey", LocalDate.of(2021,1,2), ValuationType.MARKETVALUE).block();
         assertEquals(100, result);
 
-        result = valuationService.getValue("testKey", LocalDate.of(2022,2,2)).block();
+        result = valuationService.getValue("testKey", LocalDate.of(2022,2,2), ValuationType.MARKETVALUE).block();
         assertEquals(140, result);
     }
 
@@ -183,7 +184,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         valueMap = new TreeMap<LocalDate, Double>();
         valueMap.put(LocalDate.of(2022,1,1), 200.0);
         valueMap.put(LocalDate.of(2022,1,2), 210.0);
-        valueCurve = new ValueCurveEntity("testKey",valueMap);
+        valueCurve = new ValueCurveEntity("testKey2",valueMap);
         valueCurveRepository.save(valueCurve).block();
 
         var listOfBusinessKeys = new ArrayList<String>();
@@ -191,7 +192,7 @@ public class ValuationServiceTest extends EventProcessorTestBase {
         listOfBusinessKeys.add("testKey2");
 
         Map<String,Double> resultMap = new TreeMap<String, Double>();
-        Flux<Map<String,Double>> result = valuationService.getValues(listOfBusinessKeys, LocalDate.of(2022,1,2));
+        Flux<Map<String,Double>> result = valuationService.getValues(listOfBusinessKeys, LocalDate.of(2022,1,2), ValuationType.MARKETVALUE);
         result.collectList().block().forEach(r->resultMap.putAll(r));
         assertEquals(110, resultMap.get("testKey"));
         assertEquals(210, resultMap.get("testKey2"));
