@@ -17,15 +17,21 @@ public class DepotValueHandler  extends PortfolioValueHandler{
 
     @Override
     public Mono<Void> calcValueCurve() {
-        return getAllPositionValuesForDepotId()
-        .collectList()
-        .flatMap(this::extractAndGetCombinedValueCurve)
-        .switchIfEmpty(createZeroCurve())
-        .flatMap(this::sendValueCurveCalculatedEvent);
+        return Flux.just(ValuationType.MARKETVALUE, 
+                        ValuationType.STATIC, 
+                        ValuationType.PRUDENT)
+            .flatMap(valuationType -> 
+                getAllPositionValuesForDepotId(valuationType)
+                    .collectList()
+                    .flatMap(this::extractAndGetCombinedValueCurve)
+                    .switchIfEmpty(createZeroCurve())
+                    .flatMap(valueCurve -> {
+                        return sendValueCurveCalculatedEvent(valueCurve, valuationType);
+                    })
+            ).then();
     }
 
-    protected Flux<ValueCurve> getAllPositionValuesForDepotId() {
-        return dataReader.findPositonValueByDepotKey(instrument.getBusinesskey(), ValuationType.MARKETVALUE);
+    protected Flux<ValueCurve> getAllPositionValuesForDepotId(ValuationType valuationType) {
+        return dataReader.findPositonValueByDepotKey(instrument.getBusinesskey(), valuationType);
     }
-
 }

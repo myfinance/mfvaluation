@@ -7,6 +7,7 @@ import de.hf.myfinance.valuation.persistence.entities.PositionEntity;
 import de.hf.myfinance.valuation.persistence.entities.PositionKey;
 import de.hf.myfinance.valuation.persistence.entities.PositionValueEntity;
 import de.hf.myfinance.valuation.persistence.entities.TradeEntity;
+import de.hf.myfinance.valuation.persistence.entities.ValueCurveKey;
 import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
 import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
@@ -84,8 +85,8 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
-    public Mono<ValueCurve> findValueCurveByInstrumentBusinesskey(String businesskey){
-        return valueCurveRepository.findByInstrumentBusinesskey(businesskey).map(e-> valueCurveMapper.entityToApi(e));
+    public Mono<ValueCurve> findValueCurve(String businesskey, ValuationType valuationType){
+        return valueCurveRepository.findByValueCurveKey(new ValueCurveKey(businesskey, valuationType)).map(e-> valueCurveMapper.entityToApi(e));
     }
 
     @Override
@@ -99,8 +100,8 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
-    public Flux<ValueCurve> findValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable){
-        return valueCurveRepository.findByInstrumentBusinesskeyIn(businesskeyIterable).map(e-> valueCurveMapper.entityToApi(e));
+    public Flux<ValueCurve> findMarketValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable){
+        return valueCurveRepository.findByInstrumentBusinesskeyIn(businesskeyIterable).map(e-> valueCurveMapper.entityToApi(e)).filter(c->c.getValuationType().equals(ValuationType.MARKETVALUE));
     }
 
     @Override

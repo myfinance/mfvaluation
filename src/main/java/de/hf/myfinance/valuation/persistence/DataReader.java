@@ -11,10 +11,10 @@ public interface DataReader {
     Flux<Instrument> findAll();
     Flux<Cashflow> findAllCashflow4Instrument(String businesskey);
     Flux<Instrument> findByParentBusinesskey(String parentBusinesskey);
-    Mono<ValueCurve> findValueCurveByInstrumentBusinesskey(String businesskey);
+    Mono<ValueCurve> findValueCurve(String businesskey, ValuationType valuationType);
     Flux<Instrument> findByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType);
     Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey);
-    Flux<ValueCurve> findValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable);
+    Flux<ValueCurve> findMarketValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable);
     Mono<ValueCurve> findPositonByKey(String depotBusinessKey, String securityBusinessKey);
     Flux<Trade> findTradesByKey(String depotBusinessKey, String securityBusinessKey);
     Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey, ValuationType valuationType);

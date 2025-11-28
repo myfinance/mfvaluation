@@ -5,6 +5,7 @@ import de.hf.framework.audit.Severity;
 import de.hf.myfinance.restmodel.AdditionalProperties;
 import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.ValueCurveCalculatedEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
@@ -28,8 +29,13 @@ public abstract class AbsValueHandler extends AbsCurveHandler implements ValueHa
     }
 
     protected Mono<Void> sendValueCurveCalculatedEvent(TreeMap<LocalDate, Double> valueCurve) {
+        return sendValueCurveCalculatedEvent(valueCurve, ValuationType.MARKETVALUE);
+    }
+
+    protected Mono<Void> sendValueCurveCalculatedEvent(TreeMap<LocalDate, Double> valueCurve, ValuationType valuationType) {
         auditService.saveMessage(" new valuecurve calculated for instrument: " + instrument.getBusinesskey(), Severity.INFO, AUDIT_MSG_TYPE);
         var valueCurveObject = new ValueCurve(instrument.getBusinesskey());
+        valueCurveObject.setValuationType(valuationType);
         valueCurveObject.setValueCurve(valueCurve);
         valueCurveObject.setParentBusinesskey(instrument.getParentBusinesskey());
         if(instrument.getAdditionalProperties()!= null && instrument.getAdditionalProperties().containsKey(AdditionalProperties.VALUEBUDGETID)) {

@@ -4,6 +4,7 @@ import de.hf.framework.audit.AuditService;
 import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.restmodel.InstrumentType;
+import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.valuation.events.out.ValueCurveCalculatedEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import reactor.core.publisher.Flux;
@@ -34,7 +35,7 @@ public class CashAccValueHandler extends AbsValueHandler {
         if(instrument.getInstrumentType().equals(InstrumentType.BUDGET)){
             return dataReader.findByValueBudget(instrument.getBusinesskey())
                 .flatMap(i->{
-                    return dataReader.findValueCurveByInstrumentBusinesskey(i.getBusinesskey());
+                    return dataReader.findValueCurve(i.getBusinesskey(), ValuationType.MARKETVALUE);
                 })
                 .collectList()
                 .flatMap(c->{

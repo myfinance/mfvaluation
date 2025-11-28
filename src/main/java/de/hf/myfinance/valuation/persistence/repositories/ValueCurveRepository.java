@@ -10,7 +10,9 @@ import reactor.core.publisher.Mono;
 
 public interface ValueCurveRepository  extends ReactiveCrudRepository<ValueCurveEntity, ValueCurveKey> {
     @Query("{ 'valueCurveKey.instrumentBusinesskey' : ?0}")
-    Mono<ValueCurveEntity> findByInstrumentBusinesskey(String businesskey);
+    Flux<ValueCurveEntity> findByInstrumentBusinesskey(String businesskey);
     @Query("{ 'valueCurveKey.instrumentBusinesskey' : { $in: ?0 }}")
     Flux<ValueCurveEntity> findByInstrumentBusinesskeyIn(Iterable<String> instrumentBusinesskeyIterable);
+
+    Mono<ValueCurveEntity> findByValueCurveKey(ValueCurveKey valueCurveKey);
 }

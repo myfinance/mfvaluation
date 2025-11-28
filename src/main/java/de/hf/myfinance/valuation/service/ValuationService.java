@@ -7,6 +7,7 @@ import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Position;
 import de.hf.myfinance.restmodel.Transaction;
 import de.hf.myfinance.restmodel.TransactionType;
+import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import org.springframework.stereotype.Component;
@@ -38,11 +39,11 @@ public class ValuationService {
     }
 
     public Mono<Double> getValue(String businesskey, LocalDate date) {
-        return dataReader.findValueCurveByInstrumentBusinesskey(businesskey).flatMap(c -> extractValueFromCurve(c, date));
+        return dataReader.findValueCurve(businesskey, ValuationType.MARKETVALUE).flatMap(c -> extractValueFromCurve(c, date));
     }
 
     public Mono<LocalDateTime> getValueTs(String businesskey) {
-        return dataReader.findValueCurveByInstrumentBusinesskey(businesskey).flatMap(c -> {
+        return dataReader.findValueCurve(businesskey, ValuationType.MARKETVALUE).flatMap(c -> {
             if(c.getLastUpdateTs()==null) return Mono.just(LocalDateTime.MIN);
             return Mono.just(c.getLastUpdateTs());
         });
@@ -64,7 +65,7 @@ public class ValuationService {
         if (startDate.isAfter(endDate) || startDate.getYear() < 1970) {
             throw new MFException(MFMsgKey.ILLEGAL_ARGUMENTS, "no valid dates:" + startDate +", " + endDate);
         }
-        return dataReader.findValueCurveByInstrumentBusinesskey(businesskey).flatMap(c -> fillCurveGaps(c, startDate, endDate));
+        return dataReader.findValueCurve(businesskey, ValuationType.MARKETVALUE).flatMap(c -> fillCurveGaps(c, startDate, endDate));
     }
 
     private Mono<Double> extractValueFromCurve(final ValueCurve valueCurve, final LocalDate date) {
@@ -268,7 +269,7 @@ public class ValuationService {
     public Mono<Map<String,Double>> getLinkedValues(String businesskey, LocalDate valueDate){
         return dataReader.findByValueBudget(businesskey)                
             .flatMap(i->{
-                return dataReader.findValueCurveByInstrumentBusinesskey(i.getBusinesskey());
+                return dataReader.findValueCurve(i.getBusinesskey(), ValuationType.MARKETVALUE);
             })
             .flatMap(c -> fillCurveGaps(c, valueDate, valueDate))
             .collectList()

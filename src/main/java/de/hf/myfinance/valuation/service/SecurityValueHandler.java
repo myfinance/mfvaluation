@@ -44,7 +44,7 @@ public class SecurityValueHandler extends AbsValueHandler{
                 }
             });
         }
-        return dataReader.findValueCurvesByBusinesskeyIn(curves2Load).collectList()
+        return dataReader.findMarketValueCurvesByBusinesskeyIn(curves2Load).collectList()
                 .flatMap(i->createPriceMap(i, endOfDayPrices));
     }
 

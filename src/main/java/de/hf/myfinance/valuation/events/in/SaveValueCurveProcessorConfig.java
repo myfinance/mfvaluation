@@ -9,6 +9,7 @@ import de.hf.myfinance.valuation.events.out.PositionSavedEventHandler;
 import de.hf.myfinance.valuation.events.out.ValuationEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import de.hf.myfinance.valuation.persistence.entities.ValueCurveEntity;
+import de.hf.myfinance.valuation.persistence.entities.ValueCurveKey;
 import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.ValueCurveRepository;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +51,7 @@ public class SaveValueCurveProcessorConfig  {
                 case CREATE:
                     auditService.saveMessage("save valueCurve of instrument with businesskey=" + event.getKey(), Severity.INFO, AUDIT_MSG_TYPE);
                     var valueCurve = valueCurveMapper.apiToEntity(event.getData());
-                    valueCurveRepository.findByInstrumentBusinesskey(valueCurve.getInstrumentBusinesskey())
+                    valueCurveRepository.findByValueCurveKey(new ValueCurveKey(valueCurve.getInstrumentBusinesskey(), valueCurve.getValueCurveKey().getValuationType()))
                             .switchIfEmpty(Mono.just(valueCurve))
                             .map(e -> {
                                 e.setValueCurve(valueCurve.getValueCurve());

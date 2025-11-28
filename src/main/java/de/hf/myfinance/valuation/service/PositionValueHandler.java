@@ -49,7 +49,7 @@ public class PositionValueHandler extends AbsCurveHandler{
 
     public Mono<Void> calcPositionValueCurve() {
         Mono<ValueCurve> positionCurveMono = dataReader.findPositonByKey(depotId, securityId);
-        Mono<ValueCurve> priceCurveMono = dataReader.findValueCurveByInstrumentBusinesskey(securityId);
+        Mono<ValueCurve> priceCurveMono = dataReader.findValueCurve(securityId, ValuationType.MARKETVALUE);
         Mono<List<Trade>> tradesMono = dataReader.findTradesByKey(depotId, securityId).collectList();
         Mono<List<Cashflow>> cashflowsMono = dataReader.findAllCashflow4Instrument(securityId).collectList();
 
