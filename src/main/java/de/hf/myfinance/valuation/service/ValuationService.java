@@ -39,7 +39,9 @@ public class ValuationService {
     }
 
     public Mono<Double> getValue(String businesskey, LocalDate date, ValuationType valType) {
-        return dataReader.findValueCurve(businesskey, valType).flatMap(c -> extractValueFromCurve(c, date));
+        return dataReader.findValueCurve(businesskey, valType)
+                .switchIfEmpty(dataReader.findValueCurve(businesskey, ValuationType.MARKETVALUE))
+                .flatMap(c -> extractValueFromCurve(c, date));
     }
 
     public Mono<LocalDateTime> getValueTs(String businesskey) {
