@@ -33,7 +33,12 @@ public class CagrCalculator {
                     List<ValueCurve> positionList = tuple.getT3();
                     List<ValueCurve> positionValueList = tuple.getT4();
 
-                    double cagr = calculateCagr(positionList, positionValueList, tradeList, cashflowList, LocalDate.now().minusYears(5), LocalDate.now());
+                    LocalDate beginDate = tradeList.stream()
+                        .map(Trade::getTradeDate)
+                        .min(LocalDate::compareTo)
+                        .orElse(LocalDate.now());
+
+                    double cagr = calculateCagr(positionList, positionValueList, tradeList, cashflowList, beginDate, LocalDate.now());
                     System.out.println("Calculated CAGR: " + cagr);
                     return cagr;
                 });
