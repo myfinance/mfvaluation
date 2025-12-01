@@ -30,7 +30,7 @@ public class ValueHandlerFactory {
     }
 
     public Mono<ValueHandler> getValueHandler(String businesskey){
-        return dataReader.findByBusinesskey(businesskey)
+        return dataReader.findInstrumentByBusinesskey(businesskey)
                 .switchIfEmpty(Mono.error(new MFException(MFMsgKey.UNKNOWN_INSTRUMENT_EXCEPTION, " Instrument for id:" + businesskey + " not found")))
                 .flatMap(this::createValueHandler);
     }

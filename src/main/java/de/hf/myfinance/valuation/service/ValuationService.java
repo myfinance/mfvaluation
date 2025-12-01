@@ -200,8 +200,8 @@ public class ValuationService {
     }
 
     public Flux<Position> getPositions(List<String> depots) {
-        var postions = dataReader.findAllPostions(depots).map(this::mapPositionValueCurveToPosition);
-        var postionValues = dataReader.findAllPostionValues(depots).map(this::mapPositionValueValueCurveToPosition);
+        var postions = dataReader.findAllPostions4Depots(depots).map(this::mapPositionValueCurveToPosition);
+        var postionValues = dataReader.findAllPostionValues4Depots(depots).map(this::mapPositionValueValueCurveToPosition);
 
         var result = Mono.zip(
             postions.collectList(),
@@ -262,14 +262,14 @@ public class ValuationService {
     }
 
     public Mono<String> recalcAllCurves(){
-        return dataReader.findAll()
+        return dataReader.findAllInstruments()
             .flatMap(i -> valueHandlerFactory.getValueHandler(i.getBusinesskey())
                 .flatMap(vh -> vh.calcValueCurve()))
             .then(Mono.just("Recalculation successful"));
     }
 
     public Mono<Map<String,Double>> getLinkedValues(String businesskey, LocalDate valueDate, ValuationType valType){
-        return dataReader.findByValueBudget(businesskey)                
+        return dataReader.findInstrumentByValueBudget(businesskey)                
             .flatMap(i->{
                 return dataReader.findValueCurve(i.getBusinesskey(), valType);
             })

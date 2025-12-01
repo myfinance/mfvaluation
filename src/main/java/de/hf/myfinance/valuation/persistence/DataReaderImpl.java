@@ -65,12 +65,12 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
-    public Mono<Instrument> findByBusinesskey(String businesskey) {
+    public Mono<Instrument> findInstrumentByBusinesskey(String businesskey) {
         return instrumentRepository.findByBusinesskey(businesskey).map(e-> instrumentMapper.entityToApi(e));
     }
 
     @Override
-    public Flux<Instrument> findAll() {
+    public Flux<Instrument> findAllInstruments() {
         return instrumentRepository.findAll().map(e-> instrumentMapper.entityToApi(e));
     }
 
@@ -80,7 +80,7 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
-    public Flux<Instrument> findByParentBusinesskey(String parentBusinesskey){
+    public Flux<Instrument> findInstrumentByParentBusinesskey(String parentBusinesskey){
         return instrumentRepository.findByParentBusinesskey(parentBusinesskey).map(e-> instrumentMapper.entityToApi(e));
     }
 
@@ -90,7 +90,7 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
-    public Flux<Instrument> findByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType){
+    public Flux<Instrument> findInstrumentByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType){
         return instrumentRepository.findByParentBusinesskeyAndInstrumentType(parentBusinesskey, instrumentType).map(e-> instrumentMapper.entityToApi(e));
     }
 
@@ -143,17 +143,37 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
-    public Flux<Instrument> findByValueBudget(String valueBudget){
+    public Flux<Instrument> findInstrumentByValueBudget(String valueBudget){
         return instrumentRepository.findByValueBudget(valueBudget).map(e-> instrumentMapper.entityToApi(e));
     }
 
     @Override
-    public Flux<ValueCurve> findAllPostions(List<String> depots) {
+    public Flux<ValueCurve> findAllPostions4Depots(List<String> depots) {
         return positionRepository.findByPositionKey_DepotBusinessKeyIn(depots).map(this::positionToValueCurve);
     }
 
     @Override
-    public Flux<ValueCurve> findAllPostionValues(List<String> depots) {
+    public Flux<ValueCurve> findAllPostionValues4Depots(List<String> depots) {
         return positionValueRepository.findByDepotBusinessKeyInAndValuationType(depots, ValuationType.MARKETVALUE).map(this::positionValueToValueCurve);
+    }
+
+    @Override
+    public Flux<Cashflow> findAllCashflows() {
+        return cashflowRepository.findAll().map(e-> cashflowMapper.entityToApi(e));
+    }
+
+    @Override
+    public Flux<Trade> findAllTrades() {
+        return tradeRepository.findAll().map(e-> tradeMapper.entityToApi(e));
+    }
+
+    @Override
+    public Flux<ValueCurve> findAllPostions() {
+        return positionRepository.findAll().map(this::positionToValueCurve);
+    }
+
+    @Override
+    public Flux<ValueCurve> findAllPostionValues() {
+        return positionValueRepository.findAll().map(this::positionValueToValueCurve);
     }
 }

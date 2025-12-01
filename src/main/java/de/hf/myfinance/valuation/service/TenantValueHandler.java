@@ -6,6 +6,7 @@ import de.hf.myfinance.restmodel.InstrumentType;
 import de.hf.myfinance.valuation.events.out.ValueCurveCalculatedEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public class TenantValueHandler  extends PortfolioValueHandler{
 
@@ -15,6 +16,11 @@ public class TenantValueHandler  extends PortfolioValueHandler{
 
     @Override
     protected Flux<Instrument> getChilds4Valuation() {
-        return dataReader.findByParentBusinesskeyAndInstrumentType(instrument.getBusinesskey(), InstrumentType.ACCOUNTPORTFOLIO);
+        return dataReader.findInstrumentByParentBusinesskeyAndInstrumentType(instrument.getBusinesskey(), InstrumentType.ACCOUNTPORTFOLIO);
+    }
+
+    @Override
+    public Mono<Void> calcValueCurve(){
+        return super.calcValueCurve();
     }
 }

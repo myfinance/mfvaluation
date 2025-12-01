@@ -48,7 +48,7 @@ public class CashAccValueHandler extends AbsValueHandler {
     }
 
     Mono<TreeMap<LocalDate, Double>> addLinkedInstrumentValues(TreeMap<LocalDate, Double> valueCurve, ValuationType valuationType) {
-        return dataReader.findByValueBudget(instrument.getBusinesskey())
+        return dataReader.findInstrumentByValueBudget(instrument.getBusinesskey())
                 .flatMap(i->{
                     return getValueCurve4ValuationType(i, valuationType);
                 })

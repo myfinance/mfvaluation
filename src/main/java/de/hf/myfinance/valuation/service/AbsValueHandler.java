@@ -64,7 +64,7 @@ public abstract class AbsValueHandler extends AbsCurveHandler implements ValueHa
     }
 
     protected Flux<Instrument> getChilds4Valuation() {
-        return dataReader.findByParentBusinesskey(instrument.getBusinesskey());
+        return dataReader.findInstrumentByParentBusinesskey(instrument.getBusinesskey());
     }
 
     protected Mono<TreeMap<LocalDate, Double>> extractAndGetCombinedValueCurve(List<ValueCurve>  valueCurves) {
