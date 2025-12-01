@@ -163,6 +163,11 @@ public class DataReaderImpl implements DataReader{
     }
 
     @Override
+    public Flux<Cashflow> findAllCashflows4InstrumentKeyList(List<String> instrumentKeys) {
+        return cashflowRepository.findByinstrumentBusinesskeyIn(instrumentKeys).map(e-> cashflowMapper.entityToApi(e));
+    }
+
+    @Override
     public Flux<Trade> findAllTrades() {
         return tradeRepository.findAll().map(e-> tradeMapper.entityToApi(e));
     }

@@ -15,6 +15,7 @@ public interface DataReader {
 
     Flux<Cashflow> findAllCashflow4Instrument(String businesskey);
     Flux<Cashflow> findAllCashflows();
+    Flux<Cashflow> findAllCashflows4InstrumentKeyList(List<String> instrumentKeys);
 
     Flux<Trade> findTradesByKey(String depotBusinessKey, String securityBusinessKey);
     Flux<Trade> findAllTrades();
