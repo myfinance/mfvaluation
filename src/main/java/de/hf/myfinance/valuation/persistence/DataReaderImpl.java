@@ -11,11 +11,13 @@ import de.hf.myfinance.valuation.persistence.entities.ValueCurveKey;
 import de.hf.myfinance.valuation.persistence.mapper.CashflowMapper;
 import de.hf.myfinance.valuation.persistence.mapper.EndOfDayPricesMapper;
 import de.hf.myfinance.valuation.persistence.mapper.InstrumentMapper;
+import de.hf.myfinance.valuation.persistence.mapper.PortfolioMetricsMapper;
 import de.hf.myfinance.valuation.persistence.mapper.TradeMapper;
 import de.hf.myfinance.valuation.persistence.mapper.ValueCurveMapper;
 import de.hf.myfinance.valuation.persistence.repositories.CashflowRepository;
 import de.hf.myfinance.valuation.persistence.repositories.EndOfDayPricesRepository;
 import de.hf.myfinance.valuation.persistence.repositories.InstrumentRepository;
+import de.hf.myfinance.valuation.persistence.repositories.PortfolioMetricsRepository;
 import de.hf.myfinance.valuation.persistence.repositories.PositionRepository;
 import de.hf.myfinance.valuation.persistence.repositories.PositionValueRepository;
 import de.hf.myfinance.valuation.persistence.repositories.TradeRepository;
@@ -30,7 +32,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
-public class DataReaderImpl implements DataReader{
+public class DataReaderImpl implements DataReader {
     private final InstrumentRepository instrumentRepository;
     private final InstrumentMapper instrumentMapper;
     private final CashflowRepository cashflowRepository;
@@ -43,13 +45,16 @@ public class DataReaderImpl implements DataReader{
     private final PositionValueRepository positionValueRepository;
     private final TradeRepository tradeRepository;
     private final TradeMapper tradeMapper;
+    private final PortfolioMetricsRepository portfolioMetricsRepository;
+    private final PortfolioMetricsMapper portfolioMetricsMapper;
 
     public DataReaderImpl(InstrumentRepository instrumentRepository, InstrumentMapper instrumentMapper,
-                          CashflowRepository cashflowRepository, CashflowMapper cashflowMapper,
-                          ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper,
-                          EndOfDayPricesRepository endOfDayPricesRepository, EndOfDayPricesMapper endOfDayPricesMapper, 
-                          PositionRepository positionRepository, PositionValueRepository positionValueRepository,
-                          TradeRepository tradeRepository, TradeMapper tradeMapper) {
+            CashflowRepository cashflowRepository, CashflowMapper cashflowMapper,
+            ValueCurveRepository valueCurveRepository, ValueCurveMapper valueCurveMapper,
+            EndOfDayPricesRepository endOfDayPricesRepository, EndOfDayPricesMapper endOfDayPricesMapper,
+            PositionRepository positionRepository, PositionValueRepository positionValueRepository,
+            TradeRepository tradeRepository, TradeMapper tradeMapper,
+            PortfolioMetricsRepository portfolioMetricsRepository, PortfolioMetricsMapper portfolioMetricsMapper) {
         this.instrumentRepository = instrumentRepository;
         this.instrumentMapper = instrumentMapper;
         this.cashflowRepository = cashflowRepository;
@@ -62,46 +67,55 @@ public class DataReaderImpl implements DataReader{
         this.positionValueRepository = positionValueRepository;
         this.tradeRepository = tradeRepository;
         this.tradeMapper = tradeMapper;
+        this.portfolioMetricsRepository = portfolioMetricsRepository;
+        this.portfolioMetricsMapper = portfolioMetricsMapper;
     }
 
     @Override
     public Mono<Instrument> findInstrumentByBusinesskey(String businesskey) {
-        return instrumentRepository.findByBusinesskey(businesskey).map(e-> instrumentMapper.entityToApi(e));
+        return instrumentRepository.findByBusinesskey(businesskey).map(e -> instrumentMapper.entityToApi(e));
     }
 
     @Override
     public Flux<Instrument> findAllInstruments() {
-        return instrumentRepository.findAll().map(e-> instrumentMapper.entityToApi(e));
+        return instrumentRepository.findAll().map(e -> instrumentMapper.entityToApi(e));
     }
 
     @Override
     public Flux<Cashflow> findAllCashflow4Instrument(String businesskey) {
-        return cashflowRepository.findByInstrumentBusinesskey(businesskey).map(e-> cashflowMapper.entityToApi(e));
+        return cashflowRepository.findByInstrumentBusinesskey(businesskey).map(e -> cashflowMapper.entityToApi(e));
     }
 
     @Override
-    public Flux<Instrument> findInstrumentByParentBusinesskey(String parentBusinesskey){
-        return instrumentRepository.findByParentBusinesskey(parentBusinesskey).map(e-> instrumentMapper.entityToApi(e));
+    public Flux<Instrument> findInstrumentByParentBusinesskey(String parentBusinesskey) {
+        return instrumentRepository.findByParentBusinesskey(parentBusinesskey)
+                .map(e -> instrumentMapper.entityToApi(e));
     }
 
     @Override
-    public Mono<ValueCurve> findValueCurve(String businesskey, ValuationType valuationType){
-        return valueCurveRepository.findByValueCurveKey(new ValueCurveKey(businesskey, valuationType)).map(e-> valueCurveMapper.entityToApi(e));
+    public Mono<ValueCurve> findValueCurve(String businesskey, ValuationType valuationType) {
+        return valueCurveRepository.findByValueCurveKey(new ValueCurveKey(businesskey, valuationType))
+                .map(e -> valueCurveMapper.entityToApi(e));
     }
 
     @Override
-    public Flux<Instrument> findInstrumentByParentBusinesskeyAndInstrumentType(String parentBusinesskey, InstrumentType instrumentType){
-        return instrumentRepository.findByParentBusinesskeyAndInstrumentType(parentBusinesskey, instrumentType).map(e-> instrumentMapper.entityToApi(e));
+    public Flux<Instrument> findInstrumentByParentBusinesskeyAndInstrumentType(String parentBusinesskey,
+            InstrumentType instrumentType) {
+        return instrumentRepository.findByParentBusinesskeyAndInstrumentType(parentBusinesskey, instrumentType)
+                .map(e -> instrumentMapper.entityToApi(e));
     }
 
     @Override
-    public Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey){
-        return endOfDayPricesRepository.findByInstrumentBusinesskey(businesskey).map(e-> endOfDayPricesMapper.entityToApi(e));
+    public Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey) {
+        return endOfDayPricesRepository.findByInstrumentBusinesskey(businesskey)
+                .map(e -> endOfDayPricesMapper.entityToApi(e));
     }
 
     @Override
-    public Flux<ValueCurve> findMarketValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable){
-        return valueCurveRepository.findByInstrumentBusinesskeyIn(businesskeyIterable).map(e-> valueCurveMapper.entityToApi(e)).filter(c->c.getValuationType().equals(ValuationType.MARKETVALUE));
+    public Flux<ValueCurve> findMarketValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable) {
+        return valueCurveRepository.findByInstrumentBusinesskeyIn(businesskeyIterable)
+                .map(e -> valueCurveMapper.entityToApi(e))
+                .filter(c -> c.getValuationType().equals(ValuationType.MARKETVALUE));
     }
 
     @Override
@@ -112,39 +126,42 @@ public class DataReaderImpl implements DataReader{
 
     @Override
     public Flux<Trade> findTradesByKey(String depotBusinessKey, String securityBusinessKey) {
-        return tradeRepository.findByDepotBusinessKeyAndSecurityBusinessKey(depotBusinessKey, securityBusinessKey).switchIfEmpty(handleNotExisting()).map(tradeMapper::entityToApi);
+        return tradeRepository.findByDepotBusinessKeyAndSecurityBusinessKey(depotBusinessKey, securityBusinessKey)
+                .switchIfEmpty(handleNotExisting()).map(tradeMapper::entityToApi);
     }
-    private Flux<TradeEntity> handleNotExisting(){
+
+    private Flux<TradeEntity> handleNotExisting() {
         return Flux.error(new MFException(MFMsgKey.UNKNOWN_INSTRUMENT_EXCEPTION, "No Trades for this Id available."));
     }
 
-    private ValueCurve positionToValueCurve(PositionEntity position){
+    private ValueCurve positionToValueCurve(PositionEntity position) {
         var valueCurve = new ValueCurve(position.getPositionKey().getSecurityBusinessKey());
         valueCurve.setParentBusinesskey(position.getPositionKey().getDepotBusinessKey());
-        valueCurve.setValueCurve(new TreeMap<LocalDate,Double>(position.getPositionCurve()));
+        valueCurve.setValueCurve(new TreeMap<LocalDate, Double>(position.getPositionCurve()));
         return valueCurve;
     }
 
     @Override
-    public Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey, ValuationType valuationType){
-        return positionValueRepository.findByDepotBusinessKeyAndValuationType(depotBusinessKey, valuationType).map(this::positionValueToValueCurve);
+    public Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey, ValuationType valuationType) {
+        return positionValueRepository.findByDepotBusinessKeyAndValuationType(depotBusinessKey, valuationType)
+                .map(this::positionValueToValueCurve);
     }
 
     @Override
-    public Flux<ValueCurve> findPositonBySecurityKey(String securityKey){
+    public Flux<ValueCurve> findPositonBySecurityKey(String securityKey) {
         return positionRepository.findByPositionKey_SecurityBusinessKey(securityKey).map(this::positionToValueCurve);
     }
 
-    private ValueCurve positionValueToValueCurve(PositionValueEntity positionValue){
+    private ValueCurve positionValueToValueCurve(PositionValueEntity positionValue) {
         var valueCurve = new ValueCurve(positionValue.getPositionValueKey().getSecurityBusinessKey());
         valueCurve.setParentBusinesskey(positionValue.getPositionValueKey().getDepotBusinessKey());
-        valueCurve.setValueCurve(new TreeMap<LocalDate,Double>(positionValue.getPositionValueCurve()));
+        valueCurve.setValueCurve(new TreeMap<LocalDate, Double>(positionValue.getPositionValueCurve()));
         return valueCurve;
     }
 
     @Override
-    public Flux<Instrument> findInstrumentByValueBudget(String valueBudget){
-        return instrumentRepository.findByValueBudget(valueBudget).map(e-> instrumentMapper.entityToApi(e));
+    public Flux<Instrument> findInstrumentByValueBudget(String valueBudget) {
+        return instrumentRepository.findByValueBudget(valueBudget).map(e -> instrumentMapper.entityToApi(e));
     }
 
     @Override
@@ -154,22 +171,23 @@ public class DataReaderImpl implements DataReader{
 
     @Override
     public Flux<ValueCurve> findAllPostionValues4Depots(List<String> depots) {
-        return positionValueRepository.findByDepotBusinessKeyInAndValuationType(depots, ValuationType.MARKETVALUE).map(this::positionValueToValueCurve);
+        return positionValueRepository.findByDepotBusinessKeyInAndValuationType(depots, ValuationType.MARKETVALUE)
+                .map(this::positionValueToValueCurve);
     }
 
     @Override
     public Flux<Cashflow> findAllCashflows() {
-        return cashflowRepository.findAll().map(e-> cashflowMapper.entityToApi(e));
+        return cashflowRepository.findAll().map(e -> cashflowMapper.entityToApi(e));
     }
 
     @Override
     public Flux<Cashflow> findAllCashflows4InstrumentKeyList(List<String> instrumentKeys) {
-        return cashflowRepository.findByinstrumentBusinesskeyIn(instrumentKeys).map(e-> cashflowMapper.entityToApi(e));
+        return cashflowRepository.findByinstrumentBusinesskeyIn(instrumentKeys).map(e -> cashflowMapper.entityToApi(e));
     }
 
     @Override
     public Flux<Trade> findAllTrades() {
-        return tradeRepository.findAll().map(e-> tradeMapper.entityToApi(e));
+        return tradeRepository.findAll().map(e -> tradeMapper.entityToApi(e));
     }
 
     @Override
@@ -181,4 +199,17 @@ public class DataReaderImpl implements DataReader{
     public Flux<ValueCurve> findAllPostionValues() {
         return positionValueRepository.findAll().map(this::positionValueToValueCurve);
     }
+
+    @Override
+    public Flux<PortfolioMetrics> findAllPortfolioMetrics() {
+        return portfolioMetricsRepository.findAll()
+                .map(e -> portfolioMetricsMapper.entityToApi(e));
+    }
+
+    @Override
+    public Mono<PortfolioMetrics> findPortfolioMetricsByPortfolio(String portfolio) {
+        return portfolioMetricsRepository.findById(portfolio)
+                .map(e -> portfolioMetricsMapper.entityToApi(e));
+    }
+
 }

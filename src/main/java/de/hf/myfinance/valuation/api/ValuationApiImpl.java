@@ -2,6 +2,7 @@ package de.hf.myfinance.valuation.api;
 
 import de.hf.myfinance.restapi.ValuationApi;
 import de.hf.myfinance.restmodel.Cashflow;
+import de.hf.myfinance.restmodel.PortfolioMetrics;
 import de.hf.myfinance.restmodel.Position;
 import de.hf.myfinance.restmodel.ValuationType;
 import de.hf.myfinance.restmodel.ValueCurve;
@@ -74,6 +75,16 @@ public class ValuationApiImpl implements ValuationApi {
     @Override
     public Mono<String> recalcAllCurves() {
         return valuationService.recalcAllCurves();
+    }
+
+    @Override
+    public Flux<PortfolioMetrics> getPortfolioMetrics() {
+        return valuationService.getAllPortfolioMetrics();
+    }
+
+    @Override
+    public Mono<String> recalcAPortfolioMetrics() {
+        return valuationService.recalcAPortfolioMetrics();
     }
 
 }

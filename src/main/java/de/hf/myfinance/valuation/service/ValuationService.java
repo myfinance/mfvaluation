@@ -4,6 +4,7 @@ import de.hf.framework.audit.AuditService;
 import de.hf.framework.exceptions.MFException;
 import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.restmodel.Cashflow;
+import de.hf.myfinance.restmodel.PortfolioMetrics;
 import de.hf.myfinance.restmodel.Position;
 import de.hf.myfinance.restmodel.Transaction;
 import de.hf.myfinance.restmodel.TransactionType;
@@ -26,16 +27,20 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.sound.sampled.Port;
+
 @Component
 public class ValuationService {
     private final DataReader dataReader;
+    private final CagrCalculator cagrCalculator;
     private final AuditService auditService;
     private final ValueHandlerFactory valueHandlerFactory;
 
-    public ValuationService(DataReader dataReader, AuditService auditService, ValueHandlerFactory valueHandlerFactory) {
+    public ValuationService(DataReader dataReader, AuditService auditService, ValueHandlerFactory valueHandlerFactory, CagrCalculator cagrCalculator) {
         this.dataReader = dataReader;
         this.auditService = auditService;
         this.valueHandlerFactory = valueHandlerFactory;
+        this.cagrCalculator = cagrCalculator;
     }
 
     public Mono<Double> getValue(String businesskey, LocalDate date, ValuationType valType) {
@@ -282,5 +287,14 @@ public class ValuationService {
                 });
                 return Mono.just(valueMap);
             });
+    }
+
+    public Flux<PortfolioMetrics> getAllPortfolioMetrics(){
+        return dataReader.findAllPortfolioMetrics();
+    }
+
+    public Mono<String> recalcAPortfolioMetrics(){
+        return cagrCalculator.calcAllCagrValues()
+            .then(Mono.just("Recalculation of PortfolioMetrics successful"));
     }
 }

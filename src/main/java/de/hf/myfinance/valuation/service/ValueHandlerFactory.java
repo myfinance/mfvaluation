@@ -4,6 +4,7 @@ import de.hf.framework.audit.AuditService;
 import de.hf.framework.exceptions.MFException;
 import de.hf.myfinance.exception.MFMsgKey;
 import de.hf.myfinance.restmodel.Instrument;
+import de.hf.myfinance.valuation.events.out.PortfolioMetricsEventHandler;
 import de.hf.myfinance.valuation.events.out.PositionBuildedEventHandler;
 import de.hf.myfinance.valuation.events.out.PositionValueCalculatedEventHandler;
 import de.hf.myfinance.valuation.events.out.ValueCurveCalculatedEventHandler;
@@ -19,14 +20,16 @@ public class ValueHandlerFactory {
     protected final ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler;
     protected final PositionBuildedEventHandler positionBuildedEventHandler;
     protected final PositionValueCalculatedEventHandler positionValueCalculatedEventHandler;
+    protected final PortfolioMetricsEventHandler portfolioMetricsEventHandler;
 
     public ValueHandlerFactory(DataReader dataReader, AuditService auditService, ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler, 
-                            PositionBuildedEventHandler positionBuildedEventHandler, PositionValueCalculatedEventHandler positionValueCalculatedEventHandler) {
+                            PositionBuildedEventHandler positionBuildedEventHandler, PositionValueCalculatedEventHandler positionValueCalculatedEventHandler, PortfolioMetricsEventHandler portfolioMetricsEventHandler) {
         this.dataReader = dataReader;
         this.auditService = auditService;
         this.valueCurveCalculatedEventHandler = valueCurveCalculatedEventHandler;
         this.positionBuildedEventHandler = positionBuildedEventHandler;
         this.positionValueCalculatedEventHandler = positionValueCalculatedEventHandler;
+        this.portfolioMetricsEventHandler = portfolioMetricsEventHandler;
     }
 
     public Mono<ValueHandler> getValueHandler(String businesskey){
@@ -46,7 +49,7 @@ public class ValueHandlerFactory {
                 valueHandler = new CashAccValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
                 break;
             case TENANT:
-                valueHandler = new TenantValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);
+                valueHandler = new TenantValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService, portfolioMetricsEventHandler);
                 break;
             case PORTFOLIO:
                 valueHandler = new PortfolioValueHandler(instrument, dataReader, valueCurveCalculatedEventHandler, auditService);

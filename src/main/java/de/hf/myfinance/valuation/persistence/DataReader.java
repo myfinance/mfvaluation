@@ -32,4 +32,7 @@ public interface DataReader {
     Flux<ValueCurve> findAllPostions();
 
     Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey);
+
+    Flux<PortfolioMetrics> findAllPortfolioMetrics();
+    Mono<PortfolioMetrics> findPortfolioMetricsByPortfolio(String portfolio);
 }

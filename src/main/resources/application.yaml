@@ -28,7 +28,7 @@ spring.data.mongodb:
 spring:
   cloud:
     function:
-      definition: extractCashflowsAndTradesProcessor;saveTradeProcessor;saveCashflowsProcessor;saveInstrumentProcessor;saveMarketDataProcessor;valuationProcessor;positionProcessor;saveValueCurveProcessor;positionValueProcessor;savePositionProcessor;savePositionValueProcessor
+      definition: extractCashflowsAndTradesProcessor;saveTradeProcessor;saveCashflowsProcessor;saveInstrumentProcessor;saveMarketDataProcessor;valuationProcessor;positionProcessor;saveValueCurveProcessor;positionValueProcessor;savePositionProcessor;savePositionValueProcessor;savePortfolioMetricsProcessor;calculatePortfolioMetricsProcessor
 
 spring.cloud.stream:
   defaultBinder: rabbit
@@ -66,6 +66,12 @@ spring.cloud.stream:
   bindings.savePositionValueProcessor-in-0:
     destination: positionValueCalculated
     group: savePositionValueGroup
+  bindings.savePortfolioMetricsProcessor-in-0:
+    destination: portfolioMetricsCalculated
+    group: savePortfolioMetricsGroup
+  bindings.calculatePortfolioMetricsProcessor-in-0:
+    destination: calculatePortfolioMetrics
+    group: calculatePortfolioMetricsGroup
   bindings.valuationDataChanged-out-0:
     destination: valuationDataChanged
     producer:
@@ -97,7 +103,15 @@ spring.cloud.stream:
   bindings.positionValueCalculated-out-0:
     destination: positionValueCalculated
     producer:
-      required-groups: savePositionValueGroup                          
+      required-groups: savePositionValueGroup     
+  bindings.portfolioMetricsCalculated-out-0:
+    destination: portfolioMetricsCalculated
+    producer:
+      required-groups: savePortfolioMetricsGroup    
+  bindings.portfolioMetrics-out-0:
+    destination: calculatePortfolioMetrics
+    producer:
+      required-groups: calculatePortfolioMetricsGroup                   
  
 
 spring.rabbitmq:

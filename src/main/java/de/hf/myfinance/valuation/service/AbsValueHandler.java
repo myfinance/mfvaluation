@@ -22,6 +22,7 @@ public abstract class AbsValueHandler extends AbsCurveHandler implements ValueHa
 
     protected Instrument instrument;
     protected final ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler;
+    
     protected static final String AUDIT_MSG_TYPE="ValueHandler_User_Event";
 
     protected AbsValueHandler(Instrument instrument, DataReader dataReader, ValueCurveCalculatedEventHandler valueCurveCalculatedEventHandler, AuditService auditService){

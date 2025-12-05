@@ -81,6 +81,10 @@ public class EventProcessorTestBase extends MongoDbTestBase {
     protected Consumer<Event<String, String>> valuationProcessor;
 
     @Autowired
+    @Qualifier("portfolioMetricsProcessor")
+    protected Consumer<Event<String, String>> portfolioMetricsProcessor;
+
+    @Autowired
     @Qualifier("saveMarketDataProcessor")
     protected Consumer<Event<String, EndOfDayPrices>> saveMarketDataProcessor;
 
