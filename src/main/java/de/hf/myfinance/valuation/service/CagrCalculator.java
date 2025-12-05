@@ -109,7 +109,7 @@ public class CagrCalculator extends AbsCurveHandler {
         portfolioMetricsCalculatedEventHandler.sendPortfolioMetricsCalculatedEvent(kryptoportfolio);
     }
 
-    private Double calcCagr( List<Cashflow> cashflows, LocalDate endDate) { 
+    public Double calcCagr( List<Cashflow> cashflows, LocalDate endDate) { 
 
         final int maxIterations = 100;
         final double tolerance = 1.0e-6;

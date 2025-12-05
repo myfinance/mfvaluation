@@ -1,21 +1,28 @@
 package de.hf.myfinance.valuation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 
+import de.hf.framework.audit.AuditService;
 import de.hf.myfinance.event.Event;
 import de.hf.myfinance.restmodel.AdditionalProperties;
 import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Instrument;
 import de.hf.myfinance.restmodel.InstrumentType;
 import de.hf.myfinance.restmodel.ValueCurve;
+import de.hf.myfinance.valuation.events.out.PortfolioMetricsCalculatedEventHandler;
+import de.hf.myfinance.valuation.persistence.DataReader;
+import de.hf.myfinance.valuation.service.CagrCalculator;
 import de.hf.testhelper.JsonHelper;
 
 public class PortfolioMetricsTest extends EventProcessorTestBase {
@@ -78,15 +85,28 @@ public class PortfolioMetricsTest extends EventProcessorTestBase {
         messages = getMessages("portfolioMetricsCalculated-out-0");
         assertEquals(6, messages.size());
 
-        JsonHelper jsonHelper = new JsonHelper();
-        messages.forEach(m->{
-            var data = (LinkedHashMap)jsonHelper.convertJsonStringToMap(m).get("data");
-            var portfolio = (String) data.get("portfolio");
-            var totalCagr = (Double) data.get("totalCagr");
-            if(portfolio.equals("TOTAL")) {
-                 assertEquals(0.0, totalCagr);
-            }
+    }
 
-        });
+    @Test
+    void testCalcCagr() {
+        DataReader dataReader = mock(DataReader.class);
+        PortfolioMetricsCalculatedEventHandler portfolioMetricsCalculatedEventHandler = mock(PortfolioMetricsCalculatedEventHandler.class);
+        AuditService auditService = mock(AuditService.class);
+
+        CagrCalculator cagrCalculator = new CagrCalculator(dataReader, portfolioMetricsCalculatedEventHandler, auditService);
+
+        List<Cashflow> cashflows = new ArrayList<>();
+        cashflows.add(new Cashflow("buy", LocalDate.of(2020, 1, 1), "sec1", -10000.0));
+        cashflows.add(new Cashflow("buy2", LocalDate.of(2021, 3, 1), "sec1", -5000.0));
+        cashflows.add(new Cashflow("dividend", LocalDate.of(2022, 2, 15), "sec1", 300.0));
+        cashflows.add(new Cashflow("sell", LocalDate.of(2023, 1, 20), "sec1", 2000.0));
+        cashflows.add(new Cashflow("final", LocalDate.of(2025, 1, 1), "sec1", 20000.0));
+        
+
+
+        var result = cagrCalculator.calcCagr(cashflows, LocalDate.of(2025, 1, 1));
+
+        assertEquals(0.094, result, 0.001);
     }
 }
+
