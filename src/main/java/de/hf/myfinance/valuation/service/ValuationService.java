@@ -32,11 +32,11 @@ import javax.sound.sampled.Port;
 @Component
 public class ValuationService {
     private final DataReader dataReader;
-    private final CagrCalculator cagrCalculator;
+    private final PortfolioMetricsCalculator cagrCalculator;
     private final AuditService auditService;
     private final ValueHandlerFactory valueHandlerFactory;
 
-    public ValuationService(DataReader dataReader, AuditService auditService, ValueHandlerFactory valueHandlerFactory, CagrCalculator cagrCalculator) {
+    public ValuationService(DataReader dataReader, AuditService auditService, ValueHandlerFactory valueHandlerFactory, PortfolioMetricsCalculator cagrCalculator) {
         this.dataReader = dataReader;
         this.auditService = auditService;
         this.valueHandlerFactory = valueHandlerFactory;
@@ -294,7 +294,7 @@ public class ValuationService {
     }
 
     public Mono<String> recalcAPortfolioMetrics(){
-        return cagrCalculator.calcAllCagrValues()
+        return cagrCalculator.calcAllPortfolioMetrics()
             .then(Mono.just("Recalculation of PortfolioMetrics successful"));
     }
 }

@@ -22,7 +22,7 @@ import de.hf.myfinance.restmodel.InstrumentType;
 import de.hf.myfinance.restmodel.ValueCurve;
 import de.hf.myfinance.valuation.events.out.PortfolioMetricsCalculatedEventHandler;
 import de.hf.myfinance.valuation.persistence.DataReader;
-import de.hf.myfinance.valuation.service.CagrCalculator;
+import de.hf.myfinance.valuation.service.PortfolioMetricsCalculator;
 import de.hf.testhelper.JsonHelper;
 
 public class PortfolioMetricsTest extends EventProcessorTestBase {
@@ -93,7 +93,7 @@ public class PortfolioMetricsTest extends EventProcessorTestBase {
         PortfolioMetricsCalculatedEventHandler portfolioMetricsCalculatedEventHandler = mock(PortfolioMetricsCalculatedEventHandler.class);
         AuditService auditService = mock(AuditService.class);
 
-        CagrCalculator cagrCalculator = new CagrCalculator(dataReader, portfolioMetricsCalculatedEventHandler, auditService);
+        PortfolioMetricsCalculator cagrCalculator = new PortfolioMetricsCalculator(dataReader, portfolioMetricsCalculatedEventHandler, auditService);
 
         List<Cashflow> cashflows = new ArrayList<>();
         cashflows.add(new Cashflow("buy", LocalDate.of(2020, 1, 1), "sec1", -10000.0));
