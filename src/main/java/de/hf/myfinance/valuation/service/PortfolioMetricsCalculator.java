@@ -10,8 +10,6 @@ import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.annotation.JacksonInject.Value;
-
 import de.hf.framework.audit.AuditService;
 import de.hf.myfinance.restmodel.Cashflow;
 import de.hf.myfinance.restmodel.Instrument;
@@ -26,6 +24,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class PortfolioMetricsCalculator extends AbsCurveHandler {
 
+    private static final Boolean SAVECASHFLOWS=true;
     private final DataReader dataReader;
     private final PortfolioMetricsCalculatedEventHandler portfolioMetricsCalculatedEventHandler;
 
@@ -104,45 +103,74 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
         var portfolio = new PortfolioMetrics(portfolioName);
         portfolio.setIsSingleSecurity(false);     
 
+        LocalDate startDate = cashflows.stream()
+                        .map(Cashflow::getTransactiondate)
+                        .min(LocalDate::compareTo)
+                        .orElse(LocalDate.now());
         
-        var value = addFinalValuesAndCalcCagr(positionValues, cashflows, LocalDate.now());
+        var value = addStartAndFinalValuesAndCalcCagr(positionValues, cashflows, startDate, LocalDate.now());
         portfolio.setTotalCagr(value);
+        if(SAVECASHFLOWS) {
+            portfolio.setCashflows(cashflows.stream().map(cf->cf.getValue()).toList());
+        }
 
         var years = new ArrayList<Integer>();
         cashflows.forEach(cf -> {
             years.add(cf.getTransactiondate().getYear());
         });
         years.stream().forEach(year -> {
+           
+            var endDate = LocalDate.of(year, 12, 31);
             List<Cashflow> cfThisYear = cashflows.stream().filter(cf -> cf.getTransactiondate().getYear() == year).toList();
-            Double cagrPerYear = addFinalValuesAndCalcCagr(positionValues, cfThisYear, LocalDate.of(year, 12, 31));
+            var cfWithFinalValues = getCfWithStartAndFinalValues(positionValues, cfThisYear, LocalDate.of(year, 1, 1), endDate);   
+            Double cagrPerYear = calcCagr(cfWithFinalValues, endDate);
             if (portfolio.getCagrPerYear() == null) {
                 portfolio.setCagrPerYear(new HashMap<>());
             }
             portfolio.getCagrPerYear().put(year, cagrPerYear);
+            if(SAVECASHFLOWS) {
+                if(portfolio.getCashflowsWithStartAndEndValues()==null) {
+                    portfolio.setCashflowsWithStartAndEndValues(new HashMap<>());
+                }
+                var cfValuesList = new ArrayList<Double>();   
+                cfWithFinalValues.forEach(cf->cfValuesList.add(cf.getValue()));
+                portfolio.getCashflowsWithStartAndEndValues().put(year, cfValuesList);
+            }
         });
 
 
         portfolioMetricsCalculatedEventHandler.sendPortfolioMetricsCalculatedEvent(portfolio);
     }
 
-    private Double addFinalValuesAndCalcCagr( List<ValueCurve> positionValues, List<Cashflow> cashflows, LocalDate endDate) {
-        LocalDate startDate = cashflows.stream()
-                        .map(Cashflow::getTransactiondate)
-                        .min(LocalDate::compareTo)
-                        .orElse(LocalDate.now());
+    private Double addStartAndFinalValuesAndCalcCagr( List<ValueCurve> positionValues, List<Cashflow> cashflows, LocalDate startDate, LocalDate endDate) {
+
+        var cfWithFinalValues = getCfWithStartAndFinalValues(positionValues, cashflows, startDate, endDate);   
+        return calcCagr(cfWithFinalValues, endDate);
+    }
+    private ArrayList<Cashflow> getCfWithStartAndFinalValues(List<ValueCurve> positionValues, List<Cashflow> cashflows,
+            LocalDate startDate, LocalDate endDate) {
         var cfWithFinalValues = new ArrayList<Cashflow>(cashflows);
         positionValues.forEach(pv -> {
+            //-1 to get the value before start date, as on start date there could be a cashflow
             var startValue = extractValueFromCurve(pv.getValueCurve(), startDate.minusDays(1));
             var endValue = extractValueFromCurve(pv.getValueCurve(), endDate);
-            var value = endValue - startValue;
-            if(value==0) return;
-            var cf = new Cashflow();
-            cf.setInstrumentBusinesskey(pv.getInstrumentBusinesskey());
-            cf.setTransactiondate(endDate);
-            cf.setValue(value);
-            cfWithFinalValues.add(cf);
-        });   
-        return calcCagr(cfWithFinalValues, endDate);
+            if(startValue!=0) {
+                var cf = new Cashflow();
+                cf.setInstrumentBusinesskey(pv.getInstrumentBusinesskey());
+                cf.setTransactiondate(startDate);
+                cf.setValue(startValue);
+                cfWithFinalValues.add(cf);
+            }
+            if(endValue!=0) {
+                var cf = new Cashflow();
+                cf.setInstrumentBusinesskey(pv.getInstrumentBusinesskey());
+                cf.setTransactiondate(endDate);
+                cf.setValue(endValue);
+                cfWithFinalValues.add(cf);
+            }
+
+        });
+        return cfWithFinalValues;
     }
 
     public Double calcCagr( List<Cashflow> cashflows, LocalDate endDate) { 

@@ -1,10 +1,13 @@
 package de.hf.myfinance.valuation.persistence.entities;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import de.hf.myfinance.restmodel.Cashflow;
 
 @Document(collection = "portfoliometrics")
 public class PortfolioMetricsEntity {
@@ -23,6 +26,11 @@ public class PortfolioMetricsEntity {
     private Double totalCagr;
 
     private Boolean isSingleSecurity;
+
+    //just to understand from which cashflows the metrics were calculated
+    private List<Double> cashflows;
+    // with start and final values added
+    private Map<Integer, List<Double>> cashflowsWithStartAndEndValues;
 
     public PortfolioMetricsEntity(){}
 
@@ -76,4 +84,17 @@ public class PortfolioMetricsEntity {
         this.isSingleSecurity = isSingleSecurity;
     }
      
+    public List<Double> getCashflows() {
+        return this.cashflows;
+    }
+
+    public void setCashflows(List<Double> cashflows) {
+        this.cashflows = cashflows;
+    }
+    public Map<Integer, List<Double>> getCashflowsWithStartAndEndValues() {
+        return this.cashflowsWithStartAndEndValues;
+    }
+    public void setCashflowsWithStartAndEndValues(Map<Integer, List<Double>> cashflowsWithStartAndEndValues) {
+        this.cashflowsWithStartAndEndValues = cashflowsWithStartAndEndValues;
+    }
 }

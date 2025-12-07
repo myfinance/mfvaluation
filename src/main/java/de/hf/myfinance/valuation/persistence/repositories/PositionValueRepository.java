@@ -19,4 +19,6 @@ public interface PositionValueRepository extends ReactiveCrudRepository<Position
     Mono<Long> deleteByPositionValueKey(PositionValueKey positionValueKey);
     @Query("{ 'positionValueKey.depotBusinessKey' : { $in: ?0 }, 'positionValueKey.valuationType' : ?1 }")
     Flux<PositionValueEntity> findByDepotBusinessKeyInAndValuationType(List<String> depotBusinessKeys, ValuationType valuationType);
+    @Query("{ 'positionValueKey.valuationType' : ?0 }")
+    Flux<PositionValueEntity> findByValuationType(ValuationType valuationType);
 }

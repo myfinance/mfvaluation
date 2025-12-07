@@ -197,7 +197,7 @@ public class DataReaderImpl implements DataReader {
 
     @Override
     public Flux<ValueCurve> findAllPostionValues() {
-        return positionValueRepository.findAll().map(this::positionValueToValueCurve);
+        return positionValueRepository.findByValuationType(ValuationType.MARKETVALUE).map(this::positionValueToValueCurve);
     }
 
     @Override

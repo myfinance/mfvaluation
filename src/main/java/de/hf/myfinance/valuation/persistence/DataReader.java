@@ -24,12 +24,13 @@ public interface DataReader {
     Flux<ValueCurve> findMarketValueCurvesByBusinesskeyIn(Iterable<String> businesskeyIterable);
 
     Mono<ValueCurve> findPositonByKey(String depotBusinessKey, String securityBusinessKey);
-    Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey, ValuationType valuationType);
     Flux<ValueCurve> findPositonBySecurityKey(String securityKey);
     Flux<ValueCurve> findAllPostions4Depots(List<String> depots);
+    Flux<ValueCurve> findAllPostions();
+
+    Flux<ValueCurve> findPositonValueByDepotKey(String depotBusinessKey, ValuationType valuationType);
     Flux<ValueCurve> findAllPostionValues4Depots(List<String> depots);
     Flux<ValueCurve> findAllPostionValues();
-    Flux<ValueCurve> findAllPostions();
 
     Mono<EndOfDayPrices> findPricesByInstrumentBusinesskey(String businesskey);
 

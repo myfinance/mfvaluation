@@ -44,6 +44,8 @@ public class SavePortfolioMetricsProcessorConfig {
                                 e.setPortfolio(portfolioMetricsEntity.getPortfolio());
                                 e.setCagrPerYear(portfolioMetricsEntity.getCagrPerYear());
                                 e.setTotalCagr(portfolioMetricsEntity.getTotalCagr());
+                                e.setCashflows(portfolioMetricsEntity.getCashflows());
+                                e.setCashflowsWithStartAndEndValues(portfolioMetricsEntity.getCashflowsWithStartAndEndValues());
                                 e.setIsSingleSecurity(portfolioMetricsEntity.getIsSingleSecurity());
                                 return e;
                             })
