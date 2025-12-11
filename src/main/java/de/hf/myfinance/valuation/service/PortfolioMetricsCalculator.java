@@ -152,7 +152,7 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
         var cfWithFinalValues = new ArrayList<Cashflow>(cashflows);
         positionValues.forEach(pv -> {
             //-1 to get the value before start date, as on start date there could be a cashflow
-            var startValue = extractValueFromCurve(pv.getValueCurve(), startDate.minusDays(1));
+            var startValue = extractValueFromCurve(pv.getValueCurve(), startDate.minusDays(1)) *(-1);
             var endValue = extractValueFromCurve(pv.getValueCurve(), endDate);
             if(startValue!=0) {
                 var cf = new Cashflow();
@@ -182,14 +182,35 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
         for (int i = 0; i < maxIterations; i++) {
             double npv = 0.0;
             double npvDerivative = 0.0;
+            
+            double base = 1.0 + guess;
+            if (base <= 0) {
+                // If we are in this state, we need to recover.
+                // A simple strategy is to move the guess closer to -1.
+                guess = (guess - 1.0) / 2.0;
+                continue;
+            }
+
             for (Cashflow cf : cashflows) {
                 long days = ChronoUnit.DAYS.between(endDate, cf.getTransactiondate());
                 double t = (double) days / 365.0;
-                npv += cf.getValue() / Math.pow(1.0 + guess, t);
-                npvDerivative -= cf.getValue() * t / Math.pow(1.0 + guess, t + 1);
+                npv += cf.getValue() / Math.pow(base, t);
+                npvDerivative -= cf.getValue() * t / Math.pow(base, t + 1);
             }
 
-            double newGuess = guess - npv / npvDerivative;
+            if (npvDerivative == 0.0) {
+                return guess;
+            }
+
+            double change = npv / npvDerivative;
+            
+            // Damping factor to prevent too large steps
+            while (guess - change <= -1.0) {
+                change /= 2.0;
+            }
+
+            double newGuess = guess - change;
+
             if (Math.abs(newGuess - guess) < tolerance) {
                 return newGuess;
             }
