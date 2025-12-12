@@ -43,6 +43,7 @@ public class SavePortfolioMetricsProcessorConfig {
                             .map(e -> {
                                 e.setPortfolio(portfolioMetricsEntity.getPortfolio());
                                 e.setCagrPerYear(portfolioMetricsEntity.getCagrPerYear());
+                                e.setYieldPerYear(portfolioMetricsEntity.getYieldPerYear());
                                 e.setTotalCagr(portfolioMetricsEntity.getTotalCagr());
                                 e.setCashflows(portfolioMetricsEntity.getCashflows());
                                 e.setCashflowsWithStartAndEndValues(portfolioMetricsEntity.getCashflowsWithStartAndEndValues());

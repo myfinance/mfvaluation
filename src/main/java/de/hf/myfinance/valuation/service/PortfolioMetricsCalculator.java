@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 import org.springframework.stereotype.Component;
 
 import de.hf.framework.audit.AuditService;
@@ -108,7 +107,7 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
                         .min(LocalDate::compareTo)
                         .orElse(LocalDate.now());
         
-        var value = addStartAndFinalValuesAndCalcCagr(positionValues, cashflows, startDate, LocalDate.now());
+        var value =  calcCagr(getCfWithStartAndFinalValues(positionValues, cashflows, startDate, LocalDate.now()), LocalDate.now());
         portfolio.setTotalCagr(value);
         if(SAVECASHFLOWS) {
             portfolio.setCashflows(cashflows.stream().map(cf->cf.getValue()).toList());
@@ -121,13 +120,24 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
         years.stream().forEach(year -> {
            
             var endDate = LocalDate.of(year, 12, 31);
+            if (endDate.isAfter(LocalDate.now())) {
+                endDate = LocalDate.now();
+            }
+            var firstDateOfTheYear = LocalDate.of(year, 1, 1);
             List<Cashflow> cfThisYear = cashflows.stream().filter(cf -> cf.getTransactiondate().getYear() == year).toList();
-            var cfWithFinalValues = getCfWithStartAndFinalValues(positionValues, cfThisYear, LocalDate.of(year, 1, 1), endDate);   
+            var cfWithFinalValues = getCfWithStartAndFinalValues(positionValues, cfThisYear, firstDateOfTheYear, endDate);   
             Double cagrPerYear = calcCagr(cfWithFinalValues, endDate);
             if (portfolio.getCagrPerYear() == null) {
                 portfolio.setCagrPerYear(new HashMap<>());
             }
             portfolio.getCagrPerYear().put(year, cagrPerYear);
+
+            Double yieldPerYear = calcYield(cfWithFinalValues, firstDateOfTheYear, endDate);
+            if (portfolio.getYieldPerYear() == null) {
+                portfolio.setYieldPerYear(new HashMap<>());
+            }
+            portfolio.getYieldPerYear().put(year, yieldPerYear);
+            
             if(SAVECASHFLOWS) {
                 if(portfolio.getCashflowsWithStartAndEndValues()==null) {
                     portfolio.setCashflowsWithStartAndEndValues(new HashMap<>());
@@ -142,11 +152,6 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
         portfolioMetricsCalculatedEventHandler.sendPortfolioMetricsCalculatedEvent(portfolio);
     }
 
-    private Double addStartAndFinalValuesAndCalcCagr( List<ValueCurve> positionValues, List<Cashflow> cashflows, LocalDate startDate, LocalDate endDate) {
-
-        var cfWithFinalValues = getCfWithStartAndFinalValues(positionValues, cashflows, startDate, endDate);   
-        return calcCagr(cfWithFinalValues, endDate);
-    }
     private ArrayList<Cashflow> getCfWithStartAndFinalValues(List<ValueCurve> positionValues, List<Cashflow> cashflows,
             LocalDate startDate, LocalDate endDate) {
         var cfWithFinalValues = new ArrayList<Cashflow>(cashflows);
@@ -173,50 +178,84 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
         return cfWithFinalValues;
     }
 
-    public Double calcCagr( List<Cashflow> cashflows, LocalDate endDate) { 
+    public Double calcYield( List<Cashflow> cashflows, LocalDate startDate, LocalDate endDate){
+        long days = ChronoUnit.DAYS.between(startDate, endDate);
+        return calcYield(cashflows, endDate, (double) days);
+    }
 
-        final int maxIterations = 100;
-        final double tolerance = 1.0e-6;
-        double guess = 0.1;
+    public Double calcCagr( List<Cashflow> cashflows, LocalDate endDate){
+        return calcYield(cashflows, endDate, 365.0) ;
+    }
 
-        for (int i = 0; i < maxIterations; i++) {
+    private Double calcYield( List<Cashflow> cashflows, LocalDate endDate, Double daysInPeriod) { 
+
+        final int maxIterations = 1000;
+        final double tolerance = 1.0e-9;
+
+        java.util.function.Function<Double, Double> npvFunc = rate -> {
             double npv = 0.0;
-            double npvDerivative = 0.0;
+            for (Cashflow cf : cashflows) {
+                long days = ChronoUnit.DAYS.between(endDate, cf.getTransactiondate());
+                double t = (double) days / daysInPeriod;
+                double base = 1.0 + rate;
+                if (base <= 0) return Double.NaN;
+                npv += cf.getValue() / Math.pow(base, t);
+            }
+            return npv;
+        };
+
+        double low = -0.99;
+        double high = 1.0;
+        
+        double npvLow = npvFunc.apply(low);
+        if(Double.isNaN(npvLow)) npvLow = Double.POSITIVE_INFINITY;
+
+        for (int i = 0; i < 30; i++) {
+            double npvHigh = npvFunc.apply(high);
+            if(Double.isNaN(npvHigh)) {
+                high /= 10;
+                break;
+            }
+            if (npvLow * npvHigh < 0) break;
+            low = high;
+            npvLow = npvHigh;
+            high *= 10;
+        }
+
+        if (npvFunc.apply(low) * npvFunc.apply(high) > 0) {
+            return 0.0; // no bracket
+        }
+
+
+        // Bisection method
+        for (int i = 0; i < maxIterations; i++) {
+            double mid = low + (high - low) / 2; 
+            if (mid == low || mid == high) return mid;
             
-            double base = 1.0 + guess;
-            if (base <= 0) {
-                // If we are in this state, we need to recover.
-                // A simple strategy is to move the guess closer to -1.
-                guess = (guess - 1.0) / 2.0;
+            double npvMid = npvFunc.apply(mid);
+
+            if (Double.isNaN(npvMid)) {
+                high = mid;
                 continue;
             }
 
-            for (Cashflow cf : cashflows) {
-                long days = ChronoUnit.DAYS.between(endDate, cf.getTransactiondate());
-                double t = (double) days / 365.0;
-                npv += cf.getValue() / Math.pow(base, t);
-                npvDerivative -= cf.getValue() * t / Math.pow(base, t + 1);
+            if (Math.abs(npvMid) < tolerance) {
+                return mid;
             }
 
-            if (npvDerivative == 0.0) {
-                return guess;
+            if (npvLow * npvMid < 0) {
+                high = mid;
+            } else {
+                low = mid;
+                npvLow = npvMid;
             }
 
-            double change = npv / npvDerivative;
-            
-            // Damping factor to prevent too large steps
-            while (guess - change <= -1.0) {
-                change /= 2.0;
+            if ((high - low) / Math.abs(mid) < tolerance) {
+                return mid;
             }
-
-            double newGuess = guess - change;
-
-            if (Math.abs(newGuess - guess) < tolerance) {
-                return newGuess;
-            }
-            guess = newGuess;
         }
-        return 0.0; // Failed to converge
+        
+        return (low+high)/2.0;
     }
 
     private Map<String, Double> getPositionValuesPerSecurity(String businesskey, List<ValueCurve> positions, List<ValueCurve> positionValues) {

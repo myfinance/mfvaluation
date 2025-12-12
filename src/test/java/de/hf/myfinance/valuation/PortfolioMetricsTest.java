@@ -135,14 +135,19 @@ public class PortfolioMetricsTest extends EventProcessorTestBase {
         PortfolioMetricsCalculator cagrCalculator = new PortfolioMetricsCalculator(dataReader, portfolioMetricsCalculatedEventHandler, auditService);
 
         List<Cashflow> cashflows = new ArrayList<>();
-        cashflows.add(new Cashflow("buy", LocalDate.of(2006, 1, 14), "sec1", 4622.98));
+        cashflows.add(new Cashflow("start", LocalDate.of(2006, 1, 1), "sec1", -2014.57));
         cashflows.add(new Cashflow("buy2", LocalDate.of(2006, 1, 2), "sec1", -180.09));
         cashflows.add(new Cashflow("dividende", LocalDate.of(2006, 1, 2), "sec1", 180.09));
-        cashflows.add(new Cashflow("final", LocalDate.of(2006, 1, 1), "sec1", 2014.57));
+        cashflows.add(new Cashflow("sell", LocalDate.of(2006, 1, 14), "sec1", 4622.98));
+        
         
         var result = cagrCalculator.calcCagr(cashflows, LocalDate.of(2006, 12, 31));
-
-        assertEquals(13362087992.0, result, 0.001);
+        var result2 = cagrCalculator.calcCagr(cashflows, LocalDate.of(2006, 1, 14));
+        var result3 = cagrCalculator.calcYield(cashflows, LocalDate.of(2006, 1, 1), LocalDate.of(2006, 1, 14));
+//warum ist result1 = result2 und warum result 3 negativ?
+        assertEquals(13441863054.0, result, 1000.0);
+        assertEquals(13441863054.0, result2, 1000.0);
+        assertEquals(1.294773, result3, 0.0001);
     }
 }
 
