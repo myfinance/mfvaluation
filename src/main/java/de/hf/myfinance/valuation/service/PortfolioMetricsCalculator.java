@@ -69,6 +69,22 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
                     var cashflowListKrypto = filterCashflowsForInstruments(cashflowList, instrumentList, InstrumentType.KRYPTO);
                     calculateMetricsForPortfolio(kryptoPositionValues, cashflowListKrypto, InstrumentType.KRYPTO.name());
 
+                    var instrumentBusinessKeysWithPositions = positionList.stream()
+                        .filter(p -> !p.getValueCurve().isEmpty() && p.getValueCurve().lastEntry().getValue() != 0)
+                        .map(ValueCurve::getInstrumentBusinesskey)
+                        .distinct()
+                        .toList();
+
+                    instrumentBusinessKeysWithPositions.forEach(instrumentBusinessKey -> {
+                        var cashflowsForInstrument = cashflowList.stream()
+                                .filter(cf -> cf.getInstrumentBusinesskey().equals(instrumentBusinessKey))
+                                .toList();
+                        var positionValuesForInstrument = positionValueList.stream()
+                                .filter(pv -> pv.getInstrumentBusinesskey().equals(instrumentBusinessKey))
+                                .toList();
+                        calculateMetricsForPortfolio(positionValuesForInstrument, cashflowsForInstrument, instrumentBusinessKey, true);
+                    });
+
                 }).then());
     }
 
@@ -99,8 +115,12 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
     }
 
     public void calculateMetricsForPortfolio(List<ValueCurve> positionValues, List<Cashflow> cashflows, String portfolioName) {
+        calculateMetricsForPortfolio(positionValues, cashflows, portfolioName, false);
+    }
+
+    public void calculateMetricsForPortfolio(List<ValueCurve> positionValues, List<Cashflow> cashflows, String portfolioName, boolean isSingleSecurity) {
         var portfolio = new PortfolioMetrics(portfolioName);
-        portfolio.setIsSingleSecurity(false);     
+        portfolio.setIsSingleSecurity(isSingleSecurity);
 
         LocalDate startDate = cashflows.stream()
                         .map(Cashflow::getTransactiondate)
@@ -117,7 +137,7 @@ public class PortfolioMetricsCalculator extends AbsCurveHandler {
         cashflows.forEach(cf -> {
             years.add(cf.getTransactiondate().getYear());
         });
-        years.stream().forEach(year -> {
+        years.stream().distinct().forEach(year -> {
            
             var endDate = LocalDate.of(year, 12, 31);
             if (endDate.isAfter(LocalDate.now())) {
