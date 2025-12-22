@@ -28,7 +28,7 @@ spring.data.mongodb:
 spring:
   cloud:
     function:
-      definition: extractCashflowsAndTradesProcessor;saveTradeProcessor;saveCashflowsProcessor;saveInstrumentProcessor;saveMarketDataProcessor;valuationProcessor;positionProcessor;saveValueCurveProcessor;positionValueProcessor;savePositionProcessor;savePositionValueProcessor;savePortfolioMetricsProcessor;calculatePortfolioMetricsProcessor
+      definition: extractCashflowsAndTradesProcessor;saveTradeProcessor;saveCashflowsProcessor;saveInstrumentProcessor;saveMarketDataProcessor;valuationProcessor;positionProcessor;saveValueCurveProcessor;positionValueProcessor;savePositionProcessor;savePositionValueProcessor;savePortfolioMetricsProcessor;portfolioMetricsProcessor
 
 spring.cloud.stream:
   defaultBinder: rabbit
@@ -69,7 +69,7 @@ spring.cloud.stream:
   bindings.savePortfolioMetricsProcessor-in-0:
     destination: portfolioMetricsCalculated
     group: savePortfolioMetricsGroup
-  bindings.calculatePortfolioMetricsProcessor-in-0:
+  bindings.portfolioMetricsProcessor-in-0:
     destination: calculatePortfolioMetrics
     group: calculatePortfolioMetricsGroup
   bindings.valuationDataChanged-out-0:
